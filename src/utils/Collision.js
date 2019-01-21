@@ -35,16 +35,20 @@ const Collision = (function () {
       const result = collisions.maniCircleToAABB(ball, aabb);
       if (result.collision) {
         ball.position = {
-            x: ball.position.x + result.manifest.circle.distance.x,
-            y: ball.position.y + result.manifest.circle.distance.y
+          x: ball.position.x + result.manifest.circle.distance.x,
+          y: ball.position.y + result.manifest.circle.distance.y
         };
         const direction = {
-            x: block.position.x - ball.position.x,
-            y: block.position.y - ball.position.y
+          x: result.manifest.circle.distance.x,
+          y: result.manifest.circle.distance.y
         };
-        if (direction.x > 0) {
+        ball.velocity = {
+          x: (direction.x !== 0) ? -ball.velocity.x : ball.velocity.x,
+          y: (direction.y !== 0) ? -ball.velocity.y : ball.velocity.y
+        };
 
-        }
+        // Delete block game object.
+        //block.delete();
       }
     }
   }
