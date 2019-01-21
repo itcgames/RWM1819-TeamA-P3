@@ -1,0 +1,18 @@
+# Arkanoid Souls
+Computer Games Development - 4th year - Real World Modelling Module - Project 3
+
+# Developer Guide
+
+## Setup local environment
+
+### With Visual Studio Code
+The repository includes settings, launch and tasks for vscode.
+- Install Node.js
+- through vscode:
+  - Terminal > Run Task... > `install host server`
+  - Terminal > Run Build Task... (Default keybind is Ctrl + Shift + B) > `host server`
+  - Debug > Start Debugging (Default keybind is F5)
+### Without Visual Studio Code
+- Install Node.js
+- run `npm install http-server -g`
+- through Console/Powershell run `http-server -p 8080 -o`
