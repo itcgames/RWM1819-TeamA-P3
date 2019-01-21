@@ -1,0 +1,16 @@
+[submodule "lib/RWM1819-Sprite-A"]
+	path = lib/RWM1819-Sprite-A
+	url = https://github.com/itcgames/RWM1819-Sprite-A.git
+	branch = master
+[submodule "lib/RWM1819-Audio-A"]
+	path = lib/RWM1819-Audio-A
+	url = https://github.com/itcgames/RWM1819-Audio-A.git
+	branch = master
+[submodule "lib/RWM1819-DnD-A"]
+	path = lib/RWM1819-DnD-A
+	url = https://github.com/itcgames/RWM1819-DnD-A.git
+	branch = master
+[submodule "lib/RWM1819-Collision-B"]
+	path = lib/RWM1819-Collision-B
+	url = https://github.com/itcgames/RWM1819-Collision-B.git
+	branch = master
