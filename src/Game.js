@@ -3,6 +3,8 @@ class Game {
   constructor() {
     this.prevDt = Date.now();
     this.canvas = new Canvas("canvas");
+
+    this.yellowBrick = new Brick("YELLOW","y1", 100,100,50,25);
   }
 
   run() {
@@ -19,6 +21,8 @@ class Game {
 
   update() {
     const dt = this.calculateDt();
+    this.yellowBrick.update();
+
   }
 
   render() {
