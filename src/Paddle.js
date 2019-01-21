@@ -59,7 +59,7 @@ class Paddle {
      */
     draw(ctx){
 
-        ctx.rect(this.position.x, this.position.y, this.size.x, this.size.y);
+      ctx.fillRect(this.position.x, this.position.y, this.size.x, this.size.y);
         ctx.stroke();
 
     }
