@@ -10,7 +10,7 @@ class Paddle {
         };
         this.speed = 300.0;
         this.size = {
-            x: 100,
+            x: 150,
             y: 50
         }
         this.leftPressed = false;
@@ -18,6 +18,10 @@ class Paddle {
 
         this.maxX = 1000;
         this.minX = 100;
+        this.origin = {
+            x: this.position.x + this.size.x / 2,
+            y: this.position.y + this.size.y / 2
+        }
 
         this.events = {
             onKeyDown: this.onKeyDown.bind(this),
@@ -57,10 +61,12 @@ class Paddle {
            this.position.x = this.clampPaddleLeft;
            this.paddleRect.x = this.clampPaddleLeft;
          }
-         else if (this.position.x > this.clampPaddleRight){
-           this.position.x = this.clampPaddleRight;
-           this.paddleRect.x = this.clampPaddleRight;
+         else if (this.position.x + this.size.x > this.clampPaddleRight){
+           this.position.x = this.clampPaddleRight - this.size.x;
+           this.paddleRect.x = this.clampPaddleRight - this.size.x;
          }
+         this.updateOrigin();
+
     }
 
     /**
@@ -107,5 +113,9 @@ class Paddle {
         }
     }
 
+    updateOrigin(){
+        this.origin.x = this.position.x + this.size.x / 2;
+        this.origin.y = this.position.y + this.size.y / 2;
+    }
     
 }
