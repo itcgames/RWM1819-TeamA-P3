@@ -55,7 +55,6 @@ class Paddle {
                 this.paddleRect.x -= this.speed * (dt/1000);
             }       
          }
-         this.updateOrigin();
          this.position.x = this.paddleRect.x;
          this.position.y = this.paddleRect.y;
          if (this.position.x < this.clampPaddleLeft){
@@ -66,6 +65,8 @@ class Paddle {
            this.position.x = this.clampPaddleRight;
            this.paddleRect.x = this.clampPaddleRight;
          }
+         this.updateOrigin();
+
     }
 
     /**
