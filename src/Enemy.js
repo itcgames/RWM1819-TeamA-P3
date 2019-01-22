@@ -77,9 +77,14 @@ class Enemy
   {
       this.img = new Image(this.width, this.height)
       if(this.type === "BLUE")
-      {
         this.img.src = EnemyType.BLUE;
-      }
+      if(this.type === "RED")
+        this.img.src = EnemyType.RED;
+      if(this.type === "GREEN")
+        this.img.src = EnemyType.GREEN;
+      if(this.type === "RAINBOW")
+        this.img.src = EnemyType.RAINBOW;
+
       this.img.id = this.id;
   }
   die()

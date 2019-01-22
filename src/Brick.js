@@ -64,10 +64,27 @@ class Brick
   createNewBrick()
   {
       this.img = new Image(this.width, this.height)
+      if(this.colour === "RED")
+        this.img.src = ColourEnum.RED;
+      if(this.colour === "WHITE")
+        this.img.src = ColourEnum.WHITE;
+      if(this.colour === "ORANGE")
+        this.img.src = ColourEnum.ORANGE;
+      if(this.colour === "LIGHTBLUE")
+        this.img.src = ColourEnum.LIGHTBLUE;
+      if(this.colour === "GREEN")
+        this.img.src = ColourEnum.GREEN;
+      if(this.colour === "BLUE")
+        this.img.src = ColourEnum.BLUE;
+      if(this.colour === "PINK")
+        this.img.src = ColourEnum.PINK;
       if(this.colour === "YELLOW")
-      {
         this.img.src = ColourEnum.YELLOW;
-      }
+      if(this.colour === "METAL")
+        this.img.src = ColourEnum.METAL;
+      if(this.colour === "GOLD")
+        this.img.src = ColourEnum.GOLD;
+
       this.img.id = this.id;
   }
   /**

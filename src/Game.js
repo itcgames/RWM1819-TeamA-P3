@@ -8,6 +8,17 @@ class Game {
       maxX: 1000,
       maxY: 800
     };
+    //scene management
+    this.menuManager = new MenuManager();
+    this.menuManager.addScene("Splash", new Scene("SPLASH", "s", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
+    this.menuManager.addScene("Main Menu", new Scene("MAIN", "m", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
+    this.menuManager.addScene("Game Scene", new Scene("GAME", "g", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
+    this.menuManager.setCurrentScene("Splash");
+    //this.menuManager.current.key; current scene
+    this.menuManager.fadeSpeed = 4000;
+    this.menuManager.fadeTo("Main Menu");
+
+
     this.paddle = new Paddle(100,700, this.worldBounds.minX, this.worldBounds.maxX);
     this.prevDt = Date.now();
     this.canvas = new Canvas("canvas");
@@ -30,10 +41,38 @@ class Game {
     this.dnd.addDraggable(this.paddle.paddleRect, false, true);
     this.score = 0;
     this.highScore = 500;
-
+    this.pressedUp = true;
+    this.pressedEnter = false;
     window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
     window.addEventListener("mouseup", this.dnd.dragend.bind(this.dnd));
+    this.events = {
+        onKeyDown: this.onKeyDown.bind(this)
+      };
+    window.addEventListener("keydown", this.events.onKeyDown, false);
   }
+  /**
+   * This is the function that detect key presses.
+   * @param {KeyboardEvent} event
+   * the key down event
+   */
+  onKeyDown(event){
+    if(this.menuManager.current.key === "Main Menu")
+    {
+        //enter key
+        if(event.keyCode === 13){
+            this.pressedEnter = true;
+        }
+        //UP arrow key
+        if(event.keyCode === 38) {
+            this.pressedUp = true;
+        }
+        //Down arrow key
+        if(event.keyCode === 40){
+            this.pressedUp = false;
+        }
+    }
+  }
+
 
   run() {
     this.loop();
@@ -49,56 +88,88 @@ class Game {
 
   update() {
     const dt = this.calculateDt();
-    this.dnd.update();
-    this.paddle.update(dt);
-    this.ballUpdate(dt);
-    this.score = this.score + 1;
-    if (this.score > this.highScore)
+    this.menuManager.update(dt);
+    if(this.menuManager.current.key === "Main Menu")
     {
-      this.highScore = this.score;
-    }
-    for(var i =0; i<this.bricks.length; i++)
-    {
-      this.bricks[i].update();
-      Collision.BallToBlock(this.ball,this.bricks[i]);
-      if(this.bricks[i].health <= 0)
+      if(this.pressedUp === true)
       {
-        this.bricks.splice(i, 1);
+        this.menuManager.current.value.cursorHeight = 712;
+      }
+      if(this.pressedUp === false) {
+        this.menuManager.current.value.cursorHeight = 762;
+      }
+      if(this.pressedEnter === true)
+      {
+        this.menuManager.setCurrentScene("Game Scene");
       }
     }
-    for(var i=0; i < this.enemies.length; i++)
+
+    if(this.menuManager.current.key === "Game Scene")
     {
-      this.enemies[i].update();
-      if(!this.ballSpawning)
+      //reset bools
+      this.pressedUp = true;
+      this.pressedEnter = false;
+
+      this.dnd.update();
+      this.paddle.update(dt);
+      this.ballUpdate(dt);
+      this.score = this.score + 1;
+      if (this.score > this.highScore)
       {
-        Collision.BallToEnemy(this.ball, this.enemies[i]);
+        this.highScore = this.score;
       }
-      if(this.enemies[i].health <= 0)
+      for(var i =0; i<this.bricks.length; i++)
       {
-        this.enemies.splice(i, 1);
+        this.bricks[i].update();
+        Collision.BallToBlock(this.ball,this.bricks[i]);
+        if(this.bricks[i].health <= 0)
+        {
+          this.bricks.splice(i, 1);
+        }
+      }
+      for(var i=0; i < this.enemies.length; i++)
+      {
+        this.enemies[i].update();
+        if(!this.ballSpawning)
+        {
+          Collision.BallToEnemy(this.ball, this.enemies[i]);
+        }
+        if(this.enemies[i].health <= 0)
+        {
+          this.enemies.splice(i, 1);
+        }
+      }
+      if (!this.ballSpawning){
+        Collision.BallToPaddle(this.ball, this.paddle);
       }
     }
-    if (!this.ballSpawning){
-      Collision.BallToPaddle(this.ball, this.paddle);
-    }
+
   }
 
   render() {
     this.ctx.clearRect(0,0,this.canvas.resolution.x, this.canvas.resolution.y);
-    this.paddle.draw(this.ctx);
-    this.ball.render(this.ctx);
-    for(var i = 0; i< this.bricks.length; i++)
+    this.menuManager.draw(this.ctx);
+    if(this.menuManager.current.key === "Main Menu")
     {
-      this.bricks[i].draw(this.ctx);
-    }
-    for(var i = 0; i<this.enemies.length; i++)
-    {
-      this.enemies[i].draw(this.ctx);
-    }
 
-    this.ctx.font = "14px Arial";
-    this.ctx.fillText("Score: " + this.score, 50, 50);
-    this.ctx.fillText("High Score: " + this.highScore, 50, 80);
+    }
+    if(this.menuManager.current.key === "Game Scene")
+    {
+      this.paddle.draw(this.ctx);
+      this.ball.render(this.ctx);
+      for(var i = 0; i< this.bricks.length; i++)
+      {
+        this.bricks[i].draw(this.ctx);
+      }
+      for(var i = 0; i<this.enemies.length; i++)
+      {
+        this.enemies[i].draw(this.ctx);
+      }
+
+      this.ctx.font = "14px Arial";
+      this.ctx.fillText("Score: " + this.score, 50, 50);
+      this.ctx.fillText("High Score: " + this.highScore, 50, 80);
+    }
   }
 
   calculateDt() {
