@@ -1,7 +1,7 @@
 
 class Game {
   constructor() {
-    
+
     this.worldBounds = {
       minX: 100,
       minY: 100,
@@ -14,9 +14,8 @@ class Game {
     this.ctx = canvas.getContext("2d");
     this.ball = new Ball(100, 100, 20);
     this.yellowBrick = new Brick("YELLOW","y1", 100,100,50,25);
+    this.blueEnemy = new Enemy("BLUE", "b1", 200, 100, 1,1,25,25);
     this.debugBrick = new Brick("YELLOW", "debug1", 100, 400, 500, 20);
-
-
     this.ballSpawning = true;
     this.spawnBallCountdown = 3.0;
     this.generatedRandomPaddlePos = false;
@@ -26,7 +25,7 @@ class Game {
     this.dnd.addDraggable(this.paddle.paddleRect, false, true);
     this.score = 0;
     this.highScore = 500;
-    
+
     window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
     window.addEventListener("mouseup", this.dnd.dragend.bind(this.dnd));
   }
@@ -48,6 +47,7 @@ class Game {
     this.dnd.update();
     this.paddle.update(dt);
     this.yellowBrick.update();
+    this.blueEnemy.update();
     this.debugBrick.update();
     this.ballUpdate(dt);
     this.score = this.score + 1;
@@ -63,6 +63,7 @@ class Game {
     this.ctx.clearRect(0,0,this.canvas.resolution.x, this.canvas.resolution.y);
     this.paddle.draw(this.ctx);
     this.ball.render(this.ctx);
+    this.blueEnemy.draw(this.ctx);
     this.yellowBrick.draw(this.ctx);
     this.ctx.font = "14px Arial";
     this.ctx.fillText("Score: " + this.score, 50, 50);
@@ -82,7 +83,7 @@ class Game {
    * will also deal with when the ball first spawns on the paddle
    * at a randomly selected posiiton and fire it at an angle.
    * @param {Number} dt
-   * time between cycles 
+   * time between cycles
    */
   ballUpdate(dt){
 
@@ -97,7 +98,7 @@ class Game {
       //make balls position relative to the paddle
       this.ball.position.x = this.paddle.origin.x - (this.ball.radius / 2) + this.randPaddlePos;
       this.ball.position.y = this.paddle.position.y - (this.ball.radius);
-      //when countdown is 0 fire ball at angle depending on position 
+      //when countdown is 0 fire ball at angle depending on position
       //relative to the paddle
       if(this.spawnBallCountdown <= 0){
 
@@ -109,7 +110,7 @@ class Game {
 
         //get angle
         var angle = Math.atan2(vectorBetweenBallAndPaddle.y, vectorBetweenBallAndPaddle.x);
-        angle = VectorMath.toDeg(angle) 
+        angle = VectorMath.toDeg(angle)
 
         //make unit vector from angle
         var firingVectorUnit = VectorMath.vector(angle);
