@@ -28,6 +28,7 @@ class Enemy
     this.height = height;
     this.minX = minX;
     this.maxX = maxX;
+    this.health =1;
     this.direction = Math.floor((Math.random() * 2) + 1);
 
     this.createNewEnemy();
@@ -83,6 +84,6 @@ class Enemy
   }
   die()
   {
-    delete this;
+    this.health -=1;
   }
 }
