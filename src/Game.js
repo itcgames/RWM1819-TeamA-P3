@@ -1,7 +1,7 @@
 
 class Game {
   constructor() {
-    this.paddle = new Paddle(100,100);
+    this.paddle = new Paddle(100,700);
     this.prevDt = Date.now();
     this.canvas = new Canvas("canvas");
     this.ctx = canvas.getContext("2d");
