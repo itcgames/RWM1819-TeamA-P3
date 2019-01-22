@@ -57,6 +57,9 @@ class Game {
     }
     Collision.BallToBlock(this.ball, this.yellowBrick);
     Collision.BallToBlock(this.ball, this.debugBrick);
+    if (!this.ballSpawning){
+      Collision.BallToPaddle(this.ball, this.paddle);
+    }
   }
 
   render() {
@@ -125,6 +128,7 @@ class Game {
         this.spawnBallCountdown = 3.0;
         this.ball.velocity.x = firingVector.x;
         this.ball.velocity.y = firingVector.y;
+        this.ball.speed = this.ballStartSpeed;
         this.generatedRandomPaddlePos = false;
       }
     }

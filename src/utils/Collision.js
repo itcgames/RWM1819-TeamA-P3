@@ -50,6 +50,54 @@ const Collision = (function () {
         block.health -= 1;
       }
     }
+      /**
+     * Will process collisions between ball and rectangle.
+     * @param {Ball} ball 
+     *  Ball object is expected to have a position and radius properties.
+     * @param {Brick} paddle 
+     *  block is expected to have a position, width and height.
+     */
+    static BallToPaddle(ball, paddle) {
+      const aabbBall = rectangleToAabb({ position: ball.position, width: ball.radius, height: ball.radius });
+      const aabbPaddle = rectangleToAabb({ position: { x: paddle.position.x, y: paddle.position.y }, width: paddle.size.x, height: paddle.size.y });
+      const result = collisions.maniAABBToAABB(aabbBall, aabbPaddle);
+      if (result.collision) {
+        /*ball.position = {
+          x: ball.position.x + result.manifest.leftAABB.distance.x,
+          y: ball.position.y + result.manifest.leftAABB.distance.y
+        };
+        const direction = {
+          x: result.manifest.leftAABB.distance.x,
+          y: result.manifest.leftAABB.distance.y
+        };
+        */
+        var vectorBetweenBallAndPaddle = {
+          x: ball.position.x + ball.radius - paddle.origin.x,
+          y: ball.position.y + ball.radius - paddle.origin.y
+        }
+
+        //get angle
+        var angle = Math.atan2(vectorBetweenBallAndPaddle.y, vectorBetweenBallAndPaddle.x);
+        angle = VectorMath.toDeg(angle) 
+
+        //make unit vector from angle
+        var firingVectorUnit = VectorMath.vector(angle);
+        //multiply by start speed
+        var firingVector = {
+          x: firingVectorUnit.x * ball.speed,
+          y: firingVectorUnit.y * ball.speed
+        }
+        ball.velocity.x = firingVector.x;
+        ball.velocity.y = firingVector.y;
+        /*if (ball.velocity.y > 0)
+        {
+          console.log("negative bounce");
+        }
+        */
+        
+      }
+    
+    }
   }
   return Collision;
 })();

@@ -9,6 +9,7 @@ class Ball{
       y:1
     }
     this.radius = r;
+    this.speed = 0;
   }
 
   update() {
