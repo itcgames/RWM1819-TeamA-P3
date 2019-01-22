@@ -32,6 +32,7 @@ class Game {
     this.ctx.clearRect(0,0,this.canvas.resolution.x, this.canvas.resolution.y);
     this.paddle.draw(this.ctx);
     this.ball.render(this.ctx);
+    this.yellowBrick.draw(this.ctx);
   }
 
   calculateDt() {
