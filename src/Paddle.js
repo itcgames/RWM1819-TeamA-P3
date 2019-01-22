@@ -28,8 +28,8 @@ class Paddle {
             onKeyUp: this.onKeyUp.bind(this)
         };
         this.paddleRect = new Square(this.position.x, this.position.y, this.size.x, this.size.y, "#095ee8");
-        this.clampPaddleLeft = 100;
-        this.clampPaddleRight = 800;
+        this.clampPaddleLeft = minX;
+        this.clampPaddleRight = maxX;
         document.addEventListener("keydown", this.events.onKeyDown, false);
         document.addEventListener("keyup", this.events.onKeyUp, false);
 
@@ -61,9 +61,9 @@ class Paddle {
            this.position.x = this.clampPaddleLeft;
            this.paddleRect.x = this.clampPaddleLeft;
          }
-         else if (this.position.x > this.clampPaddleRight){
-           this.position.x = this.clampPaddleRight;
-           this.paddleRect.x = this.clampPaddleRight;
+         else if (this.position.x + this.size.x > this.clampPaddleRight){
+           this.position.x = this.clampPaddleRight - this.size.x;
+           this.paddleRect.x = this.clampPaddleRight - this.size.x;
          }
          this.updateOrigin();
 
