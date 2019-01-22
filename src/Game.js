@@ -15,6 +15,7 @@ class Game {
     this.ball = new Ball(100, 100, 20);
     this.yellowBrick = new Brick("YELLOW","y1", 100,100,50,25);
     this.blueEnemy = new Enemy("BLUE", "b1", 200, 100, 1,1,25,25);
+    this.debugBrick = new Brick("YELLOW", "debug1", 100, 400, 500, 20);
     this.ballSpawning = true;
     this.spawnBallCountdown = 3.0;
     this.generatedRandomPaddlePos = false;
@@ -45,7 +46,10 @@ class Game {
     this.paddle.update(dt);
     this.yellowBrick.update();
     this.blueEnemy.update();
+    this.debugBrick.update();
     this.ballUpdate(dt);
+    Collision.BallToBlock(this.ball, this.yellowBrick);
+    Collision.BallToBlock(this.ball, this.debugBrick);
   }
 
   render() {
@@ -54,6 +58,7 @@ class Game {
     this.ball.render(this.ctx);
     this.blueEnemy.draw(this.ctx);
     this.yellowBrick.draw(this.ctx);
+    this.debugBrick.draw(this.ctx);
   }
 
   calculateDt() {
