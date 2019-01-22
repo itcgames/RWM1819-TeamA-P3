@@ -48,8 +48,6 @@ class Paddle {
                 this.position.x -= this.speed * (dt/1000);
             }       
          }
-         console.log(this.position.x);
-
     }
 
     /**

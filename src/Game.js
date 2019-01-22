@@ -5,6 +5,8 @@ class Game {
     this.prevDt = Date.now();
     this.canvas = new Canvas("canvas");
     this.ctx = canvas.getContext("2d");
+
+    this.yellowBrick = new Brick("YELLOW","y1", 100,100,50,25);
   }
 
   run() {
@@ -22,6 +24,8 @@ class Game {
   update() {
     const dt = this.calculateDt();
     this.paddle.update(dt);
+    this.yellowBrick.update();
+
   }
 
   render() {
