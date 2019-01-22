@@ -34,11 +34,15 @@ class Paddle {
         document.addEventListener("keydown", this.events.onKeyDown, false);
         document.addEventListener("keyup", this.events.onKeyUp, false);
 
-        this.laserPowerActive = false;
+        this.laserPowerActive = true;
 
+
+        this.lasers = [];
 
         //laser power related
         this.canFire = true;
+        this.laserWidth = 10;
+        this.laserHeight = 50;
 
     }
 
@@ -50,8 +54,18 @@ class Paddle {
     update(dt){
 
         if(this.laserPowerActive){
-            if(this.spacePressed){
-
+            if(this.spacePressed && this.canFire){
+                this.lasers.push(new Laser(this.position.x, 
+                        this.position.y, 
+                        this.laserWidth, 
+                        this.laserHeight)
+                        );
+                this.lasers.push(new Laser(this.position.x + (this.size.x - this.laserWidth), 
+                        this.position.y, 
+                        this.laserWidth,
+                        this.laserHeight)
+                        );
+                this.canFire = false;
             }
         }
 
@@ -79,7 +93,10 @@ class Paddle {
            this.paddleRect.x = this.clampPaddleRight;
          }
          this.updateOrigin();
-
+         this.lasers.forEach(function (laser) {
+            laser.update(dt);
+        });
+        
     }
 
     /**
@@ -89,7 +106,10 @@ class Paddle {
      */
     draw(ctx){
 
-      ctx.fillRect(this.position.x, this.position.y, this.size.x, this.size.y);
+        this.lasers.forEach(function (laser) {
+            laser.draw(ctx);
+        });
+        ctx.fillRect(this.position.x, this.position.y, this.size.x, this.size.y);
         ctx.stroke();
 
     }
@@ -109,7 +129,6 @@ class Paddle {
             this.rightPressed = true;
         }
         if(event.keyCode === 32){
-            this.canFire = false;
             this.spacePressed = true;
         }
     }

@@ -2,14 +2,17 @@
  * Represents the laser shot out by the player
  * during the laser power up.
  */
-class Paddle {
-  constructor(xPos,yPos){
-    this.img = new Image();
+class Laser {
+  constructor(xPos,yPos,width,height){
     this.position = {
       x: xPos,
       y: yPos
     };
-    this.speed = 600;
+    this.width = width;
+    this.height = height;
+    this.speed = -800;
+    this.image = new Image();
+    this.image.src = "./res/Images/Laser.png";
   }
 
   /**
@@ -26,6 +29,8 @@ class Paddle {
    * @param {CanvasRenderingContext2D} ctx 
    */
   draw(ctx){
-
+    ctx.save()
+    ctx.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+    ctx.restore();
   }
 }
