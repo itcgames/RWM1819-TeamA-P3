@@ -25,30 +25,29 @@ const Collision = (function () {
 
     /**
      * Will process collisions between ball and rectangle.
-     * @param {{ position: { x: number, y: number }, radius: number }, velocity: { x: number, y: number }} ball 
+     * @param {Ball} ball 
      *  Ball object is expected to have a position and radius properties.
-     * @param {{ position: { x: number, y: number }, width: number, height: number }} block 
+     * @param {Brick} block 
      *  block is expected to have a position, width and height.
      */
     static BallToBlock(ball, block) {
-      const aabb = rectangleToAabb(block);
-      const result = collisions.maniCircleToAABB(ball, aabb);
+      const aabbBall = rectangleToAabb({ position: ball.position, width: ball.radius, height: ball.radius });
+      const aabbBlock = rectangleToAabb({ position: { x: block.x, y: block.y }, width: block.width, height: block.height });
+      const result = collisions.maniAABBToAABB(aabbBall, aabbBlock);
       if (result.collision) {
         ball.position = {
-          x: ball.position.x + result.manifest.circle.distance.x,
-          y: ball.position.y + result.manifest.circle.distance.y
+          x: ball.position.x + result.manifest.leftAABB.distance.x,
+          y: ball.position.y + result.manifest.leftAABB.distance.y
         };
         const direction = {
-          x: result.manifest.circle.distance.x,
-          y: result.manifest.circle.distance.y
+          x: result.manifest.leftAABB.distance.x,
+          y: result.manifest.leftAABB.distance.y
         };
         ball.velocity = {
           x: (direction.x !== 0) ? -ball.velocity.x : ball.velocity.x,
           y: (direction.y !== 0) ? -ball.velocity.y : ball.velocity.y
         };
-
-        // Delete block game object.
-        //block.delete();
+        block.health -= 1;
       }
     }
   }

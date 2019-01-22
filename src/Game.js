@@ -14,6 +14,7 @@ class Game {
     this.ctx = canvas.getContext("2d");
     this.ball = new Ball(100, 100, 20);
     this.yellowBrick = new Brick("YELLOW","y1", 100,100,50,25);
+    this.debugBrick = new Brick("YELLOW", "debug1", 100, 400, 500, 20);
 
 
     this.ballSpawning = true;
@@ -45,7 +46,10 @@ class Game {
     this.dnd.update();
     this.paddle.update(dt);
     this.yellowBrick.update();
+    this.debugBrick.update();
     this.ballUpdate(dt);
+    Collision.BallToBlock(this.ball, this.yellowBrick);
+    Collision.BallToBlock(this.ball, this.debugBrick);
   }
 
   render() {
@@ -53,6 +57,7 @@ class Game {
     this.paddle.draw(this.ctx);
     this.ball.render(this.ctx);
     this.yellowBrick.draw(this.ctx);
+    this.debugBrick.draw(this.ctx);
   }
 
   calculateDt() {
