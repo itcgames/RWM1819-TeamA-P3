@@ -24,4 +24,12 @@ class Ball{
     ctx.restore();
   }
 
+  flipVelX(){
+    this.velocity.x = this.velocity.x * -1;
+  }
+
+  flipVelY(){
+    this.velocity.y = this.velocity.y * -1;
+  }
+
 }

@@ -24,6 +24,8 @@ class Game {
     this.ballStartSpeed = 8;
     this.dnd = new DragDrop();
     this.dnd.addDraggable(this.paddle.paddleRect, false, true);
+    this.score = 0;
+    this.highScore = 500;
     
     window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
     window.addEventListener("mouseup", this.dnd.dragend.bind(this.dnd));
@@ -48,6 +50,11 @@ class Game {
     this.yellowBrick.update();
     this.debugBrick.update();
     this.ballUpdate(dt);
+    this.score = this.score + 1;
+    if (this.score > this.highScore)
+    {
+      this.highScore = this.score;
+    }
     Collision.BallToBlock(this.ball, this.yellowBrick);
     Collision.BallToBlock(this.ball, this.debugBrick);
   }
@@ -57,6 +64,9 @@ class Game {
     this.paddle.draw(this.ctx);
     this.ball.render(this.ctx);
     this.yellowBrick.draw(this.ctx);
+    this.ctx.font = "14px Arial";
+    this.ctx.fillText("Score: " + this.score, 50, 50);
+    this.ctx.fillText("High Score: " + this.highScore, 50, 80);
     this.debugBrick.draw(this.ctx);
   }
 
@@ -125,16 +135,16 @@ class Game {
 
   ballWorldCollision(){
     if(this.ball.position.x + (this.ball.radius * 2) > this.worldBounds.maxX){
-      this.ball.velocity.x *= -1;
+      this.ball.flipVelX();
     }
     if(this.ball.position.x < this.worldBounds.minX){
-      this.ball.velocity.x *= -1;
+      this.ball.flipVelX();
     }
     if(this.ball.position.y > this.worldBounds.maxY){
-      this.ball.velocity.y *= -1;
+      this.ball.flipVelY();
     }
     if(this.ball.position.y < this.worldBounds.minY){
-      this.ball.velocity.y *= -1;
+      this.ball.flipVelY();
     }
     if(this.ball.position.y + (this.ball.radius * 2) > this.worldBounds.maxY){
       this.ballSpawning = true;
