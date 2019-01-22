@@ -14,6 +14,7 @@ class Game {
     this.ctx = canvas.getContext("2d");
     this.ball = new Ball(100, 100, 20);
     this.yellowBrick = new Brick("YELLOW","y1", 100,100,50,25);
+    this.debugBrick = new Brick("YELLOW", "debug1", 100, 400, 500, 20);
 
 
     this.ballSpawning = true;
@@ -47,12 +48,15 @@ class Game {
     this.dnd.update();
     this.paddle.update(dt);
     this.yellowBrick.update();
+    this.debugBrick.update();
     this.ballUpdate(dt);
     this.score = this.score + 1;
     if (this.score > this.highScore)
     {
       this.highScore = this.score;
     }
+    Collision.BallToBlock(this.ball, this.yellowBrick);
+    Collision.BallToBlock(this.ball, this.debugBrick);
   }
 
   render() {
@@ -63,6 +67,7 @@ class Game {
     this.ctx.font = "14px Arial";
     this.ctx.fillText("Score: " + this.score, 50, 50);
     this.ctx.fillText("High Score: " + this.highScore, 50, 80);
+    this.debugBrick.draw(this.ctx);
   }
 
   calculateDt() {

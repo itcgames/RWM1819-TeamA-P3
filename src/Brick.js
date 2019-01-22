@@ -51,8 +51,9 @@ class Brick
   */
   draw(ctx)
   {
+    if (this.health <= 0) { return; }
     ctx.save();
-    ctx.drawImage(this.img, this.x, this.y);
+    ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
     ctx.restore();
 
   }
