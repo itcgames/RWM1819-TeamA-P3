@@ -3,7 +3,7 @@
  * Represents the paddle.
  */
 class Paddle {
-    constructor(posX,posY){
+    constructor(posX,posY, minX, maxX){
         this.position = {
             x: posX,
             y: posY
@@ -16,8 +16,8 @@ class Paddle {
         this.leftPressed = false;
         this.rightPressed = false;
 
-        this.maxX = 1000;
-        this.minX = 100;
+        this.maxX = maxX;
+        this.minX = minX;
         this.origin = {
             x: this.position.x + this.size.x / 2,
             y: this.position.y + this.size.y / 2
