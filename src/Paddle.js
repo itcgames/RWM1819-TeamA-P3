@@ -3,21 +3,25 @@
  * Represents the paddle.
  */
 class Paddle {
-    constructor(posX,posY){
+    constructor(posX,posY, minX, maxX){
         this.position = {
             x: posX,
             y: posY
         };
         this.speed = 300.0;
         this.size = {
-            x: 100,
+            x: 150,
             y: 50
         }
         this.leftPressed = false;
         this.rightPressed = false;
 
-        this.maxX = 1000;
-        this.minX = 100;
+        this.maxX = maxX;
+        this.minX = minX;
+        this.origin = {
+            x: this.position.x + this.size.x / 2,
+            y: this.position.y + this.size.y / 2
+        }
 
         this.events = {
             onKeyDown: this.onKeyDown.bind(this),
@@ -61,6 +65,8 @@ class Paddle {
            this.position.x = this.clampPaddleRight;
            this.paddleRect.x = this.clampPaddleRight;
          }
+         this.updateOrigin();
+
     }
 
     /**
@@ -107,5 +113,9 @@ class Paddle {
         }
     }
 
+    updateOrigin(){
+        this.origin.x = this.position.x + this.size.x / 2;
+        this.origin.y = this.position.y + this.size.y / 2;
+    }
     
 }
