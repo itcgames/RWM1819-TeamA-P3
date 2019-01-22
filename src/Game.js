@@ -9,6 +9,8 @@ class Game {
     this.yellowBrick = new Brick("YELLOW","y1", 100,100,50,25);
     this.dnd = new DragDrop();
     this.dnd.addDraggable(this.paddle.paddleRect, false, true);
+    this.score = 0;
+    this.highScore = 500;
     
     window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
     window.addEventListener("mouseup", this.dnd.dragend.bind(this.dnd));
@@ -32,6 +34,11 @@ class Game {
     this.paddle.update(dt);
     this.yellowBrick.update();
     this.ball.update();
+    this.score = this.score + 1;
+    if (this.score > this.highScore)
+    {
+      this.highScore = this.score;
+    }
   }
 
   render() {
@@ -39,6 +46,9 @@ class Game {
     this.paddle.draw(this.ctx);
     this.ball.render(this.ctx);
     this.yellowBrick.draw(this.ctx);
+    this.ctx.font = "14px Arial";
+    this.ctx.fillText("Score: " + this.score, 50, 50);
+    this.ctx.fillText("High Score: " + this.highScore, 50, 80);
   }
 
   calculateDt() {
