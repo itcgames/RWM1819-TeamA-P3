@@ -130,16 +130,16 @@ class Game {
 
   ballWorldCollision(){
     if(this.ball.position.x + (this.ball.radius * 2) > this.worldBounds.maxX){
-      this.ball.velocity.x *= -1;
+      this.ball.flipVelX;
     }
     if(this.ball.position.x < this.worldBounds.minX){
-      this.ball.velocity.x *= -1;
+      this.ball.flipVelX;
     }
     if(this.ball.position.y > this.worldBounds.maxY){
-      this.ball.velocity.y *= -1;
+      this.ball.flipVelY;
     }
     if(this.ball.position.y < this.worldBounds.minY){
-      this.ball.velocity.y *= -1;
+      this.ball.flipVelY;
     }
     if(this.ball.position.y + (this.ball.radius * 2) > this.worldBounds.maxY){
       this.ballSpawning = true;
