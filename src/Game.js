@@ -59,6 +59,7 @@ class Game {
     Collision.BallToBlock(this.ball, this.debugBrick);
     if (!this.ballSpawning){
       Collision.BallToPaddle(this.ball, this.paddle);
+      Collision.BallToEnemy(this.ball, this.blueEnemy);
     }
   }
 

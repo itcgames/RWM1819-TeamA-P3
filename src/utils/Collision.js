@@ -54,7 +54,7 @@ const Collision = (function () {
      * Will process collisions between ball and rectangle.
      * @param {Ball} ball 
      *  Ball object is expected to have a position and radius properties.
-     * @param {Brick} paddle 
+     * @param {Paddle} paddle 
      *  block is expected to have a position, width and height.
      */
     static BallToPaddle(ball, paddle) {
@@ -96,7 +96,33 @@ const Collision = (function () {
         */
         
       }
-    
+    }
+    /**
+     * Will process collisions between ball and rectangle.
+     * @param {Ball} ball 
+     *  Ball object is expected to have a position and radius properties.
+     * @param {Enemy} enemy 
+     *  enemy is expected to have a position, width and height.
+     */
+    static BallToEnemy(ball, enemy) {
+      const aabbBall = rectangleToAabb({ position: ball.position, width: ball.radius, height: ball.radius });
+      const aabbBlock = rectangleToAabb({ position: { x: enemy.x, y: enemy.y }, width: enemy.width, height: enemy.height });
+      const result = collisions.maniAABBToAABB(aabbBall, aabbBlock);
+      if (result.collision) {
+        ball.position = {
+          x: ball.position.x + result.manifest.leftAABB.distance.x,
+          y: ball.position.y + result.manifest.leftAABB.distance.y
+        };
+        const direction = {
+          x: result.manifest.leftAABB.distance.x,
+          y: result.manifest.leftAABB.distance.y
+        };
+        ball.velocity = {
+          x: (direction.x !== 0) ? -ball.velocity.x : ball.velocity.x,
+          y: (direction.y !== 0) ? -ball.velocity.y : ball.velocity.y
+        };
+        enemy.die();
+      }
     }
   }
   return Collision;
