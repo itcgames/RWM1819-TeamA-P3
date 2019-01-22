@@ -13,9 +13,14 @@ class Game {
     this.canvas = new Canvas("canvas");
     this.ctx = canvas.getContext("2d");
     this.ball = new Ball(100, 100, 20);
-    this.yellowBrick = new Brick("YELLOW","y1", 100,100,50,25);
-    this.blueEnemy = new Enemy("BLUE", "b1", 200, 100, 1,1,25,25, this.worldBounds.minX, this.worldBounds.maxX  );
-    this.debugBrick = new Brick("YELLOW", "debug1", 100, 400, 500, 20);
+    //brick array
+    this.bricks = [];
+    this.bricks.push(new Brick("YELLOW","y1", 100,100,50,25));
+    this.bricks.push(new Brick("YELLOW", "debug1", 100,400,500,25));
+    //enemy array
+    this.enemies = [];
+    this.enemies.push(new Enemy("BLUE", "b1", 200, 100, 1,1,25,25, this.worldBounds.minX, this.worldBounds.maxX));
+
     this.ballSpawning = true;
     this.spawnBallCountdown = 3.0;
     this.generatedRandomPaddlePos = false;
@@ -46,20 +51,35 @@ class Game {
     const dt = this.calculateDt();
     this.dnd.update();
     this.paddle.update(dt);
-    this.yellowBrick.update();
-    this.blueEnemy.update();
-    this.debugBrick.update();
     this.ballUpdate(dt);
     this.score = this.score + 1;
     if (this.score > this.highScore)
     {
       this.highScore = this.score;
     }
-    Collision.BallToBlock(this.ball, this.yellowBrick);
-    Collision.BallToBlock(this.ball, this.debugBrick);
+    for(var i =0; i<this.bricks.length; i++)
+    {
+      this.bricks[i].update();
+      Collision.BallToBlock(this.ball,this.bricks[i]);
+      if(this.bricks[i].health <= 0)
+      {
+        this.bricks.splice(i, 1);
+      }
+    }
+    for(var i=0; i < this.enemies.length; i++)
+    {
+      this.enemies[i].update();
+      if(!this.ballSpawning)
+      {
+        Collision.BallToEnemy(this.ball, this.enemies[i]);
+      }
+      if(this.enemies[i].health <= 0)
+      {
+        this.enemies.splice(i, 1);
+      }
+    }
     if (!this.ballSpawning){
       Collision.BallToPaddle(this.ball, this.paddle);
-      Collision.BallToEnemy(this.ball, this.blueEnemy);
     }
   }
 
@@ -67,12 +87,18 @@ class Game {
     this.ctx.clearRect(0,0,this.canvas.resolution.x, this.canvas.resolution.y);
     this.paddle.draw(this.ctx);
     this.ball.render(this.ctx);
-    this.blueEnemy.draw(this.ctx);
-    this.yellowBrick.draw(this.ctx);
+    for(var i = 0; i< this.bricks.length; i++)
+    {
+      this.bricks[i].draw(this.ctx);
+    }
+    for(var i = 0; i<this.enemies.length; i++)
+    {
+      this.enemies[i].draw(this.ctx);
+    }
+
     this.ctx.font = "14px Arial";
     this.ctx.fillText("Score: " + this.score, 50, 50);
     this.ctx.fillText("High Score: " + this.highScore, 50, 80);
-    this.debugBrick.draw(this.ctx);
   }
 
   calculateDt() {

@@ -8,7 +8,7 @@ const Collision = (function () {
 
   /**
    * Converts a rectangle into a axis aligned bounding box.
-   * @param {{ position: { x: number, y: number }, width: number, height: number }} rect 
+   * @param {{ position: { x: number, y: number }, width: number, height: number }} rect
    * @returns {Array<{ x: number, y: number }>} axis aligned bounding box,
    *  an array of positions of size 4.
    */
@@ -25,9 +25,9 @@ const Collision = (function () {
 
     /**
      * Will process collisions between ball and rectangle.
-     * @param {Ball} ball 
+     * @param {Ball} ball
      *  Ball object is expected to have a position and radius properties.
-     * @param {Brick} block 
+     * @param {Brick} block
      *  block is expected to have a position, width and height.
      */
     static BallToBlock(ball, block) {
@@ -47,14 +47,14 @@ const Collision = (function () {
           x: (direction.x !== 0) ? -ball.velocity.x : ball.velocity.x,
           y: (direction.y !== 0) ? -ball.velocity.y : ball.velocity.y
         };
-        block.health -= 1;
+        block.damage();
       }
     }
       /**
      * Will process collisions between ball and rectangle.
-     * @param {Ball} ball 
+     * @param {Ball} ball
      *  Ball object is expected to have a position and radius properties.
-     * @param {Paddle} paddle 
+     * @param {Paddle} paddle
      *  block is expected to have a position, width and height.
      */
     static BallToPaddle(ball, paddle) {
@@ -78,7 +78,7 @@ const Collision = (function () {
 
         //get angle
         var angle = Math.atan2(vectorBetweenBallAndPaddle.y, vectorBetweenBallAndPaddle.x);
-        angle = VectorMath.toDeg(angle) 
+        angle = VectorMath.toDeg(angle)
 
         //make unit vector from angle
         var firingVectorUnit = VectorMath.vector(angle);
@@ -94,14 +94,14 @@ const Collision = (function () {
           console.log("negative bounce");
         }
         */
-        
+
       }
     }
     /**
      * Will process collisions between ball and rectangle.
-     * @param {Ball} ball 
+     * @param {Ball} ball
      *  Ball object is expected to have a position and radius properties.
-     * @param {Enemy} enemy 
+     * @param {Enemy} enemy
      *  enemy is expected to have a position, width and height.
      */
     static BallToEnemy(ball, enemy) {

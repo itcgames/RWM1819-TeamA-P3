@@ -93,8 +93,6 @@ class Brick
     {
       this.health -= 1;
     }
-    if(this.health === 0)
-      delete this;
   }
 
 }
