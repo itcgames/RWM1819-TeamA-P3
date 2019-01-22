@@ -1,33 +1,43 @@
 
 class Game {
   constructor() {
-
-    this.worldBounds = {
-      minX: 100,
-      minY: 100,
-      maxX: 1000,
-      maxY: 800
-    };
-    this.paddle = new Paddle(100,700, this.worldBounds.minX, this.worldBounds.maxX);
     this.prevDt = Date.now();
     this.canvas = new Canvas("canvas");
     this.ctx = canvas.getContext("2d");
+    /** @type {Array<Brick>} */
+    this.bricks = [];
+    /** @type {Array<Enemy>} */
+    this.enemies = [];
+    
+    new LevelLoader("./res/Levels.json", (ev, data) => {
+      const level = data[0];
+      this.worldBounds = level.WorldBounds;
+      this.paddle = new Paddle(level.Paddle.position.x, level.Paddle.position.y, this.worldBounds.minX, this.worldBounds.maxX);
+      level.Bricks.forEach((brick, index) => {
+        const id = brick.type + index.toString();
+        this.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height));
+      });
+      level.Enemies.forEach((enemy, index) => {
+        const id = enemy.type + index.toString();
+        this.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height));
+      });
+      this.dnd = new DragDrop();
+      this.dnd.addDraggable(this.paddle.paddleRect, false, true);
+      window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
+      window.addEventListener("mouseup", this.dnd.dragend.bind(this.dnd));
+      this.run();
+    }, ev => { alert("Failed to load level"); });
     this.ball = new Ball(100, 100, 20);
     this.yellowBrick = new Brick("YELLOW","y1", 100,100,50,25);
     this.blueEnemy = new Enemy("BLUE", "b1", 200, 100, 1,1,25,25);
-    this.debugBrick = new Brick("YELLOW", "debug1", 100, 400, 500, 20);
     this.ballSpawning = true;
     this.spawnBallCountdown = 3.0;
     this.generatedRandomPaddlePos = false;
     this.randPaddlePos;
     this.ballStartSpeed = 8;
-    this.dnd = new DragDrop();
-    this.dnd.addDraggable(this.paddle.paddleRect, false, true);
     this.score = 0;
     this.highScore = 500;
-
-    window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
-    window.addEventListener("mouseup", this.dnd.dragend.bind(this.dnd));
+    
   }
 
   run() {
@@ -48,7 +58,8 @@ class Game {
     this.paddle.update(dt);
     this.yellowBrick.update();
     this.blueEnemy.update();
-    this.debugBrick.update();
+    this.bricks.forEach(function (brick) { brick.update(); });
+    this.enemies.forEach(function (enemy) { enemy.update(); });
     this.ballUpdate(dt);
     this.score = this.score + 1;
     if (this.score > this.highScore)
@@ -56,8 +67,8 @@ class Game {
       this.highScore = this.score;
     }
     Collision.BallToBlock(this.ball, this.yellowBrick);
-    Collision.BallToBlock(this.ball, this.debugBrick);
-    if (!this.ballSpawning){
+    if (!this.ballSpawning) {
+      this.bricks.forEach(brick => Collision.BallToBlock(this.ball, brick));
       Collision.BallToPaddle(this.ball, this.paddle);
     }
   }
@@ -68,10 +79,11 @@ class Game {
     this.ball.render(this.ctx);
     this.blueEnemy.draw(this.ctx);
     this.yellowBrick.draw(this.ctx);
+    this.bricks.forEach(brick => brick.draw(this.ctx));
+    this.enemies.forEach(enemy => enemy.draw(this.ctx));
     this.ctx.font = "14px Arial";
     this.ctx.fillText("Score: " + this.score, 50, 50);
     this.ctx.fillText("High Score: " + this.highScore, 50, 80);
-    this.debugBrick.draw(this.ctx);
   }
 
   calculateDt() {
