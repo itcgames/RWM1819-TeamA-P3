@@ -2,7 +2,7 @@
 * @EnemyType enum for the different type of bricks in our game
 */
 const EnemyType = {
-    BLUE: "./res/Images/Blinky.png",
+    BLUE: "./res/Images/Bricks/brick_yellow.png",
     RED: 2,
     GREEN: 3,
     RAINBOW: 4
@@ -15,7 +15,7 @@ class Enemy
   /**
   * @constructor constructor for the enemy class
   */
-  constructor(type, id, posX, posY, velX, velY, width, height)
+  constructor(type, id, posX, posY, velX, velY, width, height, minX, maxX)
   {
     this.img;
     this.type = type;
@@ -26,6 +26,8 @@ class Enemy
     this.velY = velY;
     this.width = width;
     this.height = height;
+    this.minX = minX;
+    this.maxX = maxX;
     this.direction = Math.floor((Math.random() * 2) + 1);
 
     this.createNewEnemy();
@@ -44,15 +46,15 @@ class Enemy
       this.x+=3;
     }
 
-    if(this.x < 0)
+    if(this.x < this.minX)
     {
-      this.x = 1;
+      this.x = this.minX;
       this.direction = 2;
     }
 
-    if(this.x > 1000)
+    if(this.x > this.maxX)
     {
-      this.x = 1000;
+      this.x = this.maxX;
       this.direction = 1
     }
 

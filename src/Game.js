@@ -14,7 +14,7 @@ class Game {
     this.ctx = canvas.getContext("2d");
     this.ball = new Ball(100, 100, 20);
     this.yellowBrick = new Brick("YELLOW","y1", 100,100,50,25);
-    this.blueEnemy = new Enemy("BLUE", "b1", 200, 100, 1,1,25,25);
+    this.blueEnemy = new Enemy("BLUE", "b1", 200, 100, 1,1,25,25, this.worldBounds.minX, this.worldBounds.maxX  );
     this.debugBrick = new Brick("YELLOW", "debug1", 100, 400, 500, 20);
     this.ballSpawning = true;
     this.spawnBallCountdown = 3.0;
