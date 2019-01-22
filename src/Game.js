@@ -23,7 +23,17 @@ class Game {
     this.ballStartSpeed = 8;
     this.dnd = new DragDrop();
     this.dnd.addDraggable(this.paddle.paddleRect, false, true);
-    
+
+
+    this.laserImg = new Image();
+    var gameInstance = this;
+    this.img.addEventListener('load', function () {
+      gameInstance.mySprite = new Animation(gameInstance.img, 197, 260, 30);
+      gameInstance.playerAnimator.addAnimation("idle", gameInstance.mySprite);
+
+    });
+
+    this.img.src = "player_idle.png";
     window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
     window.addEventListener("mouseup", this.dnd.dragend.bind(this.dnd));
   }
