@@ -28,8 +28,8 @@ class Paddle {
             onKeyUp: this.onKeyUp.bind(this)
         };
         this.paddleRect = new Square(this.position.x, this.position.y, this.size.x, this.size.y, "#095ee8");
-        this.clampPaddleLeft = 100;
-        this.clampPaddleRight = 800;
+        this.clampPaddleLeft = minX;
+        this.clampPaddleRight = maxX;
         document.addEventListener("keydown", this.events.onKeyDown, false);
         document.addEventListener("keyup", this.events.onKeyUp, false);
 

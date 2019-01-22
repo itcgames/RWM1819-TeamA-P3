@@ -47,7 +47,7 @@ class Game {
     this.dnd.update();
     this.paddle.update(dt);
     this.yellowBrick.update();
-    this.ball.update();
+    this.ballUpdate(dt);
     this.score = this.score + 1;
     if (this.score > this.highScore)
     {
@@ -130,16 +130,16 @@ class Game {
 
   ballWorldCollision(){
     if(this.ball.position.x + (this.ball.radius * 2) > this.worldBounds.maxX){
-      this.ball.flipVelX;
+      this.ball.flipVelX();
     }
     if(this.ball.position.x < this.worldBounds.minX){
-      this.ball.flipVelX;
+      this.ball.flipVelX();
     }
     if(this.ball.position.y > this.worldBounds.maxY){
-      this.ball.flipVelY;
+      this.ball.flipVelY();
     }
     if(this.ball.position.y < this.worldBounds.minY){
-      this.ball.flipVelY;
+      this.ball.flipVelY();
     }
     if(this.ball.position.y + (this.ball.radius * 2) > this.worldBounds.maxY){
       this.ballSpawning = true;
