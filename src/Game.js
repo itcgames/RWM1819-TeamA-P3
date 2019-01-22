@@ -1,18 +1,26 @@
 
 class Game {
   constructor() {
-    this.paddle = new Paddle(100,700);
+    
+    this.worldBounds = {
+      minX: 100,
+      minY: 100,
+      maxX: 1000,
+      maxY: 800
+    };
+    this.paddle = new Paddle(100,700, this.worldBounds.minX, this.worldBounds.maxX);
     this.prevDt = Date.now();
     this.canvas = new Canvas("canvas");
     this.ctx = canvas.getContext("2d");
     this.ball = new Ball(100, 100, 20);
     this.yellowBrick = new Brick("YELLOW","y1", 100,100,50,25);
 
+
     this.ballSpawning = true;
     this.spawnBallCountdown = 3.0;
     this.generatedRandomPaddlePos = false;
     this.randPaddlePos;
-    this.ballStartSpeed = 5;
+    this.ballStartSpeed = 8;
     this.dnd = new DragDrop();
     this.dnd.addDraggable(this.paddle.paddleRect, false, true);
     
@@ -62,9 +70,10 @@ class Game {
    * time between cycles 
    */
   ballUpdate(dt){
-    this.spawnBallCountdown -= dt / 1000;
 
     if(this.ballSpawning){
+      this.spawnBallCountdown -= dt / 1000;
+
       if(!this.generatedRandomPaddlePos){
         //generate random offset from centre of paddle
         this.randPaddlePos = Math.random() * this.paddle.size.x - (this.paddle.size.x/2);
@@ -100,10 +109,30 @@ class Game {
         this.spawnBallCountdown = 3.0;
         this.ball.velocity.x = firingVector.x;
         this.ball.velocity.y = firingVector.y;
+        this.generatedRandomPaddlePos = false;
       }
     }
     else{
+      this.ballWorldCollision();
       this.ball.update();
+    }
+  }
+
+  ballWorldCollision(){
+    if(this.ball.position.x + (this.ball.radius * 2) > this.worldBounds.maxX){
+      this.ball.velocity.x *= -1;
+    }
+    if(this.ball.position.x < this.worldBounds.minX){
+      this.ball.velocity.x *= -1;
+    }
+    if(this.ball.position.y > this.worldBounds.maxY){
+      this.ball.velocity.y *= -1;
+    }
+    if(this.ball.position.y < this.worldBounds.minY){
+      this.ball.velocity.y *= -1;
+    }
+    if(this.ball.position.y + (this.ball.radius * 2) > this.worldBounds.maxY){
+      this.ballSpawning = true;
     }
   }
 }
