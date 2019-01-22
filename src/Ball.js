@@ -1,8 +1,8 @@
 class Ball{
   constructor(x, y, r) {
     this.position = {
-      x: x,
-      y: y
+      x: x + r,
+      y: y + r
     }
     this.velocity = {
       x:1 ,
@@ -20,7 +20,7 @@ class Ball{
   render(ctx) {
     ctx.save();
     ctx.fillStyle = "#ce0a2b";
-    ctx.fillRect(this.position.x, this.position.y, this.radius, this.radius);
+    ctx.fillRect(this.position.x - this.radius, this.position.y - this.radius, this.radius, this.radius);
     ctx.restore();
   }
 
