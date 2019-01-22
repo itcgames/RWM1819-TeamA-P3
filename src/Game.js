@@ -13,6 +13,11 @@ class Game {
     this.generatedRandomPaddlePos = false;
     this.randPaddlePos;
     this.ballStartSpeed = 5;
+    this.dnd = new DragDrop();
+    this.dnd.addDraggable(this.paddle.paddleRect, false, true);
+    
+    window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
+    window.addEventListener("mouseup", this.dnd.dragend.bind(this.dnd));
   }
 
   run() {
@@ -29,6 +34,7 @@ class Game {
 
   update() {
     const dt = this.calculateDt();
+    this.dnd.update();
     this.paddle.update(dt);
     this.yellowBrick.update();
     this.ballUpdate(dt);
@@ -38,6 +44,7 @@ class Game {
     this.ctx.clearRect(0,0,this.canvas.resolution.x, this.canvas.resolution.y);
     this.paddle.draw(this.ctx);
     this.ball.render(this.ctx);
+    this.yellowBrick.draw(this.ctx);
   }
 
   calculateDt() {

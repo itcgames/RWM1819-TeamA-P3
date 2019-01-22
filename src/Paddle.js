@@ -27,6 +27,9 @@ class Paddle {
             onKeyDown: this.onKeyDown.bind(this),
             onKeyUp: this.onKeyUp.bind(this)
         };
+        this.paddleRect = new Square(this.position.x, this.position.y, this.size.x, this.size.y, "#095ee8");
+        this.clampPaddleLeft = 100;
+        this.clampPaddleRight = 800;
         document.addEventListener("keydown", this.events.onKeyDown, false);
         document.addEventListener("keyup", this.events.onKeyUp, false);
 
@@ -43,16 +46,26 @@ class Paddle {
         if(this.rightPressed && !this.leftPressed){
             //check if next step will be out of bounds if not move
             if(!((this.position.x + this.size.x) + this.speed * (dt/1000) > this.maxX)){
-                this.position.x += this.speed * (dt/1000);
+                this.paddleRect.x += this.speed * (dt/1000);
             }
         }
         //if only left arrow pressed
         else if(this.leftPressed && !this.rightPressed){
             if(!(this.position.x - this.speed * (dt/1000) < this.minX)){
-                this.position.x -= this.speed * (dt/1000);
+                this.paddleRect.x -= this.speed * (dt/1000);
             }       
          }
          this.updateOrigin();
+         this.position.x = this.paddleRect.x;
+         this.position.y = this.paddleRect.y;
+         if (this.position.x < this.clampPaddleLeft){
+           this.position.x = this.clampPaddleLeft;
+           this.paddleRect.x = this.clampPaddleLeft;
+         }
+         else if (this.position.x > this.clampPaddleRight){
+           this.position.x = this.clampPaddleRight;
+           this.paddleRect.x = this.clampPaddleRight;
+         }
     }
 
     /**
