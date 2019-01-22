@@ -2,16 +2,16 @@
 * @ColourEnum enum for the different type of bricks in our game
 */
 const ColourEnum = {
-  RED: 1,
-  WHITE: 2,
-  ORANGE: 3,
-  LIGHTBLUE: 4,
-  GREEN: 5,
-  BLUE: 6,
-  PINK: 7,
-  YELLOW: "./res/Images/YellowBrick.png",
-  METAL: 9,
-  GOLD: 10
+  RED: "./res/Images/Bricks/brick_red.png",
+  WHITE: "./res/Images/Bricks/brick_white.png",
+  ORANGE: "./res/Images/Bricks/brick_orange.png",
+  LIGHTBLUE: "./res/Images/Bricks/brick_light_blue.png",
+  GREEN: "./res/Images/Bricks/brick_green.png",
+  BLUE: "./res/Images/Bricks/brick_blue.png",
+  PINK: "./res/Images/Bricks/brick_pink.png",
+  YELLOW: "./res/Images/Bricks/brick_yellow.png",
+  METAL: "./res/Images/Bricks/brick_metal.png",
+  GOLD: "./res/Images/Bricks/brick_gold.png"
 }
 /**
 * Brick class used to setup each of the destructible blocks in the game
@@ -93,8 +93,6 @@ class Brick
     {
       this.health -= 1;
     }
-    if(this.health === 0)
-      delete this;
   }
 
 }

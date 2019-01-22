@@ -8,7 +8,7 @@ class Game {
     this.bricks = [];
     /** @type {Array<Enemy>} */
     this.enemies = [];
-    
+
     new LevelLoader("./res/Levels.json", (ev, data) => {
       const level = data[0];
       this.worldBounds = level.WorldBounds;
@@ -19,7 +19,7 @@ class Game {
       });
       level.Enemies.forEach((enemy, index) => {
         const id = enemy.type + index.toString();
-        this.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height));
+        this.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height, this.worldBounds.minX, this.worldBounds.maxX));
       });
       this.dnd = new DragDrop();
       this.dnd.addDraggable(this.paddle.paddleRect, false, true);
@@ -27,9 +27,8 @@ class Game {
       window.addEventListener("mouseup", this.dnd.dragend.bind(this.dnd));
       this.run();
     }, ev => { alert("Failed to load level"); });
+
     this.ball = new Ball(100, 100, 20);
-    this.yellowBrick = new Brick("YELLOW","y1", 100,100,50,25);
-    this.blueEnemy = new Enemy("BLUE", "b1", 200, 100, 1,1,25,25);
     this.ballSpawning = true;
     this.spawnBallCountdown = 3.0;
     this.generatedRandomPaddlePos = false;
@@ -37,7 +36,7 @@ class Game {
     this.ballStartSpeed = 8;
     this.score = 0;
     this.highScore = 500;
-    
+
   }
 
   run() {
@@ -56,29 +55,36 @@ class Game {
     const dt = this.calculateDt();
     this.dnd.update();
     this.paddle.update(dt);
-    this.yellowBrick.update();
-    this.blueEnemy.update();
-    this.bricks.forEach(function (brick) { brick.update(); });
-    this.enemies.forEach(function (enemy) { enemy.update(); });
     this.ballUpdate(dt);
     this.score = this.score + 1;
-    if (this.score > this.highScore)
-    {
+    if (this.score > this.highScore) {
       this.highScore = this.score;
     }
-    Collision.BallToBlock(this.ball, this.yellowBrick);
+    this.bricks.forEach((brick, index, array) => {
+      brick.update();
+      Collision.BallToBlock(this.ball, brick);
+      if (brick.health <= 0) {
+        array.splice(index, 1);
+      }
+    });
+    this.enemies.forEach((enemy, index, array) => {
+      enemy.update();
+      if (!this.ballSpawning) {
+        Collision.BallToEnemy(this.ball, enemy);
+      }
+      if (enemy.health <= 0) {
+        array.splice(index, 1);
+      }
+    });
     if (!this.ballSpawning) {
-      this.bricks.forEach(brick => Collision.BallToBlock(this.ball, brick));
       Collision.BallToPaddle(this.ball, this.paddle);
     }
   }
 
   render() {
-    this.ctx.clearRect(0,0,this.canvas.resolution.x, this.canvas.resolution.y);
+    this.ctx.clearRect(0, 0, this.canvas.resolution.x, this.canvas.resolution.y);
     this.paddle.draw(this.ctx);
     this.ball.render(this.ctx);
-    this.blueEnemy.draw(this.ctx);
-    this.yellowBrick.draw(this.ctx);
     this.bricks.forEach(brick => brick.draw(this.ctx));
     this.enemies.forEach(enemy => enemy.draw(this.ctx));
     this.ctx.font = "14px Arial";
@@ -100,14 +106,14 @@ class Game {
    * @param {Number} dt
    * time between cycles
    */
-  ballUpdate(dt){
+  ballUpdate(dt) {
 
-    if(this.ballSpawning){
+    if (this.ballSpawning) {
       this.spawnBallCountdown -= dt / 1000;
 
-      if(!this.generatedRandomPaddlePos){
+      if (!this.generatedRandomPaddlePos) {
         //generate random offset from centre of paddle
-        this.randPaddlePos = Math.random() * this.paddle.size.x - (this.paddle.size.x/2);
+        this.randPaddlePos = Math.random() * this.paddle.size.x - (this.paddle.size.x / 2);
         this.generatedRandomPaddlePos = true;
       }
       //make balls position relative to the paddle
@@ -115,7 +121,7 @@ class Game {
       this.ball.position.y = this.paddle.position.y - (this.ball.radius);
       //when countdown is 0 fire ball at angle depending on position
       //relative to the paddle
-      if(this.spawnBallCountdown <= 0){
+      if (this.spawnBallCountdown <= 0) {
 
         //calculate vector between ball and paddle
         var vectorBetweenBallAndPaddle = {
@@ -144,26 +150,26 @@ class Game {
         this.generatedRandomPaddlePos = false;
       }
     }
-    else{
+    else {
       this.ballWorldCollision();
       this.ball.update();
     }
   }
 
-  ballWorldCollision(){
-    if(this.ball.position.x + (this.ball.radius * 2) > this.worldBounds.maxX){
+  ballWorldCollision() {
+    if (this.ball.position.x + (this.ball.radius * 2) > this.worldBounds.maxX) {
       this.ball.flipVelX();
     }
-    if(this.ball.position.x < this.worldBounds.minX){
+    if (this.ball.position.x < this.worldBounds.minX) {
       this.ball.flipVelX();
     }
-    if(this.ball.position.y > this.worldBounds.maxY){
+    if (this.ball.position.y > this.worldBounds.maxY) {
       this.ball.flipVelY();
     }
-    if(this.ball.position.y < this.worldBounds.minY){
+    if (this.ball.position.y < this.worldBounds.minY) {
       this.ball.flipVelY();
     }
-    if(this.ball.position.y + (this.ball.radius * 2) > this.worldBounds.maxY){
+    if (this.ball.position.y + (this.ball.radius * 2) > this.worldBounds.maxY) {
       this.ballSpawning = true;
     }
   }
