@@ -23,6 +23,7 @@ class Brick
   */
   constructor(colour, id, positionX, positionY, width, height)
   {
+     this.img;
      this.x = positionX;
      this.y = positionY;
      this.id = id;
@@ -52,7 +53,7 @@ class Brick
   draw(ctx)
   {
     ctx.save();
-    ctx.drawImage(this.img, this.x, this.y);
+    ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
     ctx.restore();
 
   }
@@ -84,6 +85,15 @@ class Brick
     else {
       this.health = 1;
     }
+  }
+  damage()
+  {
+    if(this.health < 3)
+    {
+      this.health -= 1;
+    }
+    if(this.health === 0)
+      delete this;
   }
 
 }

@@ -7,9 +7,10 @@ class Game {
     this.ctx = canvas.getContext("2d");
     this.ball = new Ball(100, 100, 50);
     this.yellowBrick = new Brick("YELLOW","y1", 100,100,50,25);
+    this.blueEnemy = new Enemy("BLUE", "b1", 200, 100, 1,1,25,25);
     this.dnd = new DragDrop();
     this.dnd.addDraggable(this.paddle.paddleRect, false, true);
-    
+
     window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
     window.addEventListener("mouseup", this.dnd.dragend.bind(this.dnd));
   }
@@ -31,6 +32,7 @@ class Game {
     this.dnd.update();
     this.paddle.update(dt);
     this.yellowBrick.update();
+    this.blueEnemy.update();
     this.ball.update();
   }
 
@@ -38,6 +40,7 @@ class Game {
     this.ctx.clearRect(0,0,this.canvas.resolution.x, this.canvas.resolution.y);
     this.paddle.draw(this.ctx);
     this.ball.render(this.ctx);
+    this.blueEnemy.draw(this.ctx);
     this.yellowBrick.draw(this.ctx);
   }
 
