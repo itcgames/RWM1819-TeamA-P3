@@ -1,3 +1,3 @@
 function main() {
-  (new Game()).run();
+  new Game();
 }
