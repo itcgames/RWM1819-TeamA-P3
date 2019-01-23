@@ -30,14 +30,14 @@ class Scene
 
     if(this.type === "MAIN")
     {
-      this.cursorImg = new Image(50,25);
+      this.cursorImg = new Image(50,50);
       this.cursorImg.src = "./res/Images/Scenes/cursor.png";
 
-      this.p1Img = new Image(100,50);
-      this.p1Img.src = "./res/Images/Scenes/cursor.png";
+      this.p1Img = new Image(100,25);
+      this.p1Img.src = "./res/Images/Scenes/player_1.png";
 
-      this.p2Img = new Image(100,50);
-      this.p2Img.src = "./res/Images/Scenes/cursor.png";
+      this.p2Img = new Image(100,25);
+      this.p2Img.src = "./res/Images/Scenes/player_2.png";
     }
 
     this.createScene();

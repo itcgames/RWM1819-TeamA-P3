@@ -30,6 +30,7 @@ class Brick
      this.colour = colour;
      this.width = width;
      this.height = height;
+     this.health = 1;
 
      this.setHealth();
      this.createNewBrick();
@@ -40,7 +41,6 @@ class Brick
   */
   update()
   {
-    //if the object has no health delete it
 
   }
   /**
@@ -49,7 +49,6 @@ class Brick
   */
   draw(ctx)
   {
-    if (this.health <= 0) { return; }
     ctx.save();
     ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
     ctx.restore();
@@ -93,7 +92,7 @@ class Brick
     {
       this.health = 2;
     }
-    if(this.colour === "GOLD")
+    else if(this.colour === "GOLD")
     {
       this.health = 3;
     }
