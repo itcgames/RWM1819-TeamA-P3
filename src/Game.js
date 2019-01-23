@@ -12,10 +12,10 @@ class Game {
     this.menuManager.addScene("Splash", new Scene("SPLASH", "s", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
     this.menuManager.addScene("Main Menu", new Scene("MAIN", "m", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
     this.menuManager.addScene("Game Scene", new Scene("GAME", "g", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
-    this.menuManager.setCurrentScene("Splash");
+    this.menuManager.setCurrentScene("Game Scene");
     //this.menuManager.current.key; current scene
     this.menuManager.fadeSpeed = 4000;
-    this.menuManager.fadeTo("Main Menu");
+  //  this.menuManager.fadeTo("Main Menu");
     this.paddle = new Paddle(100,700, this.worldBounds.minX, this.worldBounds.maxX);
     this.prevDt = Date.now();
     this.canvas = new Canvas("canvas");
