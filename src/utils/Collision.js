@@ -124,6 +124,92 @@ const Collision = (function () {
         enemy.die();
       }
     }
+
+    /**
+     * Deals with block to laser collision detection
+     * @param {Laser} laser 
+     * laser to check against
+     * @param {Brick} block 
+     * block to check against
+     */
+    static LaserToBlock(laser, block){
+      const aabbLaser = rectangleToAabb({position: laser.position, width: laser.width, height: laser.height});
+      const aabbBlock = rectangleToAabb({ position: { x: block.x, y: block.y }, width: block.width, height: block.height });
+      const result = collisions.maniAABBToAABB(aabbLaser, aabbBlock);
+
+      if(result.collision){
+        block.damage();
+        return true;
+      }
+      return false;
+    }
+
+    /**
+     * Collisions between lasers an blocks
+     * @param {Array<Laser>} lasers 
+     * lasers array
+     * @param {Brick} block
+     * block to check collision against 
+     */
+    static LasersToBlock(lasers, block) {
+      lasers.forEach((laser, index, array) => {
+        if (Collision.LaserToBlock(laser, block)) {
+          array.splice(index, 1);
+        }
+      });
+    }
+
+    /**
+     * Check collision against world
+     * @param {Array<Laser>} lasers 
+     * lasers array
+     * @param {Brick} minY
+     * top y value of the border of the game 
+     */
+    static LasersToWorld(lasers, minY){
+      lasers.forEach((laser, index, array) => {
+        if (laser.position.y < minY) {
+          array.splice(index, 1);
+        }
+      });
+    }
+
+    /**
+     * method that deals with collision between lasers and an enemy.
+     * @param {Array<Laser>} lasers 
+     * laser array
+     * @param {Enemy} enemy
+     * enemy to check against 
+     */
+    static LasersToEnemies(lasers, enemy){
+      lasers.forEach((laser,index,array) =>{
+        if(Collision.LaserToEnemyCol(laser,enemy)){
+          array.splice(index, 1);
+          enemy.die();
+        }
+      });
+    }
+
+    /**
+     * Collision between laser and enemy detection
+     * @param {Laser<Array>} laser 
+     * the laser array
+     * @param {Enemy} enemy 
+     * enemy being checked against
+     * @returns {boolean}
+     * returns true on collision
+     */
+    static LaserToEnemyCol(laser,enemy){
+      const aabbLaser = rectangleToAabb({ position: laser.position, width: laser.width, height: laser.height });
+      const aabbEnemy = rectangleToAabb({ position: { x: enemy.x, y: enemy.y }, width: enemy.width, height: enemy.height });
+
+      const result = collisions.maniAABBToAABB(aabbLaser, aabbEnemy);
+
+      if(result.collision){
+        return true;
+      }
+      return false;
+    }
   }
   return Collision;
 })();

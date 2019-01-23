@@ -41,10 +41,7 @@ class Brick
   update()
   {
     //if the object has no health delete it
-    if(this.health <= 0)
-    {
-      delete document.getElementById(this.id);
-    }
+
   }
   /**
   * @draw

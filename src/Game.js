@@ -4,19 +4,19 @@ class Game {
     this.worldBounds = {
       minX: 100,
       minY: 100,
-      maxX: 1000,
+      maxX: 1100,
       maxY: 800
     };
     //scene management
     this.menuManager = new MenuManager();
-    this.menuManager.addScene("Splash", new Scene("SPLASH", "s", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
-    this.menuManager.addScene("Main Menu", new Scene("MAIN", "m", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
-    this.menuManager.addScene("Game Scene", new Scene("GAME", "g", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
+    this.menuManager.addScene("Splash", new Scene("SPLASH", "s", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
+    this.menuManager.addScene("Main Menu", new Scene("MAIN", "m", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
+    this.menuManager.addScene("Game Scene", new Scene("GAME", "g", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
     this.menuManager.setCurrentScene("Game Scene");
-    //this.menuManager.current.key; current scene
     this.menuManager.fadeSpeed = 4000;
-  //  this.menuManager.fadeTo("Main Menu");
+    //this.menuManager.fadeTo("Main Menu");
     this.prevDt = Date.now();
+    this.paddle = new Paddle(100, 700, this.worldBounds.minX, this.worldBounds.maxX);
     this.canvas = new Canvas("canvas");
     this.ctx = canvas.getContext("2d");
     /** @type {Array<Brick>} */
@@ -27,7 +27,6 @@ class Game {
     new LevelLoader("./res/Levels.json", (ev, data) => {
       const level = data[0];
       this.worldBounds = level.WorldBounds;
-      this.paddle = new Paddle(level.Paddle.position.x, level.Paddle.position.y, this.worldBounds.minX, this.worldBounds.maxX);
       level.Bricks.forEach((brick, index) => {
         const id = brick.type + index.toString();
         this.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height));
@@ -61,8 +60,8 @@ class Game {
     this.pressedEnter = false;
 
     this.events = {
-        onKeyDown: this.onKeyDown.bind(this)
-      };
+      onKeyDown: this.onKeyDown.bind(this)
+    };
     window.addEventListener("keydown", this.events.onKeyDown, false);
   }
   /**
@@ -70,22 +69,22 @@ class Game {
    * @param {KeyboardEvent} event
    * the key down event
    */
-  onKeyDown(event){
-    if(this.menuManager.current.key === "Main Menu")
-    {
-        //enter key
-        if(event.keyCode === 13){
-            this.pressedEnter = true;
-        }
-        //UP arrow key
-        if(event.keyCode === 38) {
-            this.pressedUp = true;
-        }
-        //Down arrow key
-        if(event.keyCode === 40){
-            this.pressedUp = false;
-        }
-    }}
+  onKeyDown(event) {
+    if (this.menuManager.current.key === "Main Menu") {
+      //enter key
+      if (event.keyCode === 13) {
+        this.pressedEnter = true;
+      }
+      //UP arrow key
+      if (event.keyCode === 38) {
+        this.pressedUp = true;
+      }
+      //Down arrow key
+      if (event.keyCode === 40) {
+        this.pressedUp = false;
+      }
+    }
+  }
 
 
   run() {
@@ -103,23 +102,19 @@ class Game {
   update() {
     const dt = this.calculateDt();
     this.menuManager.update(dt);
-    if(this.menuManager.current.key === "Main Menu")
-    {
-      if(this.pressedUp === true)
-      {
+    if (this.menuManager.current.key === "Main Menu") {
+      if (this.pressedUp === true) {
         this.menuManager.current.value.cursorHeight = 712;
       }
-      if(this.pressedUp === false) {
+      if (this.pressedUp === false) {
         this.menuManager.current.value.cursorHeight = 762;
       }
-      if(this.pressedEnter === true)
-      {
+      if (this.pressedEnter === true) {
         this.menuManager.setCurrentScene("Game Scene");
       }
     }
 
-    if(this.menuManager.current.key === "Game Scene")
-    {
+    if (this.menuManager.current.key === "Game Scene") {
       //reset bools
       this.pressedUp = true;
       this.pressedEnter = false;
@@ -128,13 +123,13 @@ class Game {
       this.paddle.update(dt);
       this.ballUpdate(dt);
       this.score = this.score + 1;
-      if (this.score > this.highScore)
-      {
+      if (this.score > this.highScore) {
         this.highScore = this.score;
       }
       this.bricks.forEach((brick, index, array) => {
         brick.update();
         Collision.BallToBlock(this.ball, brick);
+        Collision.LasersToBlock(this.paddle.lasers, brick);
         if (brick.health <= 0) {
           array.splice(index, 1);
         }
@@ -147,23 +142,23 @@ class Game {
         if (enemy.health <= 0) {
           array.splice(index, 1);
         }
+        Collision.LasersToEnemies(this.paddle.lasers, enemy);
       });
-      if (!this.ballSpawning){
+      if (!this.ballSpawning) {
         Collision.BallToPaddle(this.ball, this.paddle);
       }
+      Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
     }
 
   }
 
   render() {
-    this.ctx.clearRect(0,0,this.canvas.resolution.x, this.canvas.resolution.y);
+    this.ctx.clearRect(0, 0, this.canvas.resolution.x, this.canvas.resolution.y);
     this.menuManager.draw(this.ctx);
-    if(this.menuManager.current.key === "Main Menu")
-    {
+    if (this.menuManager.current.key === "Main Menu") {
 
     }
-    if(this.menuManager.current.key === "Game Scene")
-    {
+    if (this.menuManager.current.key === "Game Scene") {
       this.paddle.draw(this.ctx);
       this.ball.render(this.ctx);
       this.bricks.forEach(brick => brick.draw(this.ctx));
