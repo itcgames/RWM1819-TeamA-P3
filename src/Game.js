@@ -1,6 +1,22 @@
 
 class Game {
   constructor() {
+    this.worldBounds = {
+      minX: 100,
+      minY: 100,
+      maxX: 1000,
+      maxY: 800
+    };
+    //scene management
+    this.menuManager = new MenuManager();
+    this.menuManager.addScene("Splash", new Scene("SPLASH", "s", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
+    this.menuManager.addScene("Main Menu", new Scene("MAIN", "m", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
+    this.menuManager.addScene("Game Scene", new Scene("GAME", "g", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
+    this.menuManager.setCurrentScene("Splash");
+    //this.menuManager.current.key; current scene
+    this.menuManager.fadeSpeed = 4000;
+    this.menuManager.fadeTo("Main Menu");
+    this.paddle = new Paddle(100,700, this.worldBounds.minX, this.worldBounds.maxX);
     this.prevDt = Date.now();
     this.canvas = new Canvas("canvas");
     this.ctx = canvas.getContext("2d");
@@ -36,8 +52,36 @@ class Game {
     this.ballStartSpeed = 8;
     this.score = 0;
     this.highScore = 500;
+    this.pressedUp = true;
+    this.pressedEnter = false;
 
+    this.events = {
+        onKeyDown: this.onKeyDown.bind(this)
+      };
+    window.addEventListener("keydown", this.events.onKeyDown, false);
   }
+  /**
+   * This is the function that detect key presses.
+   * @param {KeyboardEvent} event
+   * the key down event
+   */
+  onKeyDown(event){
+    if(this.menuManager.current.key === "Main Menu")
+    {
+        //enter key
+        if(event.keyCode === 13){
+            this.pressedEnter = true;
+        }
+        //UP arrow key
+        if(event.keyCode === 38) {
+            this.pressedUp = true;
+        }
+        //Down arrow key
+        if(event.keyCode === 40){
+            this.pressedUp = false;
+        }
+    }}
+
 
   run() {
     this.loop();
@@ -53,45 +97,77 @@ class Game {
 
   update() {
     const dt = this.calculateDt();
-    this.dnd.update();
-    this.paddle.update(dt);
-    this.ballUpdate(dt);
-    this.score = this.score + 1;
-    if (this.score > this.highScore) {
-      this.highScore = this.score;
+    this.menuManager.update(dt);
+    if(this.menuManager.current.key === "Main Menu")
+    {
+      if(this.pressedUp === true)
+      {
+        this.menuManager.current.value.cursorHeight = 712;
+      }
+      if(this.pressedUp === false) {
+        this.menuManager.current.value.cursorHeight = 762;
+      }
+      if(this.pressedEnter === true)
+      {
+        this.menuManager.setCurrentScene("Game Scene");
+      }
     }
-    this.bricks.forEach((brick, index, array) => {
-      brick.update();
-      Collision.BallToBlock(this.ball, brick);
-      if (brick.health <= 0) {
-        array.splice(index, 1);
+
+    if(this.menuManager.current.key === "Game Scene")
+    {
+      //reset bools
+      this.pressedUp = true;
+      this.pressedEnter = false;
+
+      this.dnd.update();
+      this.paddle.update(dt);
+      this.ballUpdate(dt);
+      this.score = this.score + 1;
+      if (this.score > this.highScore)
+      {
+        this.highScore = this.score;
       }
-    });
-    this.enemies.forEach((enemy, index, array) => {
-      enemy.update();
-      if (!this.ballSpawning) {
-        Collision.BallToEnemy(this.ball, enemy);
+      this.bricks.forEach((brick, index, array) => {
+        brick.update();
+        Collision.BallToBlock(this.ball, brick);
+        if (brick.health <= 0) {
+          array.splice(index, 1);
+        }
+      });
+      this.enemies.forEach((enemy, index, array) => {
+        enemy.update();
+        if (!this.ballSpawning) {
+          Collision.BallToEnemy(this.ball, enemy);
+        }
+        if (enemy.health <= 0) {
+          array.splice(index, 1);
+        }
+      });
+      if (!this.ballSpawning){
+        Collision.BallToPaddle(this.ball, this.paddle);
       }
-      if (enemy.health <= 0) {
-        array.splice(index, 1);
-      }
-    });
-    if (!this.ballSpawning) {
-      Collision.BallToPaddle(this.ball, this.paddle);
     }
+
   }
 
   render() {
-    this.ctx.clearRect(0, 0, this.canvas.resolution.x, this.canvas.resolution.y);
-    this.paddle.draw(this.ctx);
-    this.ball.render(this.ctx);
-    this.bricks.forEach(brick => brick.draw(this.ctx));
-    this.enemies.forEach(enemy => enemy.draw(this.ctx));
-    this.ctx.font = "14px Arial";
-    this.ctx.fillText("Score: " + this.score, 50, 50);
-    this.ctx.fillText("High Score: " + this.highScore, 50, 80);
-  }
+    this.ctx.clearRect(0,0,this.canvas.resolution.x, this.canvas.resolution.y);
+    this.menuManager.draw(this.ctx);
+    if(this.menuManager.current.key === "Main Menu")
+    {
 
+    }
+    if(this.menuManager.current.key === "Game Scene")
+    {
+      this.paddle.draw(this.ctx);
+      this.ball.render(this.ctx);
+      this.bricks.forEach(brick => brick.draw(this.ctx));
+      this.enemies.forEach(enemy => enemy.draw(this.ctx));
+      this.ctx.font = "14px Arial";
+      this.ctx.fillText("Score: " + this.score, 50, 50);
+      this.ctx.fillText("High Score: " + this.highScore, 50, 80);
+    }
+  }
   calculateDt() {
     const now = Date.now();
     const dt = now - this.prevDt;

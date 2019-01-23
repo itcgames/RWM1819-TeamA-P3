@@ -8,7 +8,7 @@ class Paddle {
             x: posX,
             y: posY
         };
-        this.speed = 300.0;
+        this.speed = 600.0;
         this.size = {
             x: 150,
             y: 50
@@ -37,7 +37,7 @@ class Paddle {
 
     /**
      * update paddle logic.
-     * @param {Number} dt 
+     * @param {Number} dt
      * time since last update
      */
     update(dt){
@@ -53,7 +53,7 @@ class Paddle {
         else if(this.leftPressed && !this.rightPressed){
             if(!(this.position.x - this.speed * (dt/1000) < this.minX)){
                 this.paddleRect.x -= this.speed * (dt/1000);
-            }       
+            }
          }
          this.position.x = this.paddleRect.x;
          this.position.y = this.paddleRect.y;
@@ -71,7 +71,7 @@ class Paddle {
 
     /**
      * draw the paddle
-     * @param {CanvasRenderingContext2D} ctx 
+     * @param {CanvasRenderingContext2D} ctx
      * canvas we want to draw to
      */
     draw(ctx){
@@ -83,7 +83,7 @@ class Paddle {
 
     /**
      * This is the function that detect key presses.
-     * @param {KeyboardEvent} event 
+     * @param {KeyboardEvent} event
      * the key down event
      */
     onKeyDown(event){
@@ -99,7 +99,7 @@ class Paddle {
 
     /**
      * This is the function that detects a key being released.
-     * @param {KeyboardEvent} event 
+     * @param {KeyboardEvent} event
      * the keyboard up event.
      */
     onKeyUp(event){
@@ -117,5 +117,5 @@ class Paddle {
         this.origin.x = this.position.x + this.size.x / 2;
         this.origin.y = this.position.y + this.size.y / 2;
     }
-    
+
 }
