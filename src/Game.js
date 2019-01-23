@@ -1,7 +1,7 @@
 
 class Game {
   constructor() {
-    this.worldBounds = {
+                                                                                              this.worldBounds = {
       minX: 100,
       minY: 100,
       maxX: 1000,
@@ -32,7 +32,13 @@ class Game {
     this.twoPlayerMode = false;
 
     this.currentLevel = 0;
-    this.powerUp = new PowerUp("SLOW", 100, 100);
+    //powerups
+    this.powerUp;
+    this.powerUpActive = false;
+    this.powerUpTimer1;
+    this.powerUpTimer2;
+    this.randomNumGen;
+
     new LevelLoader("./res/Levels.json", (ev, data) => {
       const level = data[0];
       this.worldBounds = level.WorldBounds;
@@ -145,7 +151,13 @@ class Game {
       }
       this.bricks.forEach((brick, index, array) => {
         brick.update();
-        Collision.BallToBlock(this.ball, brick);
+        if(Collision.BallToBlock(this.ball, brick))
+        {
+          if(this.powerUpActive === false)
+          {
+            this.checkSpawnPowerup(brick.x+12, brick.y);
+          }
+        }
         if (brick.health <= 0) {
           array.splice(index, 1);
           if (this.isPlayerOne) {
@@ -177,24 +189,59 @@ class Game {
         Collision.BallToPaddle(this.ball, this.paddle);
       }
       Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
-      this.powerUp.update();
-      if (Collision.PaddleToPowerUp(this.paddle, this.powerUp) && this.powerUp.active){
-        if (this.powerUp.type === "SLOW"){
-          this.ball.speed -= 4;//get angle
-          var angle = Math.atan2(this.ball.velocity.y, this.ball.velocity.x);
-          angle = VectorMath.toDeg(angle)
+      if(this.powerUpActive === true)
+      {
+        this.powerUp.update();
+        this.powerUpTimer2 = new Date();
+      }
+      if(this.powerUpTimer2 - this.powerUpTimer1 >= 10000)
+      {
+        this.powerUpActive = false;
+      }
+      if(this.powerUpActive === true)
+      {
+          if (Collision.PaddleToPowerUp(this.paddle, this.powerUp) && this.powerUp.active){
+            if (this.powerUp.type === "LASER"){
+              this.powerUp.active = false;
+            }
+            else if(this.powerUp.type === "ENLARGE")
+            {
+              this.powerUp.active = false;
+            }
+            else if(this.powerUp.type === "CATCH")
+            {
+              this.powerUp.active = false;
+            }
+            else if(this.powerUp.type === "SLOW")
+            {
+              this.ball.speed -= 4;//get angle
+              var angle = Math.atan2(this.ball.velocity.y, this.ball.velocity.x);
+              angle = VectorMath.toDeg(angle)
 
-          //make unit vector from angle
-          var firingVectorUnit = VectorMath.vector(angle);
-          //multiply by speed
-          var firingVector = {
-            x: firingVectorUnit.x * this.ball.speed,
-            y: firingVectorUnit.y * this.ball.speed
-          }
-          this.ball.velocity.x = firingVector.x;
-          this.ball.velocity.y = firingVector.y;
-          this.powerUp.active = false;
-        }
+              //make unit vector from angle
+              var firingVectorUnit = VectorMath.vector(angle);
+              //multiply by speed
+              var firingVector = {
+                x: firingVectorUnit.x * this.ball.speed,
+                y: firingVectorUnit.y * this.ball.speed
+              }
+              this.ball.velocity.x = firingVector.x;
+              this.ball.velocity.y = firingVector.y;
+              this.powerUp.active = false;
+            }
+            else if(this.powerUp.type === "BREAK")
+            {
+              this.powerUp.active = false;
+            }
+            else if(this.powerUp.type === "DISRUPTION")
+            {
+              this.powerUp.active = false;
+            }
+            else if(this.powerUp.type === "PLAYER")
+            {
+              this.powerUp.active = false;
+            }
+         }
       }
 
     }
@@ -214,7 +261,10 @@ class Game {
       this.ball.render(this.ctx);
       this.bricks.forEach(brick => brick.draw(this.ctx));
       this.enemies.forEach(enemy => enemy.draw(this.ctx));
-      this.powerUp.draw(this.ctx);
+      if(this.powerUpActive === true)
+      {
+        this.powerUp.draw(this.ctx);
+      }
       this.ctx.font = "14px Arial";
       this.ctx.fillText("Score: " + (this.isPlayerOne ? this.players.one.score : this.players.two.score), 50, 50);
       this.ctx.fillText("High Score: " + this.highScore, 50, 80);
@@ -308,6 +358,44 @@ class Game {
           ? this.players.one.enemies
           : this.players.two.enemies;
       }
+    }
+  }
+  checkSpawnPowerup(x,y)
+  {
+    this.randomNumGen = Math.floor((Math.random() * 100) + 1);
+    if(this.randomNumGen >= 75)
+    {
+      this.randomNumGen = Math.floor((Math.random() * 7) +1);
+      if(this.randomNumGen === 1)
+      {
+          this.powerUp = new PowerUp("LASER", x, y,50,25, this.worldBounds.maxY);
+      }
+      if(this.randomNumGen === 2)
+      {
+          this.powerUp = new PowerUp("ENLARGE", x, y,50,25, this.worldBounds.maxY);
+      }
+      if(this.randomNumGen === 3)
+      {
+          this.powerUp = new PowerUp("CATCH", x, y,50,25, this.worldBounds.maxY);
+      }
+      if(this.randomNumGen === 4)
+      {
+          this.powerUp = new PowerUp("SLOW", x, y,50,25, this.worldBounds.maxY);
+      }
+      if(this.randomNumGen === 5)
+      {
+          this.powerUp = new PowerUp("BREAK", x, y,50,25, this.worldBounds.maxY);
+      }
+      if(this.randomNumGen === 6)
+      {
+          this.powerUp = new PowerUp("DISRUPTION", x, y,50,25, this.worldBounds.maxY);
+      }
+      if(this.randomNumGen === 7)
+      {
+          this.powerUp = new PowerUp("PLAYER", x, y,50,25, this.worldBounds.maxY);
+      }
+      this.powerUpActive = true;
+      this.powerUpTimer1 = new Date();
     }
   }
 }

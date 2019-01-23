@@ -17,6 +17,7 @@ class Scene
   constructor(type, id, posX, posY, width, height)
   {
     this.img;
+  //  this.imgWall;
     this.cursorImg;
     this.p1Img;
     this.p2Img;
@@ -27,7 +28,6 @@ class Scene
     this.width = width;
     this.height = height;
     this.cursorHeight = 712;
-
     if(this.type === "MAIN")
     {
       this.cursorImg = new Image(50,50);
@@ -38,7 +38,13 @@ class Scene
 
       this.p2Img = new Image(100,25);
       this.p2Img.src = "./res/Images/Scenes/player_2.png";
+
     }
+    // if(this.type === "GAME")
+    // {
+    //   this.imgWall = new Image(-25,-25);
+    //   this.imgWall.src = "./res/Images/Scenes/GameSceneWall.png";
+    // }
 
     this.createScene();
   }
@@ -61,6 +67,10 @@ class Scene
       ctx.drawImage(this.p1Img, 600,700,100,50);
       ctx.drawImage(this.p2Img, 600,750, 100,50);
     }
+    // if(this.type === "GAME")
+    // {
+    //   ctx.drawImage(this.imgWall,this.x,this.y,this.width+20, this.height+20);
+    // }
     ctx.restore();
   }
 /**

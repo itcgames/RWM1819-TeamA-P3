@@ -48,7 +48,9 @@ const Collision = (function () {
           y: (direction.y !== 0) ? -ball.velocity.y : ball.velocity.y
         };
         block.damage();
+        return true;
       }
+      return false;
     }
       /**
        * Will process collisions between enemy and rectangle.
