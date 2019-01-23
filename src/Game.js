@@ -52,7 +52,8 @@ class Game {
     this.highScore = 500;
     this.pressedUp = true;
     this.pressedEnter = false;
-
+    this.timer1 = new Date();
+    this.timer2;
     this.events = {
         onKeyDown: this.onKeyDown.bind(this)
       };
@@ -66,6 +67,9 @@ class Game {
   onKeyDown(event){
     if(this.menuManager.current.key === "Main Menu")
     {
+      console.log(this.timer1 - this.timer2 < -8000);
+      if(this.timer1 - this.timer2 < -8000)
+      {
         //enter key
         if(event.keyCode === 13){
             this.pressedEnter = true;
@@ -76,9 +80,11 @@ class Game {
         }
         //Down arrow key
         if(event.keyCode === 40){
-            this.pressedUp = false;
-        }
-    }}
+          this.pressedUp = false;
+          }
+      }
+    }
+  }
 
 
   run() {
@@ -98,17 +104,19 @@ class Game {
     this.menuManager.update(dt);
     if(this.menuManager.current.key === "Main Menu")
     {
-      if(this.pressedUp === true)
-      {
-        this.menuManager.current.value.cursorHeight = 712;
-      }
-      if(this.pressedUp === false) {
-        this.menuManager.current.value.cursorHeight = 762;
-      }
-      if(this.pressedEnter === true)
-      {
-        this.menuManager.setCurrentScene("Game Scene");
-      }
+        this.timer2 = new Date();
+        if(this.pressedUp === true)
+        {
+          this.menuManager.current.value.cursorHeight = 712;
+        }
+        if(this.pressedUp === false) {
+          this.menuManager.current.value.cursorHeight = 762;
+        }
+        if(this.pressedEnter === true)
+        {
+          this.menuManager.setCurrentScene("Game Scene");
+        }
+
     }
 
     if(this.menuManager.current.key === "Game Scene")
