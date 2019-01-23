@@ -210,6 +210,17 @@ const Collision = (function () {
       }
       return false;
     }
+    static PaddleToPowerUp(paddle,powerup){
+      const aabbPaddle = rectangleToAabb({ position: paddle.position, width: paddle.width, height: paddle.height });
+      const aabbPowerUp = rectangleToAabb({ position: { x: powerup.x, y: powerup.y }, width: powerup.width, height: powerup.height });
+
+      const result = collisions.maniAABBToAABB(aabbPaddle, aabbPowerUp);
+
+      if(result.collision){
+        return true;
+      }
+      return false;
+    }
   }
   return Collision;
 })();
