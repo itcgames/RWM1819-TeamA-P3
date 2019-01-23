@@ -12,9 +12,9 @@ class Game {
     this.menuManager.addScene("Splash", new Scene("SPLASH", "s", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
     this.menuManager.addScene("Main Menu", new Scene("MAIN", "m", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
     this.menuManager.addScene("Game Scene", new Scene("GAME", "g", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
-    this.menuManager.setCurrentScene("Game Scene");
+    this.menuManager.setCurrentScene("Splash");
     this.menuManager.fadeSpeed = 4000;
-    //this.menuManager.fadeTo("Main Menu");
+    this.menuManager.fadeTo("Main Menu");
     this.prevDt = Date.now();
     this.paddle = new Paddle(100, 700, this.worldBounds.minX, this.worldBounds.maxX);
     this.canvas = new Canvas("canvas");
@@ -23,17 +23,30 @@ class Game {
     this.bricks = [];
     /** @type {Array<Enemy>} */
     this.enemies = [];
+    /** @type {{ one: { score: number, bricks: Array<Brick>, enemies: Array<Enemy> }, two: { score: number, bricks: Array<Brick>, enemies: Array<Enemy> }}} */
+    this.players = {
+      one: { score: 0, bricks: [], enemies: [] },
+      two: { score: 0, bricks: [], enemies: [] }
+    };
+    this.isPlayerOne = true;
+    this.twoPlayerMode = false;
+
     this.currentLevel = 0;
+    this.powerUp = new PowerUp("SLOW", 100, 100);
     new LevelLoader("./res/Levels.json", (ev, data) => {
       const level = data[this.currentLevel];
       this.worldBounds = level.WorldBounds;
       level.Bricks.forEach((brick, index) => {
         const id = brick.type + index.toString();
-        this.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, this.currentLevel));
+        this.players.one.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, this.currentLevel));
+        this.players.two.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, this.currentLevel));
+        this.bricks = this.players.one.bricks;
       });
       level.Enemies.forEach((enemy, index) => {
         const id = enemy.type + index.toString();
-        this.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height, this.worldBounds.minX, this.worldBounds.maxX));
+        this.players.one.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height, this.worldBounds.minX, this.worldBounds.maxX));
+        this.players.two.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height, this.worldBounds.minX, this.worldBounds.maxX));
+        this.enemies = this.players.one.enemies;
       });
       this.dnd = new DragDrop();
       this.dnd.addDraggable(this.paddle.paddleRect, false, true);
@@ -54,7 +67,6 @@ class Game {
 
     window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
     window.addEventListener("mouseup", this.dnd.dragend.bind(this.dnd));
-    this.score = 0;
     this.highScore = 500;
     this.pressedUp = true;
     this.pressedEnter = false;
@@ -105,9 +117,13 @@ class Game {
     if (this.menuManager.current.key === "Main Menu") {
       if (this.pressedUp === true) {
         this.menuManager.current.value.cursorHeight = 712;
+        this.twoPlayerMode = false;
+        this.isPlayerOne = true;
       }
       if (this.pressedUp === false) {
         this.menuManager.current.value.cursorHeight = 762;
+        this.twoPlayerMode = true;
+        this.isPlayerOne = true;
       }
       if (this.pressedEnter === true) {
         this.menuManager.setCurrentScene("Game Scene");
@@ -122,9 +138,8 @@ class Game {
       this.dnd.update();
       this.paddle.update(dt);
       this.ballUpdate(dt);
-      if (this.score > this.highScore)
-      {
-        this.highScore = this.score;
+      if ((this.isPlayerOne ? this.players.one.score : this.players.two.score) > this.highScore) {
+        this.highScore = (this.isPlayerOne ? this.players.one.score : this.players.two.score);
       }
       this.bricks.forEach((brick, index, array) => {
         brick.update();
@@ -132,7 +147,11 @@ class Game {
         Collision.LasersToBlock(this.paddle.lasers, brick);
         if (brick.health <= 0) {
           array.splice(index, 1);
-          this.score += brick.score;
+          if (this.isPlayerOne) {
+            this.players.one.score += brick.score;
+          } else {
+            this.players.two.score += brick.score;
+          }
         }
       });
       this.enemies.forEach((enemy, index, array) => {
@@ -140,9 +159,14 @@ class Game {
         if (!this.ballSpawning) {
           Collision.BallToEnemy(this.ball, enemy);
         }
+        Collision.PaddleToEnemy(this.paddle, enemy);
         if (enemy.health <= 0) {
           array.splice(index, 1);
-          this.score += 100;
+          if (this.isPlayerOne) {
+            this.players.one.score += 100;
+          } else {
+            this.players.two.score += 100;
+          }
         }
         Collision.LasersToEnemies(this.paddle.lasers, enemy);
       });
@@ -150,6 +174,26 @@ class Game {
         Collision.BallToPaddle(this.ball, this.paddle);
       }
       Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
+      this.powerUp.update();
+      if (Collision.PaddleToPowerUp(this.paddle, this.powerUp) && this.powerUp.active){
+        if (this.powerUp.type === "SLOW"){
+          this.ball.speed -= 4;//get angle
+          var angle = Math.atan2(this.ball.velocity.y, this.ball.velocity.x);
+          angle = VectorMath.toDeg(angle)
+  
+          //make unit vector from angle
+          var firingVectorUnit = VectorMath.vector(angle);
+          //multiply by speed
+          var firingVector = {
+            x: firingVectorUnit.x * this.ball.speed,
+            y: firingVectorUnit.y * this.ball.speed
+          }
+          this.ball.velocity.x = firingVector.x;
+          this.ball.velocity.y = firingVector.y;
+          this.powerUp.active = false;
+        }
+      }
+
     }
 
   }
@@ -165,8 +209,9 @@ class Game {
       this.ball.render(this.ctx);
       this.bricks.forEach(brick => brick.draw(this.ctx));
       this.enemies.forEach(enemy => enemy.draw(this.ctx));
+      this.powerUp.draw(this.ctx);
       this.ctx.font = "14px Arial";
-      this.ctx.fillText("Score: " + this.score, 50, 50);
+      this.ctx.fillText("Score: " + (this.isPlayerOne ? this.players.one.score : this.players.two.score), 50, 50);
       this.ctx.fillText("High Score: " + this.highScore, 50, 80);
     }
   }
@@ -249,6 +294,15 @@ class Game {
     }
     if (this.ball.position.y + (this.ball.radius * 2) > this.worldBounds.maxY) {
       this.ballSpawning = true;
+      if (this.twoPlayerMode) {
+        this.isPlayerOne = !this.isPlayerOne;
+        this.bricks = this.isPlayerOne
+          ? this.players.one.bricks
+          : this.players.two.bricks;
+        this.enemies = this.isPlayerOne
+          ? this.players.one.enemies
+          : this.players.two.enemies;
+      }
     }
   }
 }
