@@ -25,14 +25,14 @@ class Game {
     this.enemies = [];
     /** @type {{ one: { score: number, bricks: Array<Brick>, enemies: Array<Enemy> }, two: { score: number, bricks: Array<Brick>, enemies: Array<Enemy> }}} */
     this.players = {
-      one: { score: 0, bricks: [], enemies: [] },
-      two: { score: 0, bricks: [], enemies: [] }
+      one: { score: 0, bricks: [], enemies: [], lives: 3 },
+      two: { score: 0, bricks: [], enemies: [], lives: 3 }
     };
     this.isPlayerOne = true;
     this.twoPlayerMode = false;
-
+    this.play = true;
     this.currentLevel = 0;
-    this.powerUp = new PowerUp("SLOW", 100, 100);
+    this.powerUp = new PowerUp("1UP", 100, 100);
     new LevelLoader("./res/Levels.json", (ev, data) => {
       const level = data[this.currentLevel];
       this.worldBounds = level.WorldBounds;
@@ -119,11 +119,17 @@ class Game {
         this.menuManager.current.value.cursorHeight = 712;
         this.twoPlayerMode = false;
         this.isPlayerOne = true;
+        this.play = true;
+        this.players.one.lives = 3;
+        this.players.two.lives = 3;
       }
       if (this.pressedUp === false) {
         this.menuManager.current.value.cursorHeight = 762;
         this.twoPlayerMode = true;
         this.isPlayerOne = true;
+        this.play = true;
+        this.players.one.lives = 3;
+        this.players.two.lives = 3;
       }
       if (this.pressedEnter === true) {
         this.menuManager.setCurrentScene("Game Scene");
@@ -131,71 +137,81 @@ class Game {
     }
 
     if (this.menuManager.current.key === "Game Scene") {
-      //reset bools
-      this.pressedUp = true;
-      this.pressedEnter = false;
+      if (this.play) {
+        //reset bools
+        this.pressedUp = true;
+        this.pressedEnter = false;
 
-      this.dnd.update();
-      this.paddle.update(dt);
-      this.ballUpdate(dt);
-      if ((this.isPlayerOne ? this.players.one.score : this.players.two.score) > this.highScore) {
-        this.highScore = (this.isPlayerOne ? this.players.one.score : this.players.two.score);
-      }
-      this.bricks.forEach((brick, index, array) => {
-        brick.update();
-        Collision.BallToBlock(this.ball, brick);
-        Collision.LasersToBlock(this.paddle.lasers, brick);
-        if (brick.health <= 0) {
-          array.splice(index, 1);
-          if (this.isPlayerOne) {
-            this.players.one.score += brick.score;
-          } else {
-            this.players.two.score += brick.score;
-          }
+        this.dnd.update();
+        this.paddle.update(dt);
+        this.ballUpdate(dt);
+        if ((this.isPlayerOne ? this.players.one.score : this.players.two.score) > this.highScore) {
+          this.highScore = (this.isPlayerOne ? this.players.one.score : this.players.two.score);
         }
-      });
-      this.enemies.forEach((enemy, index, array) => {
-        enemy.update();
+        this.bricks.forEach((brick, index, array) => {
+          brick.update();
+          Collision.BallToBlock(this.ball, brick);
+          Collision.LasersToBlock(this.paddle.lasers, brick);
+          if (brick.health <= 0) {
+            array.splice(index, 1);
+            if (this.isPlayerOne) {
+              this.players.one.score += brick.score;
+            } else {
+              this.players.two.score += brick.score;
+            }
+          }
+        });
+        this.enemies.forEach((enemy, index, array) => {
+          enemy.update();
+          if (!this.ballSpawning) {
+            Collision.BallToEnemy(this.ball, enemy);
+          }
+          Collision.PaddleToEnemy(this.paddle, enemy);
+          if (enemy.health <= 0) {
+            array.splice(index, 1);
+            if (this.isPlayerOne) {
+              this.players.one.score += 100;
+            } else {
+              this.players.two.score += 100;
+            }
+          }
+          Collision.LasersToEnemies(this.paddle.lasers, enemy);
+        });
         if (!this.ballSpawning) {
-          Collision.BallToEnemy(this.ball, enemy);
+          Collision.BallToPaddle(this.ball, this.paddle);
         }
-        Collision.PaddleToEnemy(this.paddle, enemy);
-        if (enemy.health <= 0) {
-          array.splice(index, 1);
-          if (this.isPlayerOne) {
-            this.players.one.score += 100;
-          } else {
-            this.players.two.score += 100;
-          }
-        }
-        Collision.LasersToEnemies(this.paddle.lasers, enemy);
-      });
-      if (!this.ballSpawning) {
-        Collision.BallToPaddle(this.ball, this.paddle);
-      }
-      Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
-      this.powerUp.update();
-      if (Collision.PaddleToPowerUp(this.paddle, this.powerUp) && this.powerUp.active){
-        if (this.powerUp.type === "SLOW"){
-          this.ball.speed -= 4;//get angle
-          var angle = Math.atan2(this.ball.velocity.y, this.ball.velocity.x);
-          angle = VectorMath.toDeg(angle)
-  
-          //make unit vector from angle
-          var firingVectorUnit = VectorMath.vector(angle);
-          //multiply by speed
-          var firingVector = {
-            x: firingVectorUnit.x * this.ball.speed,
-            y: firingVectorUnit.y * this.ball.speed
-          }
-          this.ball.velocity.x = firingVector.x;
-          this.ball.velocity.y = firingVector.y;
-          this.powerUp.active = false;
-        }
-      }
+        Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
+        this.powerUp.update();
+        if (Collision.PaddleToPowerUp(this.paddle, this.powerUp) && this.powerUp.active) {
+          if (this.powerUp.type === "SLOW") {
+            this.ball.speed -= 4;//get angle
+            var angle = Math.atan2(this.ball.velocity.y, this.ball.velocity.x);
+            angle = VectorMath.toDeg(angle)
 
+            //make unit vector from angle
+            var firingVectorUnit = VectorMath.vector(angle);
+            //multiply by speed
+            var firingVector = {
+              x: firingVectorUnit.x * this.ball.speed,
+              y: firingVectorUnit.y * this.ball.speed
+            }
+            this.ball.velocity.x = firingVector.x;
+            this.ball.velocity.y = firingVector.y;
+            this.powerUp.active = false;
+          }
+          if (this.powerUp.type === "1UP") {
+            if (this.isPlayerOne) {
+              this.players.one.lives += 1;
+            } else {
+              this.players.two.lives += 1;
+            }
+            this.powerUp.active = false;
+          }
+        }
+
+
+      }
     }
-
   }
 
   render() {
@@ -213,6 +229,8 @@ class Game {
       this.ctx.font = "14px Arial";
       this.ctx.fillText("Score: " + (this.isPlayerOne ? this.players.one.score : this.players.two.score), 50, 50);
       this.ctx.fillText("High Score: " + this.highScore, 50, 80);
+      this.ctx.fillText("Lives: " + (this.isPlayerOne ? this.players.one.lives : this.players.two.lives), 200, 50);
+      this.ctx.fillText("Player " + (this.isPlayerOne ? "1" : "2"), 200, 80);
     }
   }
   calculateDt() {
@@ -294,14 +312,40 @@ class Game {
     }
     if (this.ball.position.y + (this.ball.radius * 2) > this.worldBounds.maxY) {
       this.ballSpawning = true;
+      if (this.isPlayerOne) {
+        this.players.one.lives -= 1;
+        if (this.players.one.lives < 0)
+          this.players.one.lives = 0;
+
+      } else {
+        this.players.two.lives -= 1;
+        if (this.players.two.lives < 0)
+          this.players.two.lives = 0;
+      }
       if (this.twoPlayerMode) {
-        this.isPlayerOne = !this.isPlayerOne;
+        if ((this.isPlayerOne && this.players.two.lives > 0) || (!this.isPlayerOne && this.players.one.lives > 0)) {
+          this.isPlayerOne = !this.isPlayerOne; // swapping active player
+        } else if (this.players.one.lives > 0) {
+          // player one has lives left swap to him
+          this.isPlayerOne = true;
+        } else if (this.players.two.lives > 0) {
+          // player two has lives left swap to him
+          this.isPlayerOne = false;
+        } else {
+          // Game over both players lose
+          this.menuManager.fadeTo("Main Menu");
+          this.play = false;
+        }
         this.bricks = this.isPlayerOne
           ? this.players.one.bricks
           : this.players.two.bricks;
         this.enemies = this.isPlayerOne
           ? this.players.one.enemies
           : this.players.two.enemies;
+      } else if (this.players.one.lives <= 0) {
+        // Game over in player one mode
+        this.menuManager.fadeTo("Main Menu");
+        this.play = false;
       }
     }
   }

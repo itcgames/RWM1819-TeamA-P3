@@ -3,7 +3,7 @@
 */
 const PowerUpType = {
   Slow: "./res/Images/Bricks/brick_red.png",
-  Player: 2
+  Player: "./res/Images/Bricks/brick_white.png"
 }
 
 class PowerUp
@@ -45,5 +45,7 @@ update()
     this.img = new Image(this.width, this.height);
     if (this.type === "SLOW")
       this.img.src = PowerUpType.Slow;
+    if (this.type === "1UP")
+      this.img.src = PowerUpType.Player;
  }
 }
