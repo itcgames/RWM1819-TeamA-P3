@@ -9,6 +9,7 @@ class Ball{
       y:1
     }
     this.radius = r;
+    this.speed = 0;
   }
 
   update() {
@@ -22,6 +23,14 @@ class Ball{
     ctx.fillStyle = "#ce0a2b";
     ctx.fillRect(this.position.x, this.position.y, this.radius, this.radius);
     ctx.restore();
+  }
+
+  flipVelX(){
+    this.velocity.x = this.velocity.x * -1;
+  }
+
+  flipVelY(){
+    this.velocity.y = this.velocity.y * -1;
   }
 
 }

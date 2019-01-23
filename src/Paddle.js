@@ -8,7 +8,7 @@ class Paddle {
             x: posX,
             y: posY
         };
-        this.speed = 500.0;
+        this.speed = 600.0;
         this.size = {
             x: 150,
             y: 50
@@ -29,8 +29,8 @@ class Paddle {
             onKeyUp: this.onKeyUp.bind(this)
         };
         this.paddleRect = new Square(this.position.x, this.position.y, this.size.x, this.size.y, "#095ee8");
-        this.clampPaddleLeft = 100;
-        this.clampPaddleRight = 800;
+        this.clampPaddleLeft = minX;
+        this.clampPaddleRight = maxX;
         document.addEventListener("keydown", this.events.onKeyDown, false);
         document.addEventListener("keyup", this.events.onKeyUp, false);
 
@@ -48,7 +48,7 @@ class Paddle {
 
     /**
      * update paddle logic.
-     * @param {Number} dt 
+     * @param {Number} dt
      * time since last update
      */
     update(dt){
@@ -80,7 +80,7 @@ class Paddle {
         else if(this.leftPressed && !this.rightPressed){
             if(!(this.position.x - this.speed * (dt/1000) < this.minX)){
                 this.paddleRect.x -= this.speed * (dt/1000);
-            }       
+            }
          }
          this.position.x = this.paddleRect.x;
          this.position.y = this.paddleRect.y;
@@ -88,9 +88,9 @@ class Paddle {
            this.position.x = this.clampPaddleLeft;
            this.paddleRect.x = this.clampPaddleLeft;
          }
-         else if (this.position.x > this.clampPaddleRight){
-           this.position.x = this.clampPaddleRight;
-           this.paddleRect.x = this.clampPaddleRight;
+         else if (this.position.x + this.size.x > this.clampPaddleRight){
+           this.position.x = this.clampPaddleRight - this.size.x;
+           this.paddleRect.x = this.clampPaddleRight - this.size.x;
          }
          this.updateOrigin();
          this.lasers.forEach(function (laser) {
@@ -101,7 +101,7 @@ class Paddle {
 
     /**
      * draw the paddle
-     * @param {CanvasRenderingContext2D} ctx 
+     * @param {CanvasRenderingContext2D} ctx
      * canvas we want to draw to
      */
     draw(ctx){
@@ -116,7 +116,7 @@ class Paddle {
 
     /**
      * This is the function that detect key presses.
-     * @param {KeyboardEvent} event 
+     * @param {KeyboardEvent} event
      * the key down event
      */
     onKeyDown(event){
@@ -135,7 +135,7 @@ class Paddle {
 
     /**
      * This is the function that detects a key being released.
-     * @param {KeyboardEvent} event 
+     * @param {KeyboardEvent} event
      * the keyboard up event.
      */
     onKeyUp(event){
@@ -157,5 +157,5 @@ class Paddle {
         this.origin.x = this.position.x + this.size.x / 2;
         this.origin.y = this.position.y + this.size.y / 2;
     }
-    
+
 }

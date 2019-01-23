@@ -14,3 +14,6 @@
 	path = lib/RWM1819-Collision-B
 	url = https://github.com/itcgames/RWM1819-Collision-B.git
 	branch = master
+[submodule "lib/RWM1819-Menu-A"]
+	path = lib/RWM1819-Menu-A
+	url = https://github.com/itcgames/RWM1819-Menu-A
