@@ -241,7 +241,7 @@ class Game {
       }
       //make balls position relative to the paddle
       this.ball.position.x = this.paddle.origin.x - (this.ball.radius / 2) + this.randPaddlePos;
-      this.ball.position.y = this.paddle.position.y - (this.ball.radius);
+      this.ball.position.y = this.paddle.colBox.position.y - (this.ball.radius);
       //when countdown is 0 fire ball at angle depending on position
       //relative to the paddle
       if (this.spawnBallCountdown <= 0) {

@@ -13,6 +13,17 @@ class Paddle {
             x: 150,
             y: 50
         }
+
+        this.colBox = {
+            position :{
+                x: posX + 10,
+                y: posY + 10
+            },
+            size:{
+                x: 130,
+                y: 40
+            }
+        }
         this.leftPressed = false;
         this.rightPressed = false;
         this.spacePressed = false;
@@ -45,6 +56,27 @@ class Paddle {
         this.laserHeight = 50;
         this.laserIndex = 0;
 
+        this.defaultPaddleImg = new Image();
+        this.defaultPaddleImg.src = "./res/Images/Player/paddle.png";
+
+        this.laserPaddleImg = new Image();
+        this.laserPaddleImg.src = "./res/Images/Player/laser_paddle.png";
+
+
+        this.paddleAnimator = new AnimationManager();
+
+        this.defaultToLaserSprite = {};
+        this.defaultToLaserImage = new Image();
+
+        this.defaultToLaserImage.addEventListener('load', () => {
+            this.defaultToLaserSprite = new Animation(this.defaultToLaserImage, 307.54, 84, 24);
+            this.paddleAnimator.addAnimation("defaultToLaser", this.defaultToLaserSprite);
+            this.paddleAnimator.setScale("defaultToLaser", 0.65,0.7);
+            this.paddleAnimator.isLooping("defaultToLaser",false);
+            this.paddleAnimator.stop();
+        });
+        this.defaultToLaserImage.src = "./res/Images/Player/paddle_to_laser.png";
+
     }
 
     /**
@@ -56,7 +88,7 @@ class Paddle {
 
         if (this.laserPowerActive) {
             if (this.spacePressed && this.canFire) {
-                this.lasers.push(new Laser(this.position.x,
+                this.lasers.push(new Laser(this.position.x + 35,
                     this.position.y,
                     this.laserWidth,
                     this.laserHeight,
@@ -64,7 +96,7 @@ class Paddle {
                 );
                 this.laserIndex++;
 
-                this.lasers.push(new Laser(this.position.x + (this.size.x - this.laserWidth),
+                this.lasers.push(new Laser(this.position.x + (this.size.x - this.laserWidth) - 35,
                     this.position.y,
                     this.laserWidth,
                     this.laserHeight,
@@ -73,6 +105,9 @@ class Paddle {
                 this.laserIndex++;
 
                 this.canFire = false;
+            }
+            if(this.paddleAnimator.isPlaying()){
+                this.paddleAnimator.update(dt, this.origin.x, this.origin.y);
             }
         }
 
@@ -103,6 +138,18 @@ class Paddle {
         this.lasers.forEach((laser) => {
             laser.update(dt);
         });
+        this.colBox.position.x = this.position.x;
+
+        /**
+         * code to run when collide with laser powerup
+         * 
+         *      if(!this.laserPowerActive){
+                this.paddleAnimator.isReversing("defaultToLaser", false);
+                this.laserPowerActive = true;
+                this.paddleAnimator.continue();
+            }
+         */
+        
 
     }
 
@@ -116,8 +163,21 @@ class Paddle {
         this.lasers.forEach(function (laser) {
             laser.draw(ctx);
         });
-        ctx.fillRect(this.position.x, this.position.y, this.size.x, this.size.y);
-        ctx.stroke();
+        ctx.save()
+        if(this.laserPowerActive)
+        {
+            if(this.paddleAnimator.isPlaying()){
+                this.paddleAnimator.draw(ctx);
+            }
+            else{
+                //draw laser image
+                ctx.drawImage(this.laserPaddleImg, this.position.x, this.position.y, this.size.x, this.size.y);
+            }
+        }
+        else{
+            ctx.drawImage(this.defaultPaddleImg, this.position.x, this.position.y, this.size.x, this.size.y);
+        }
+        ctx.restore();
 
     }
 

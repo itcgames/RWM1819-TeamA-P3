@@ -59,7 +59,7 @@ const Collision = (function () {
      */
     static BallToPaddle(ball, paddle) {
       const aabbBall = rectangleToAabb({ position: ball.position, width: ball.radius, height: ball.radius });
-      const aabbPaddle = rectangleToAabb({ position: { x: paddle.position.x, y: paddle.position.y }, width: paddle.size.x, height: paddle.size.y });
+      const aabbPaddle = rectangleToAabb({ position: { x: paddle.colBox.position.x, y: paddle.colBox.position.y }, width: paddle.colBox.size.x, height: paddle.colBox.size.y });
       const result = collisions.maniAABBToAABB(aabbBall, aabbPaddle);
       if (result.collision) {
         /*ball.position = {
