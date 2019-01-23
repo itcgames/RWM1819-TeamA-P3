@@ -16,43 +16,36 @@ const ColourEnum = {
 /**
 * Brick class used to setup each of the destructible blocks in the game
 */
-class Brick
-{
+class Brick {
   /**
   * @constructor constructor for the brick class that also sets the health based on the colour
   */
-  constructor(colour, id, positionX, positionY, width, height)
-  {
-     this.img;
-     this.x = positionX;
-     this.y = positionY;
-     this.id = id;
-     this.colour = colour;
-     this.width = width;
-     this.height = height;
+  constructor(colour, id, positionX, positionY, width, height, level) {
+    this.img;
+    this.x = positionX;
+    this.y = positionY;
+    this.id = id;
+    this.colour = colour;
+    this.width = width;
+    this.height = height;
+    this.health = 1;
+    this.score = 0;
 
-     this.setHealth();
-     this.createNewBrick();
+    this.setHealth();
+    this.createNewBrick(level);
   }
 
   /**
   * @update update paddle logic.
   */
-  update()
-  {
-    //if the object has no health delete it
-    if(this.health <= 0)
-    {
-      delete document.getElementById(this.id);
-    }
+  update() {
+
   }
   /**
   * @draw
   * @param {context} ctx used to draw the paddle.
   */
-  draw(ctx)
-  {
-    if (this.health <= 0) { return; }
+  draw(ctx) {
     ctx.save();
     ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
     ctx.restore();
@@ -61,53 +54,66 @@ class Brick
   /**
   * @createNewBrick function used to create new bricks
   */
-  createNewBrick()
-  {
-      this.img = new Image(this.width, this.height)
-      if(this.colour === "RED")
-        this.img.src = ColourEnum.RED;
-      if(this.colour === "WHITE")
-        this.img.src = ColourEnum.WHITE;
-      if(this.colour === "ORANGE")
-        this.img.src = ColourEnum.ORANGE;
-      if(this.colour === "LIGHTBLUE")
-        this.img.src = ColourEnum.LIGHTBLUE;
-      if(this.colour === "GREEN")
-        this.img.src = ColourEnum.GREEN;
-      if(this.colour === "BLUE")
-        this.img.src = ColourEnum.BLUE;
-      if(this.colour === "PINK")
-        this.img.src = ColourEnum.PINK;
-      if(this.colour === "YELLOW")
-        this.img.src = ColourEnum.YELLOW;
-      if(this.colour === "METAL")
-        this.img.src = ColourEnum.METAL;
-      if(this.colour === "GOLD")
-        this.img.src = ColourEnum.GOLD;
+  createNewBrick(level) {
+    this.img = new Image(this.width, this.height)
+    if (this.colour === "RED") {
+      this.img.src = ColourEnum.RED;
+      this.score = 90;
+    }
+    if (this.colour === "WHITE") {
+      this.img.src = ColourEnum.WHITE;
+      this.score = 50;
+    }
+    if (this.colour === "ORANGE") {
+      this.img.src = ColourEnum.ORANGE;
+      this.score = 60;
+    }
+    if (this.colour === "LIGHTBLUE") {
+      this.img.src = ColourEnum.LIGHTBLUE;
+      this.score = 70;
+    }
+    if (this.colour === "GREEN") {
+      this.img.src = ColourEnum.GREEN;
+      this.score = 80;
+    }
+    if (this.colour === "BLUE") {
+      this.img.src = ColourEnum.BLUE;
+      this.score = 100;
+    }
+    if (this.colour === "PINK") {
+      this.img.src = ColourEnum.PINK;
+      this.score = 110;
+    }
+    if (this.colour === "YELLOW") {
+      this.img.src = ColourEnum.YELLOW;
+      this.score = 120;
+    }
+    if (this.colour === "METAL") {
+      this.img.src = ColourEnum.METAL;
+      this.score = (level + 1) * 50;
+    }
+    if (this.colour === "GOLD") {
+      this.img.src = ColourEnum.GOLD;
+    }
 
-      this.img.id = this.id;
+    this.img.id = this.id;
   }
   /**
   * @setHealth function used to set the health of a brick
   */
-  setHealth()
-  {
-    if(this.colour === "METAL")
-    {
+  setHealth() {
+    if (this.colour === "METAL") {
       this.health = 2;
     }
-    if(this.colour === "GOLD")
-    {
+    else if (this.colour === "GOLD") {
       this.health = 3;
     }
     else {
       this.health = 1;
     }
   }
-  damage()
-  {
-    if(this.health < 3)
-    {
+  damage() {
+    if (this.health < 3) {
       this.health -= 1;
     }
   }

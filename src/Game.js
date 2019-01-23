@@ -4,26 +4,26 @@ class Game {
     this.worldBounds = {
       minX: 100,
       minY: 100,
-      maxX: 1000,
+      maxX: 1100,
       maxY: 800
     };
     //scene management
     this.menuManager = new MenuManager();
-    this.menuManager.addScene("Splash", new Scene("SPLASH", "s", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
-    this.menuManager.addScene("Main Menu", new Scene("MAIN", "m", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
-    this.menuManager.addScene("Game Scene", new Scene("GAME", "g", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
+    this.menuManager.addScene("Splash", new Scene("SPLASH", "s", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
+    this.menuManager.addScene("Main Menu", new Scene("MAIN", "m", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
+    this.menuManager.addScene("Game Scene", new Scene("GAME", "g", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
     this.menuManager.setCurrentScene("Splash");
     this.menuManager.fadeSpeed = 4000;
     this.menuManager.fadeTo("Main Menu");
-    this.paddle = new Paddle(100, 700, this.worldBounds.minX, this.worldBounds.maxX);
     this.prevDt = Date.now();
+    this.paddle = new Paddle(100, 700, this.worldBounds.minX, this.worldBounds.maxX);
     this.canvas = new Canvas("canvas");
     this.ctx = canvas.getContext("2d");
     /** @type {Array<Brick>} */
     this.bricks = [];
     /** @type {Array<Enemy>} */
     this.enemies = [];
-    /** @type {{ one: { bricks: Array<Brick>, enemies: Array<Enemy> }, two: { bricks: Array<Brick>, enemies: Array<Enemy> }}} */
+    /** @type {{ one: { score: number, bricks: Array<Brick>, enemies: Array<Enemy> }, two: { score: number, bricks: Array<Brick>, enemies: Array<Enemy> }}} */
     this.players = {
       one: { score: 0, bricks: [], enemies: [] },
       two: { score: 0, bricks: [], enemies: [] }
@@ -31,13 +31,14 @@ class Game {
     this.isPlayerOne = true;
     this.twoPlayerMode = false;
 
+    this.currentLevel = 0;
     new LevelLoader("./res/Levels.json", (ev, data) => {
-      const level = data[0];
+      const level = data[this.currentLevel];
       this.worldBounds = level.WorldBounds;
       level.Bricks.forEach((brick, index) => {
         const id = brick.type + index.toString();
-        this.players.one.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height));
-        this.players.two.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height));
+        this.players.one.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, this.currentLevel));
+        this.players.two.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, this.currentLevel));
         this.bricks = this.players.one.bricks;
       });
       level.Enemies.forEach((enemy, index) => {
@@ -59,7 +60,12 @@ class Game {
     this.generatedRandomPaddlePos = false;
     this.randPaddlePos;
     this.ballStartSpeed = 8;
-    this.score = 0;
+    this.dnd = new DragDrop();
+    this.dnd.addDraggable(this.paddle.paddleRect, false, true);
+
+
+    window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
+    window.addEventListener("mouseup", this.dnd.dragend.bind(this.dnd));
     this.highScore = 500;
     this.pressedUp = true;
     this.pressedEnter = false;
@@ -131,15 +137,20 @@ class Game {
       this.dnd.update();
       this.paddle.update(dt);
       this.ballUpdate(dt);
-      this.score = this.score + 1;
-      if (this.score > this.highScore) {
-        this.highScore = this.score;
+      if ((this.isPlayerOne ? this.players.one.score : this.players.two.score) > this.highScore) {
+        this.highScore = (this.isPlayerOne ? this.players.one.score : this.players.two.score);
       }
       this.bricks.forEach((brick, index, array) => {
         brick.update();
         Collision.BallToBlock(this.ball, brick);
+        Collision.LasersToBlock(this.paddle.lasers, brick);
         if (brick.health <= 0) {
           array.splice(index, 1);
+          if (this.isPlayerOne) {
+            this.players.one.score += brick.score;
+          } else {
+            this.players.two.score += brick.score;
+          }
         }
       });
       this.enemies.forEach((enemy, index, array) => {
@@ -149,11 +160,18 @@ class Game {
         }
         if (enemy.health <= 0) {
           array.splice(index, 1);
+          if (this.isPlayerOne) {
+            this.players.one.score += 100;
+          } else {
+            this.players.two.score += 100;
+          }
         }
+        Collision.LasersToEnemies(this.paddle.lasers, enemy);
       });
       if (!this.ballSpawning) {
         Collision.BallToPaddle(this.ball, this.paddle);
       }
+      Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
     }
 
   }
@@ -170,7 +188,7 @@ class Game {
       this.bricks.forEach(brick => brick.draw(this.ctx));
       this.enemies.forEach(enemy => enemy.draw(this.ctx));
       this.ctx.font = "14px Arial";
-      this.ctx.fillText("Score: " + this.score, 50, 50);
+      this.ctx.fillText("Score: " + (this.isPlayerOne ? this.players.one.score : this.players.two.score), 50, 50);
       this.ctx.fillText("High Score: " + this.highScore, 50, 80);
     }
   }
@@ -256,11 +274,11 @@ class Game {
       if (this.twoPlayerMode) {
         this.isPlayerOne = !this.isPlayerOne;
         this.bricks = this.isPlayerOne
-            ? this.players.one.bricks
-            : this.players.two.bricks;
+          ? this.players.one.bricks
+          : this.players.two.bricks;
         this.enemies = this.isPlayerOne
-            ? this.players.one.enemies
-            : this.players.two.enemies;
+          ? this.players.one.enemies
+          : this.players.two.enemies;
       }
     }
   }
