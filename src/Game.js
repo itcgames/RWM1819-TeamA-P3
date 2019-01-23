@@ -32,6 +32,7 @@ class Game {
     this.twoPlayerMode = false;
 
     this.currentLevel = 0;
+    this.powerUp = new PowerUp("SLOW", 100, 100);
     new LevelLoader("./res/Levels.json", (ev, data) => {
       const level = data[this.currentLevel];
       this.worldBounds = level.WorldBounds;
@@ -173,6 +174,26 @@ class Game {
         Collision.BallToPaddle(this.ball, this.paddle);
       }
       Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
+      this.powerUp.update();
+      if (Collision.PaddleToPowerUp(this.paddle, this.powerUp) && this.powerUp.active){
+        if (this.powerUp.type === "SLOW"){
+          this.ball.speed -= 4;//get angle
+          var angle = Math.atan2(this.ball.velocity.y, this.ball.velocity.x);
+          angle = VectorMath.toDeg(angle)
+  
+          //make unit vector from angle
+          var firingVectorUnit = VectorMath.vector(angle);
+          //multiply by speed
+          var firingVector = {
+            x: firingVectorUnit.x * this.ball.speed,
+            y: firingVectorUnit.y * this.ball.speed
+          }
+          this.ball.velocity.x = firingVector.x;
+          this.ball.velocity.y = firingVector.y;
+          this.powerUp.active = false;
+        }
+      }
+
     }
 
   }
@@ -188,6 +209,7 @@ class Game {
       this.ball.render(this.ctx);
       this.bricks.forEach(brick => brick.draw(this.ctx));
       this.enemies.forEach(enemy => enemy.draw(this.ctx));
+      this.powerUp.draw(this.ctx);
       this.ctx.font = "14px Arial";
       this.ctx.fillText("Score: " + (this.isPlayerOne ? this.players.one.score : this.players.two.score), 50, 50);
       this.ctx.fillText("High Score: " + this.highScore, 50, 80);
