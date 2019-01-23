@@ -13,6 +13,17 @@ class Paddle {
             x: 150,
             y: 50
         }
+
+        this.colBox = {
+            position :{
+                x: posX + 10,
+                y: posY + 10
+            },
+            size:{
+                x: 130,
+                y: 40
+            }
+        }
         this.leftPressed = false;
         this.rightPressed = false;
         this.spacePressed = false;
@@ -44,6 +55,10 @@ class Paddle {
         this.laserWidth = 10;
         this.laserHeight = 50;
         this.laserIndex = 0;
+
+        this.defaultPaddleImg = new Image();
+        this.defaultPaddleImg.src = "./res/Images/Player/paddle.png";
+    
 
     }
 
@@ -103,6 +118,7 @@ class Paddle {
         this.lasers.forEach((laser) => {
             laser.update(dt);
         });
+        this.colBox.position.x = this.position.x;
 
     }
 
@@ -116,8 +132,9 @@ class Paddle {
         this.lasers.forEach(function (laser) {
             laser.draw(ctx);
         });
-        ctx.fillRect(this.position.x, this.position.y, this.size.x, this.size.y);
-        ctx.stroke();
+        ctx.save()
+        ctx.drawImage(this.defaultPaddleImg, this.position.x, this.position.y, this.size.x, this.size.y);
+        ctx.restore();
 
     }
 
