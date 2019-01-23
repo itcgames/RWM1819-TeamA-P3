@@ -1,0 +1,36 @@
+[
+    {
+        "WorldBounds": {
+            "minX": 100,
+            "minY": 100,
+            "maxX": 1000,
+            "maxY": 800
+        },
+        "Paddle": {
+            "position": { "x": 100, "y": 700 }
+        },
+        "Bricks": [
+            {
+                "type": "YELLOW",
+                "position": { "x": 100, "y": 100 },
+                "width": 50,
+                "height": 25
+            },
+            {
+                "type": "YELLOW",
+                "position": { "x": 100, "y": 400 },
+                "width": 500,
+                "height": 100
+            }
+        ],
+        "Enemies": [
+            {
+                "type": "BLUE",
+                "position": { "x": 0, "y": 0 },
+                "velocity": { "x": 0, "y": 0},
+                "width": 25,
+                "height": 25
+            }
+        ]
+    }
+]
