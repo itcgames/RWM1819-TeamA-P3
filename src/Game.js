@@ -16,7 +16,6 @@ class Game {
     //this.menuManager.current.key; current scene
     this.menuManager.fadeSpeed = 4000;
   //  this.menuManager.fadeTo("Main Menu");
-    this.paddle = new Paddle(100,700, this.worldBounds.minX, this.worldBounds.maxX);
     this.prevDt = Date.now();
     this.canvas = new Canvas("canvas");
     this.ctx = canvas.getContext("2d");
