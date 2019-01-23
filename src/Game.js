@@ -4,36 +4,36 @@ class Game {
     this.worldBounds = {
       minX: 100,
       minY: 100,
-      maxX: 1100,
+      maxX: 1000,
       maxY: 800
     };
     //scene management
     this.menuManager = new MenuManager();
-    this.menuManager.addScene("Splash", new Scene("SPLASH", "s", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
-    this.menuManager.addScene("Main Menu", new Scene("MAIN", "m", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
-    this.menuManager.addScene("Game Scene", new Scene("GAME", "g", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
-    this.menuManager.setCurrentScene("Game Scene");
+    this.menuManager.addScene("Splash", new Scene("SPLASH", "s", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
+    this.menuManager.addScene("Main Menu", new Scene("MAIN", "m", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
+    this.menuManager.addScene("Game Scene", new Scene("GAME", "g", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
+    this.menuManager.setCurrentScene("Splash");
     this.menuManager.fadeSpeed = 4000;
-    //this.menuManager.fadeTo("Main Menu");
+    this.menuManager.fadeTo("Main Menu");
+    this.paddle = new Paddle(100,700, this.worldBounds.minX, this.worldBounds.maxX);
     this.prevDt = Date.now();
-    this.paddle = new Paddle(100, 700, this.worldBounds.minX, this.worldBounds.maxX);
     this.canvas = new Canvas("canvas");
     this.ctx = canvas.getContext("2d");
     /** @type {Array<Brick>} */
     this.bricks = [];
     /** @type {Array<Enemy>} */
     this.enemies = [];
-    this.currentLevel = 0;
+
     new LevelLoader("./res/Levels.json", (ev, data) => {
-      const level = data[this.currentLevel];
+      const level = data[0];
       this.worldBounds = level.WorldBounds;
       level.Bricks.forEach((brick, index) => {
         const id = brick.type + index.toString();
-        this.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, this.currentLevel));
+        this.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height));
       });
       level.Enemies.forEach((enemy, index) => {
         const id = enemy.type + index.toString();
-        this.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height, this.worldBounds.minX, this.worldBounds.maxX));
+        this.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height, this.worldBounds.minX, this.worldBounds.maxX, this.worldBounds.minY, this.worldBounds.maxY));
       });
       this.dnd = new DragDrop();
       this.dnd.addDraggable(this.paddle.paddleRect, false, true);
@@ -48,20 +48,15 @@ class Game {
     this.generatedRandomPaddlePos = false;
     this.randPaddlePos;
     this.ballStartSpeed = 8;
-    this.dnd = new DragDrop();
-    this.dnd.addDraggable(this.paddle.paddleRect, false, true);
-
-
-    window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
-    window.addEventListener("mouseup", this.dnd.dragend.bind(this.dnd));
     this.score = 0;
     this.highScore = 500;
     this.pressedUp = true;
     this.pressedEnter = false;
-
+    this.timer1 = new Date();
+    this.timer2;
     this.events = {
-      onKeyDown: this.onKeyDown.bind(this)
-    };
+        onKeyDown: this.onKeyDown.bind(this)
+      };
     window.addEventListener("keydown", this.events.onKeyDown, false);
   }
   /**
@@ -69,19 +64,23 @@ class Game {
    * @param {KeyboardEvent} event
    * the key down event
    */
-  onKeyDown(event) {
-    if (this.menuManager.current.key === "Main Menu") {
-      //enter key
-      if (event.keyCode === 13) {
-        this.pressedEnter = true;
-      }
-      //UP arrow key
-      if (event.keyCode === 38) {
-        this.pressedUp = true;
-      }
-      //Down arrow key
-      if (event.keyCode === 40) {
-        this.pressedUp = false;
+  onKeyDown(event){
+    if(this.menuManager.current.key === "Main Menu")
+    {
+      if(this.timer1 - this.timer2 < -8000)
+      {
+        //enter key
+        if(event.keyCode === 13){
+            this.pressedEnter = true;
+        }
+        //UP arrow key
+        if(event.keyCode === 38) {
+            this.pressedUp = true;
+        }
+        //Down arrow key
+        if(event.keyCode === 40){
+          this.pressedUp = false;
+          }
       }
     }
   }
@@ -102,19 +101,25 @@ class Game {
   update() {
     const dt = this.calculateDt();
     this.menuManager.update(dt);
-    if (this.menuManager.current.key === "Main Menu") {
-      if (this.pressedUp === true) {
-        this.menuManager.current.value.cursorHeight = 712;
-      }
-      if (this.pressedUp === false) {
-        this.menuManager.current.value.cursorHeight = 762;
-      }
-      if (this.pressedEnter === true) {
-        this.menuManager.setCurrentScene("Game Scene");
-      }
+    if(this.menuManager.current.key === "Main Menu")
+    {
+        this.timer2 = new Date();
+        if(this.pressedUp === true)
+        {
+          this.menuManager.current.value.cursorHeight = 712;
+        }
+        if(this.pressedUp === false) {
+          this.menuManager.current.value.cursorHeight = 762;
+        }
+        if(this.pressedEnter === true)
+        {
+          this.menuManager.setCurrentScene("Game Scene");
+        }
+
     }
 
-    if (this.menuManager.current.key === "Game Scene") {
+    if(this.menuManager.current.key === "Game Scene")
+    {
       //reset bools
       this.pressedUp = true;
       this.pressedEnter = false;
@@ -122,6 +127,7 @@ class Game {
       this.dnd.update();
       this.paddle.update(dt);
       this.ballUpdate(dt);
+      this.score = this.score + 1;
       if (this.score > this.highScore)
       {
         this.highScore = this.score;
@@ -129,11 +135,12 @@ class Game {
       this.bricks.forEach((brick, index, array) => {
         brick.update();
         Collision.BallToBlock(this.ball, brick);
-        Collision.LasersToBlock(this.paddle.lasers, brick);
         if (brick.health <= 0) {
           array.splice(index, 1);
-          this.score += brick.score;
         }
+        this.enemies.forEach((enemy, index, array)=>{
+            Collision.EnemyToBlock(enemy, brick);
+        });
       });
       this.enemies.forEach((enemy, index, array) => {
         enemy.update();
@@ -142,25 +149,24 @@ class Game {
         }
         if (enemy.health <= 0) {
           array.splice(index, 1);
-          this.score += 100;
         }
-        Collision.LasersToEnemies(this.paddle.lasers, enemy);
       });
-      if (!this.ballSpawning) {
+      if (!this.ballSpawning){
         Collision.BallToPaddle(this.ball, this.paddle);
       }
-      Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
     }
 
   }
 
   render() {
-    this.ctx.clearRect(0, 0, this.canvas.resolution.x, this.canvas.resolution.y);
+    this.ctx.clearRect(0,0,this.canvas.resolution.x, this.canvas.resolution.y);
     this.menuManager.draw(this.ctx);
-    if (this.menuManager.current.key === "Main Menu") {
+    if(this.menuManager.current.key === "Main Menu")
+    {
 
     }
-    if (this.menuManager.current.key === "Game Scene") {
+    if(this.menuManager.current.key === "Game Scene")
+    {
       this.paddle.draw(this.ctx);
       this.ball.render(this.ctx);
       this.bricks.forEach(brick => brick.draw(this.ctx));
