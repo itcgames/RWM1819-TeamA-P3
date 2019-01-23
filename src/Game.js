@@ -23,13 +23,13 @@ class Game {
     this.bricks = [];
     /** @type {Array<Enemy>} */
     this.enemies = [];
-
+    this.currentLevel = 0;
     new LevelLoader("./res/Levels.json", (ev, data) => {
-      const level = data[0];
+      const level = data[this.currentLevel];
       this.worldBounds = level.WorldBounds;
       level.Bricks.forEach((brick, index) => {
         const id = brick.type + index.toString();
-        this.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height));
+        this.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, this.currentLevel));
       });
       level.Enemies.forEach((enemy, index) => {
         const id = enemy.type + index.toString();
@@ -122,8 +122,8 @@ class Game {
       this.dnd.update();
       this.paddle.update(dt);
       this.ballUpdate(dt);
-      this.score = this.score + 1;
-      if (this.score > this.highScore) {
+      if (this.score > this.highScore)
+      {
         this.highScore = this.score;
       }
       this.bricks.forEach((brick, index, array) => {
@@ -132,6 +132,7 @@ class Game {
         Collision.LasersToBlock(this.paddle.lasers, brick);
         if (brick.health <= 0) {
           array.splice(index, 1);
+          this.score += brick.score;
         }
       });
       this.enemies.forEach((enemy, index, array) => {
@@ -141,6 +142,7 @@ class Game {
         }
         if (enemy.health <= 0) {
           array.splice(index, 1);
+          this.score += 100;
         }
         Collision.LasersToEnemies(this.paddle.lasers, enemy);
       });
