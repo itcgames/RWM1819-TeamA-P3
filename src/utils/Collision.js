@@ -86,7 +86,7 @@ const Collision = (function () {
      */
     static BallToPaddle(ball, paddle) {
       const aabbBall = rectangleToAabb({ position: ball.position, width: ball.radius, height: ball.radius });
-      const aabbPaddle = rectangleToAabb({ position: { x: paddle.position.x, y: paddle.position.y }, width: paddle.size.x, height: paddle.size.y });
+      const aabbPaddle = rectangleToAabb({ position: { x: paddle.colBox.position.x, y: paddle.colBox.position.y }, width: paddle.colBox.size.x, height: paddle.colBox.size.y });
       const result = collisions.maniAABBToAABB(aabbBall, aabbPaddle);
       if (result.collision) {
         /*ball.position = {
@@ -109,7 +109,8 @@ const Collision = (function () {
 
         //make unit vector from angle
         var firingVectorUnit = VectorMath.vector(angle);
-        //multiply by start speed
+        //multiply by speed
+        ball.speed += 0.1;
         var firingVector = {
           x: firingVectorUnit.x * ball.speed,
           y: firingVectorUnit.y * ball.speed
@@ -236,6 +237,25 @@ const Collision = (function () {
         return true;
       }
       return false;
+    }
+
+    /**
+     * @param {Paddle} paddle 
+     * @param {Enemy} enemy 
+     */
+    static PaddleToEnemy(paddle, enemy) {
+      const aabbPaddle = rectangleToAabb({ position: { x: paddle.position.x, y: paddle.position.y }, width: paddle.size.x, height: paddle.size.y });
+      const aabbEnemy = rectangleToAabb({ position: { x: enemy.x, y: enemy.y }, width: enemy.width, height: enemy.height });
+
+      if (collisions.boolAABBToAABB(aabbPaddle, aabbEnemy)) {
+        enemy.die();
+      }
+    }
+    
+    static PaddleToPowerUp(paddle,powerup){
+      const aabbPaddle = rectangleToAabb({ position: paddle.position, width: paddle.size.x, height: paddle.size.y });
+      const aabbPowerUp = rectangleToAabb({ position: powerup.position, width: powerup.width, height: powerup.height });
+      return collisions.boolAABBToAABB(aabbPaddle, aabbPowerUp);
     }
   }
   return Collision;
