@@ -82,7 +82,8 @@ const Collision = (function () {
 
         //make unit vector from angle
         var firingVectorUnit = VectorMath.vector(angle);
-        //multiply by start speed
+        //multiply by speed
+        ball.speed += 0.1;
         var firingVector = {
           x: firingVectorUnit.x * ball.speed,
           y: firingVectorUnit.y * ball.speed
@@ -209,6 +210,11 @@ const Collision = (function () {
         return true;
       }
       return false;
+    }
+    static PaddleToPowerUp(paddle,powerup){
+      const aabbPaddle = rectangleToAabb({ position: paddle.position, width: paddle.size.x, height: paddle.size.y });
+      const aabbPowerUp = rectangleToAabb({ position: powerup.position, width: powerup.width, height: powerup.height });
+      return collisions.boolAABBToAABB(aabbPaddle, aabbPowerUp);
     }
   }
   return Collision;
