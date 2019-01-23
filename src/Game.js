@@ -159,6 +159,7 @@ class Game {
         if (!this.ballSpawning) {
           Collision.BallToEnemy(this.ball, enemy);
         }
+        Collision.PaddleToEnemy(this.paddle, enemy);
         if (enemy.health <= 0) {
           array.splice(index, 1);
           if (this.isPlayerOne) {

@@ -211,6 +211,20 @@ const Collision = (function () {
       }
       return false;
     }
+
+    /**
+     * @param {Paddle} paddle 
+     * @param {Enemy} enemy 
+     */
+    static PaddleToEnemy(paddle, enemy) {
+      const aabbPaddle = rectangleToAabb({ position: { x: paddle.position.x, y: paddle.position.y }, width: paddle.size.x, height: paddle.size.y });
+      const aabbEnemy = rectangleToAabb({ position: { x: enemy.x, y: enemy.y }, width: enemy.width, height: enemy.height });
+
+      if (collisions.boolAABBToAABB(aabbPaddle, aabbEnemy)) {
+        enemy.die();
+      }
+    }
+    
     static PaddleToPowerUp(paddle,powerup){
       const aabbPaddle = rectangleToAabb({ position: paddle.position, width: paddle.size.x, height: paddle.size.y });
       const aabbPowerUp = rectangleToAabb({ position: powerup.position, width: powerup.width, height: powerup.height });
