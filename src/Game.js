@@ -152,6 +152,25 @@ class Game {
       }
       Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
       this.powerUp.update();
+      if (Collision.PaddleToPowerUp(this.paddle, this.powerUp) && this.powerUp.active){
+        if (this.powerUp.type === "SLOW"){
+          this.ball.speed -= 4;//get angle
+          var angle = Math.atan2(this.ball.velocity.y, this.ball.velocity.x);
+          angle = VectorMath.toDeg(angle)
+  
+          //make unit vector from angle
+          var firingVectorUnit = VectorMath.vector(angle);
+          //multiply by speed
+          var firingVector = {
+            x: firingVectorUnit.x * this.ball.speed,
+            y: firingVectorUnit.y * this.ball.speed
+          }
+          this.ball.velocity.x = firingVector.x;
+          this.ball.velocity.y = firingVector.y;
+          this.powerUp.active = false;
+        }
+      }
+
     }
 
   }

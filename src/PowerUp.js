@@ -18,12 +18,14 @@ class PowerUp
     };
     this.width = 40;
     this.height = 15;
+    this.active = true;
     this.createPowerUp();
   }
 
 update()
 {
-  this.position.y += 1;
+  if (this.active)
+    this.position.y += 1;
 }
 
     /**
@@ -32,9 +34,11 @@ update()
   */
  draw(ctx)
  {
-   ctx.save();
-   ctx.drawImage(this.img, this.position.x, this.position.y, this.width, this.height);
-   ctx.restore();
+   if (this.active){
+    ctx.save();
+    ctx.drawImage(this.img, this.position.x, this.position.y, this.width, this.height);
+    ctx.restore();
+  }
  }
 
  createPowerUp(){
