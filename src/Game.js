@@ -24,6 +24,7 @@ class Game {
     /** @type {Array<Enemy>} */
     this.enemies = [];
     this.currentLevel = 0;
+    this.powerUp = new PowerUp("SLOW", 100, 100);
     new LevelLoader("./res/Levels.json", (ev, data) => {
       const level = data[this.currentLevel];
       this.worldBounds = level.WorldBounds;
@@ -150,6 +151,7 @@ class Game {
         Collision.BallToPaddle(this.ball, this.paddle);
       }
       Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
+      this.powerUp.update();
     }
 
   }
@@ -165,6 +167,7 @@ class Game {
       this.ball.render(this.ctx);
       this.bricks.forEach(brick => brick.draw(this.ctx));
       this.enemies.forEach(enemy => enemy.draw(this.ctx));
+      this.powerUp.draw(this.ctx);
       this.ctx.font = "14px Arial";
       this.ctx.fillText("Score: " + this.score, 50, 50);
       this.ctx.fillText("High Score: " + this.highScore, 50, 80);
