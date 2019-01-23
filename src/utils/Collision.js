@@ -51,6 +51,33 @@ const Collision = (function () {
       }
     }
       /**
+       * Will process collisions between enemy and rectangle.
+       * @param {Enemy} enemy
+       *  enemy object is expected to have a position and velocity properties.
+       * @param {Brick} block
+       *  block is expected to have a position, width and height.
+       */
+      static EnemyToBlock(enemy, block) {
+        const aabbEnemy = rectangleToAabb({ position: enemy.position, width: enemy.width, height: enemy.height });
+        const aabbBlock = rectangleToAabb({ position: { x: block.x, y: block.y } , width: block.width, height: block.height });
+        const result = collisions.maniAABBToAABB(aabbEnemy, aabbBlock);
+        if (result.collision) {
+          enemy.position = {
+            x: enemy.position.x + result.manifest.leftAABB.distance.x,
+            y: enemy.position.y + result.manifest.leftAABB.distance.y
+          };
+          const direction = {
+            x: result.manifest.leftAABB.distance.x,
+            y: result.manifest.leftAABB.distance.y
+          };
+          enemy.velocity = {
+            x: (direction.x !== 0) ? -enemy.velocity.x : enemy.velocity.x,
+            y: (direction.y !== 0) ? -enemy.velocity.y : enemy.velocity.y
+          };
+
+        }
+    }
+      /**
      * Will process collisions between ball and rectangle.
      * @param {Ball} ball
      *  Ball object is expected to have a position and radius properties.
@@ -107,7 +134,7 @@ const Collision = (function () {
      */
     static BallToEnemy(ball, enemy) {
       const aabbBall = rectangleToAabb({ position: ball.position, width: ball.radius, height: ball.radius });
-      const aabbBlock = rectangleToAabb({ position: { x: enemy.x, y: enemy.y }, width: enemy.width, height: enemy.height });
+      const aabbBlock = rectangleToAabb({ position: { x: enemy.position.x, y: enemy.position.y }, width: enemy.width, height: enemy.height });
       const result = collisions.maniAABBToAABB(aabbBall, aabbBlock);
       if (result.collision) {
         ball.position = {
@@ -128,9 +155,9 @@ const Collision = (function () {
 
     /**
      * Deals with block to laser collision detection
-     * @param {Laser} laser 
+     * @param {Laser} laser
      * laser to check against
-     * @param {Brick} block 
+     * @param {Brick} block
      * block to check against
      */
     static LaserToBlock(laser, block){
@@ -147,10 +174,10 @@ const Collision = (function () {
 
     /**
      * Collisions between lasers an blocks
-     * @param {Array<Laser>} lasers 
+     * @param {Array<Laser>} lasers
      * lasers array
      * @param {Brick} block
-     * block to check collision against 
+     * block to check collision against
      */
     static LasersToBlock(lasers, block) {
       lasers.forEach((laser, index, array) => {
@@ -162,10 +189,10 @@ const Collision = (function () {
 
     /**
      * Check collision against world
-     * @param {Array<Laser>} lasers 
+     * @param {Array<Laser>} lasers
      * lasers array
      * @param {Brick} minY
-     * top y value of the border of the game 
+     * top y value of the border of the game
      */
     static LasersToWorld(lasers, minY){
       lasers.forEach((laser, index, array) => {
@@ -177,10 +204,10 @@ const Collision = (function () {
 
     /**
      * method that deals with collision between lasers and an enemy.
-     * @param {Array<Laser>} lasers 
+     * @param {Array<Laser>} lasers
      * laser array
      * @param {Enemy} enemy
-     * enemy to check against 
+     * enemy to check against
      */
     static LasersToEnemies(lasers, enemy){
       lasers.forEach((laser,index,array) =>{
@@ -193,9 +220,9 @@ const Collision = (function () {
 
     /**
      * Collision between laser and enemy detection
-     * @param {Laser<Array>} laser 
+     * @param {Laser<Array>} laser
      * the laser array
-     * @param {Enemy} enemy 
+     * @param {Enemy} enemy
      * enemy being checked against
      * @returns {boolean}
      * returns true on collision

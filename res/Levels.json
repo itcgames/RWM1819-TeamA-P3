@@ -479,8 +479,8 @@
         "Enemies": [
             {
                 "type": "BLUE",
-                "position": { "x": 0, "y": 0 },
-                "velocity": { "x": 0, "y": 0},
+                "position": { "x": 100, "y": -200 },
+                "velocity": { "x": 3, "y": 1},
                 "width": 25,
                 "height": 25
             }
