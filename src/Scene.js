@@ -57,7 +57,6 @@ class Scene
     ctx.drawImage(this.img, this.x,this.y,this.width, this.height);
     if(this.type === "MAIN")
     {
-      console.log(this.cursorHeight);
       ctx.drawImage(this.cursorImg, 500,this.cursorHeight,50,25);
       ctx.drawImage(this.p1Img, 600,700,100,50);
       ctx.drawImage(this.p2Img, 600,750, 100,50);
