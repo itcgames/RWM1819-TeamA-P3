@@ -34,7 +34,7 @@ class Paddle {
         document.addEventListener("keydown", this.events.onKeyDown, false);
         document.addEventListener("keyup", this.events.onKeyUp, false);
 
-        this.laserPowerActive = true;
+        this.laserPowerActive = false;
 
         /** @type {Array<Laser>} */
         this.lasers = [];
