@@ -54,8 +54,7 @@ class Game {
     this.highScore = 500;
     this.pressedUp = true;
     this.pressedEnter = false;
-    window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
-    window.addEventListener("mouseup", this.dnd.dragend.bind(this.dnd));
+
     this.events = {
         onKeyDown: this.onKeyDown.bind(this)
       };
