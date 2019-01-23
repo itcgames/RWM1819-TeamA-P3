@@ -15,7 +15,7 @@ class Game {
     this.menuManager.setCurrentScene("Splash");
     this.menuManager.fadeSpeed = 4000;
     this.menuManager.fadeTo("Main Menu");
-    this.paddle = new Paddle(100,700, this.worldBounds.minX, this.worldBounds.maxX);
+    this.paddle = new Paddle(100, 700, this.worldBounds.minX, this.worldBounds.maxX);
     this.prevDt = Date.now();
     this.canvas = new Canvas("canvas");
     this.ctx = canvas.getContext("2d");
@@ -23,17 +23,28 @@ class Game {
     this.bricks = [];
     /** @type {Array<Enemy>} */
     this.enemies = [];
+    /** @type {{ one: { bricks: Array<Brick>, enemies: Array<Enemy> }, two: { bricks: Array<Brick>, enemies: Array<Enemy> }}} */
+    this.players = {
+      one: { score: 0, bricks: [], enemies: [] },
+      two: { score: 0, bricks: [], enemies: [] }
+    };
+    this.isPlayerOne = true;
+    this.twoPlayerMode = false;
 
     new LevelLoader("./res/Levels.json", (ev, data) => {
       const level = data[0];
       this.worldBounds = level.WorldBounds;
       level.Bricks.forEach((brick, index) => {
         const id = brick.type + index.toString();
-        this.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height));
+        this.players.one.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height));
+        this.players.two.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height));
+        this.bricks = this.players.one.bricks;
       });
       level.Enemies.forEach((enemy, index) => {
         const id = enemy.type + index.toString();
-        this.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height, this.worldBounds.minX, this.worldBounds.maxX));
+        this.players.one.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height, this.worldBounds.minX, this.worldBounds.maxX));
+        this.players.two.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height, this.worldBounds.minX, this.worldBounds.maxX));
+        this.enemies = this.players.one.enemies;
       });
       this.dnd = new DragDrop();
       this.dnd.addDraggable(this.paddle.paddleRect, false, true);
@@ -54,8 +65,8 @@ class Game {
     this.pressedEnter = false;
 
     this.events = {
-        onKeyDown: this.onKeyDown.bind(this)
-      };
+      onKeyDown: this.onKeyDown.bind(this)
+    };
     window.addEventListener("keydown", this.events.onKeyDown, false);
   }
   /**
@@ -63,22 +74,22 @@ class Game {
    * @param {KeyboardEvent} event
    * the key down event
    */
-  onKeyDown(event){
-    if(this.menuManager.current.key === "Main Menu")
-    {
-        //enter key
-        if(event.keyCode === 13){
-            this.pressedEnter = true;
-        }
-        //UP arrow key
-        if(event.keyCode === 38) {
-            this.pressedUp = true;
-        }
-        //Down arrow key
-        if(event.keyCode === 40){
-            this.pressedUp = false;
-        }
-    }}
+  onKeyDown(event) {
+    if (this.menuManager.current.key === "Main Menu") {
+      //enter key
+      if (event.keyCode === 13) {
+        this.pressedEnter = true;
+      }
+      //UP arrow key
+      if (event.keyCode === 38) {
+        this.pressedUp = true;
+      }
+      //Down arrow key
+      if (event.keyCode === 40) {
+        this.pressedUp = false;
+      }
+    }
+  }
 
 
   run() {
@@ -96,23 +107,23 @@ class Game {
   update() {
     const dt = this.calculateDt();
     this.menuManager.update(dt);
-    if(this.menuManager.current.key === "Main Menu")
-    {
-      if(this.pressedUp === true)
-      {
+    if (this.menuManager.current.key === "Main Menu") {
+      if (this.pressedUp === true) {
         this.menuManager.current.value.cursorHeight = 712;
+        this.twoPlayerMode = false;
+        this.isPlayerOne = true;
       }
-      if(this.pressedUp === false) {
+      if (this.pressedUp === false) {
         this.menuManager.current.value.cursorHeight = 762;
+        this.twoPlayerMode = true;
+        this.isPlayerOne = true;
       }
-      if(this.pressedEnter === true)
-      {
+      if (this.pressedEnter === true) {
         this.menuManager.setCurrentScene("Game Scene");
       }
     }
 
-    if(this.menuManager.current.key === "Game Scene")
-    {
+    if (this.menuManager.current.key === "Game Scene") {
       //reset bools
       this.pressedUp = true;
       this.pressedEnter = false;
@@ -121,8 +132,7 @@ class Game {
       this.paddle.update(dt);
       this.ballUpdate(dt);
       this.score = this.score + 1;
-      if (this.score > this.highScore)
-      {
+      if (this.score > this.highScore) {
         this.highScore = this.score;
       }
       this.bricks.forEach((brick, index, array) => {
@@ -141,7 +151,7 @@ class Game {
           array.splice(index, 1);
         }
       });
-      if (!this.ballSpawning){
+      if (!this.ballSpawning) {
         Collision.BallToPaddle(this.ball, this.paddle);
       }
     }
@@ -149,14 +159,12 @@ class Game {
   }
 
   render() {
-    this.ctx.clearRect(0,0,this.canvas.resolution.x, this.canvas.resolution.y);
+    this.ctx.clearRect(0, 0, this.canvas.resolution.x, this.canvas.resolution.y);
     this.menuManager.draw(this.ctx);
-    if(this.menuManager.current.key === "Main Menu")
-    {
+    if (this.menuManager.current.key === "Main Menu") {
 
     }
-    if(this.menuManager.current.key === "Game Scene")
-    {
+    if (this.menuManager.current.key === "Game Scene") {
       this.paddle.draw(this.ctx);
       this.ball.render(this.ctx);
       this.bricks.forEach(brick => brick.draw(this.ctx));
@@ -245,6 +253,15 @@ class Game {
     }
     if (this.ball.position.y + (this.ball.radius * 2) > this.worldBounds.maxY) {
       this.ballSpawning = true;
+      if (this.twoPlayerMode) {
+        this.isPlayerOne = !this.isPlayerOne;
+        this.bricks = this.isPlayerOne
+            ? this.players.one.bricks
+            : this.players.two.bricks;
+        this.enemies = this.isPlayerOne
+            ? this.players.one.enemies
+            : this.players.two.enemies;
+      }
     }
   }
 }
