@@ -3,7 +3,7 @@
         "WorldBounds": {
             "minX": 100,
             "minY": 100,
-            "maxX": 1000,
+            "maxX": 1100,
             "maxY": 800
         },
         "Paddle": {

@@ -3,7 +3,7 @@
  * Represents the paddle.
  */
 class Paddle {
-    constructor(posX,posY, minX, maxX){
+    constructor(posX, posY, minX, maxX) {
         this.position = {
             x: posX,
             y: posY
@@ -15,6 +15,7 @@ class Paddle {
         }
         this.leftPressed = false;
         this.rightPressed = false;
+        this.spacePressed = false;
 
         this.maxX = maxX;
         this.minX = minX;
@@ -33,6 +34,17 @@ class Paddle {
         document.addEventListener("keydown", this.events.onKeyDown, false);
         document.addEventListener("keyup", this.events.onKeyUp, false);
 
+        this.laserPowerActive = false;
+
+        /** @type {Array<Laser>} */
+        this.lasers = [];
+
+        //laser power related
+        this.canFire = true;
+        this.laserWidth = 10;
+        this.laserHeight = 50;
+        this.laserIndex = 0;
+
     }
 
     /**
@@ -40,32 +52,57 @@ class Paddle {
      * @param {Number} dt
      * time since last update
      */
-    update(dt){
+    update(dt) {
+
+        if (this.laserPowerActive) {
+            if (this.spacePressed && this.canFire) {
+                this.lasers.push(new Laser(this.position.x,
+                    this.position.y,
+                    this.laserWidth,
+                    this.laserHeight,
+                    "Laser" + this.laserIndex)
+                );
+                this.laserIndex++;
+
+                this.lasers.push(new Laser(this.position.x + (this.size.x - this.laserWidth),
+                    this.position.y,
+                    this.laserWidth,
+                    this.laserHeight,
+                    "Laser" + this.laserIndex)
+                );
+                this.laserIndex++;
+
+                this.canFire = false;
+            }
+        }
 
         //if only right arrow pressed
-        if(this.rightPressed && !this.leftPressed){
+        if (this.rightPressed && !this.leftPressed) {
             //check if next step will be out of bounds if not move
-            if(!((this.position.x + this.size.x) + this.speed * (dt/1000) > this.maxX)){
-                this.paddleRect.x += this.speed * (dt/1000);
+            if (!((this.position.x + this.size.x) + this.speed * (dt / 1000) > this.maxX)) {
+                this.paddleRect.x += this.speed * (dt / 1000);
             }
         }
         //if only left arrow pressed
-        else if(this.leftPressed && !this.rightPressed){
-            if(!(this.position.x - this.speed * (dt/1000) < this.minX)){
-                this.paddleRect.x -= this.speed * (dt/1000);
+        else if (this.leftPressed && !this.rightPressed) {
+            if (!(this.position.x - this.speed * (dt / 1000) < this.minX)) {
+                this.paddleRect.x -= this.speed * (dt / 1000);
             }
-         }
-         this.position.x = this.paddleRect.x;
-         this.position.y = this.paddleRect.y;
-         if (this.position.x < this.clampPaddleLeft){
-           this.position.x = this.clampPaddleLeft;
-           this.paddleRect.x = this.clampPaddleLeft;
-         }
-         else if (this.position.x + this.size.x > this.clampPaddleRight){
-           this.position.x = this.clampPaddleRight - this.size.x;
-           this.paddleRect.x = this.clampPaddleRight - this.size.x;
-         }
-         this.updateOrigin();
+        }
+        this.position.x = this.paddleRect.x;
+        this.position.y = this.paddleRect.y;
+        if (this.position.x < this.clampPaddleLeft) {
+            this.position.x = this.clampPaddleLeft;
+            this.paddleRect.x = this.clampPaddleLeft;
+        }
+        else if (this.position.x + this.size.x > this.clampPaddleRight) {
+            this.position.x = this.clampPaddleRight - this.size.x;
+            this.paddleRect.x = this.clampPaddleRight - this.size.x;
+        }
+        this.updateOrigin();
+        this.lasers.forEach((laser) => {
+            laser.update(dt);
+        });
 
     }
 
@@ -74,9 +111,12 @@ class Paddle {
      * @param {CanvasRenderingContext2D} ctx
      * canvas we want to draw to
      */
-    draw(ctx){
+    draw(ctx) {
 
-      ctx.fillRect(this.position.x, this.position.y, this.size.x, this.size.y);
+        this.lasers.forEach(function (laser) {
+            laser.draw(ctx);
+        });
+        ctx.fillRect(this.position.x, this.position.y, this.size.x, this.size.y);
         ctx.stroke();
 
     }
@@ -86,14 +126,17 @@ class Paddle {
      * @param {KeyboardEvent} event
      * the key down event
      */
-    onKeyDown(event){
+    onKeyDown(event) {
         //left arrow key
-        if(event.keyCode === 37) {
+        if (event.keyCode === 37) {
             this.leftPressed = true;
         }
         //right arrow key
-        if(event.keyCode === 39){
+        if (event.keyCode === 39) {
             this.rightPressed = true;
+        }
+        if (event.keyCode === 32) {
+            this.spacePressed = true;
         }
     }
 
@@ -102,18 +145,22 @@ class Paddle {
      * @param {KeyboardEvent} event
      * the keyboard up event.
      */
-    onKeyUp(event){
+    onKeyUp(event) {
         //left arrow key
-        if(event.keyCode === 37) {
+        if (event.keyCode === 37) {
             this.leftPressed = false;
         }
         //right arrow key
-        if(event.keyCode === 39){
+        if (event.keyCode === 39) {
             this.rightPressed = false;
+        }
+        if (event.keyCode === 32) {
+            this.canFire = true;
+            this.spacePressed = false;
         }
     }
 
-    updateOrigin(){
+    updateOrigin() {
         this.origin.x = this.position.x + this.size.x / 2;
         this.origin.y = this.position.y + this.size.y / 2;
     }
