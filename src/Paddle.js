@@ -130,14 +130,9 @@ class Paddle {
                 this.colBox.size.x += 3.0;
                 this.size.x += 3.0;
             }
-            else{
-                this.finishedEnlarging = true;
-                this.enlargePowerActive = false;
-                this.laserPowerActive = true;
-                this.paddleAnimator.continue();
-            }
         }
         else if(!this.enlargePowerActive && this.size.x > 150){
+            this.finishedEnlarging = false;
             this.size.x = 150.0;
             this.colBox.size.x = 130.0;
         }
