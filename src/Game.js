@@ -32,7 +32,7 @@ class Game {
     this.twoPlayerMode = false;
 
     this.currentLevel = 0;
-    this.powerUp = new PowerUp("LASER", 100, 100);
+    this.powerUp = new PowerUp("ENLARGE", 100, 100);
     new LevelLoader("./res/Levels.json", (ev, data) => {
       const level = data[this.currentLevel];
       this.worldBounds = level.WorldBounds;
@@ -188,14 +188,20 @@ class Game {
             x: firingVectorUnit.x * this.ball.speed,
             y: firingVectorUnit.y * this.ball.speed
           }
-          this.ball.velocity.x = firingVector.x;
+          this.ball.velocity.x = firingVector.x; 
           this.ball.velocity.y = firingVector.y;
           this.powerUp.active = false;
         }
         if (this.powerUp.type === "LASER"){
-          this.paddle.paddleAnimator.isReversing("defaultToLaser", false);
           this.paddle.laserPowerActive = true;
           this.paddle.paddleAnimator.continue();
+          this.powerUp.active = false;
+        }
+        if (this.powerUp.type === "ENLARGE"){
+          if(this.paddle.laserPowerActive){
+            this.paddle.laserPowerActive = false;
+          }
+          this.paddle.enlargePowerActive = true;
           this.powerUp.active = false;
         }
       }

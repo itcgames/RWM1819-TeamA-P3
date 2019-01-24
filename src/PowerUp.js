@@ -4,7 +4,8 @@
 const PowerUpType = {
   Slow: "./res/Images/Bricks/brick_red.png",
   Player: 2,
-  Laser: "./res/Images/Bricks/brick_red.png"
+  Laser: "./res/Images/Bricks/brick_red.png",
+  Enlarge: "./res/Images/Bricks/brick_red.png"
 }
 
 class PowerUp
@@ -49,6 +50,9 @@ update()
     }
     else if(this.type === "LASER"){
       this.img.src = PowerUpType.Laser;
+    }
+    else if(this.type === "ENLARGE"){
+      this.img.src = PowerUpType.Enlarge;
     }
  }
 }
