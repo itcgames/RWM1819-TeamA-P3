@@ -35,17 +35,18 @@ const Collision = (function () {
       const aabbBlock = rectangleToAabb({ position: { x: block.x, y: block.y }, width: block.width, height: block.height });
       const result = collisions.maniAABBToAABB(aabbBall, aabbBlock);
       if (result.collision) {
-        ball.position = {
-          x: ball.position.x + result.manifest.leftAABB.distance.x,
-          y: ball.position.y + result.manifest.leftAABB.distance.y
-        };
+        // hotfix for the inaccuracy of floating point numbers
         const direction = {
-          x: result.manifest.leftAABB.distance.x,
-          y: result.manifest.leftAABB.distance.y
+          x: result.manifest.leftAABB.distance.x * 1.05,
+          y: result.manifest.leftAABB.distance.y * 1.05
         };
         ball.velocity = {
           x: (direction.x !== 0) ? -ball.velocity.x : ball.velocity.x,
           y: (direction.y !== 0) ? -ball.velocity.y : ball.velocity.y
+        };
+        ball.position = {
+          x: ball.position.x + ball.velocity.x + direction.x,
+          y: ball.position.y + ball.velocity.y + direction.y
         };
         block.damage();
         return true;
