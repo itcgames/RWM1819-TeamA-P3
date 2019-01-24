@@ -13,7 +13,7 @@ class Game {
     this.menuManager.addScene("Main Menu", new Scene("MAIN", "m", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
     this.menuManager.addScene("Game Scene", new Scene("GAME", "g", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
     this.menuManager.setCurrentScene("Splash");
-    this.menuManager.fadeSpeed = 4000;
+    this.menuManager.fadeSpeed = 2000;
     this.menuManager.fadeTo("Main Menu");
     this.paddle = new Paddle(100, 700, this.worldBounds.minX, this.worldBounds.maxX);
     this.prevDt = Date.now();
@@ -162,6 +162,7 @@ class Game {
         if (!this.ballSpawning) {
           Collision.BallToPaddle(this.ball, this.paddle);
         }
+
       }
     }
   }
@@ -265,6 +266,7 @@ class Game {
     }
     if (this.ball.position.y + (this.ball.radius * 2) > this.worldBounds.maxY) {
       this.ballSpawning = true;
+      this.ball.img.src = "./res/Images/Ball/ball.png";
       if (this.isPlayerOne) {
         this.players.one.lives -= 1;
         if (this.players.one.lives < 0)
@@ -275,6 +277,7 @@ class Game {
         if (this.players.two.lives < 0)
           this.players.two.lives = 0;
       }
+      this.paddle.laserPowerActive = false;
       if (this.twoPlayerMode) {
         if ((this.isPlayerOne && this.players.two.lives > 0) || (!this.isPlayerOne && this.players.one.lives > 0)) {
           this.isPlayerOne = !this.isPlayerOne; // swapping active player

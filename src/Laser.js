@@ -3,7 +3,7 @@
  * during the laser power up.
  */
 class Laser {
-  constructor(xPos,yPos,width,height,index){
+  constructor(image,xPos,yPos,width,height,index){
     this.position = {
       x: xPos,
       y: yPos
@@ -11,8 +11,7 @@ class Laser {
     this.width = width;
     this.height = height;
     this.speed = -800;
-    this.image = new Image();
-    this.image.src = "./res/Images/Laser.png";
+    this.image = image;
     this.id = index;
   }
 

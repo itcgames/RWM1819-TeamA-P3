@@ -35,17 +35,18 @@ const Collision = (function () {
       const aabbBlock = rectangleToAabb({ position: { x: block.x, y: block.y }, width: block.width, height: block.height });
       const result = collisions.maniAABBToAABB(aabbBall, aabbBlock);
       if (result.collision) {
-        ball.position = {
-          x: ball.position.x + result.manifest.leftAABB.distance.x,
-          y: ball.position.y + result.manifest.leftAABB.distance.y
-        };
+        // hotfix for the inaccuracy of floating point numbers
         const direction = {
-          x: result.manifest.leftAABB.distance.x,
-          y: result.manifest.leftAABB.distance.y
+          x: result.manifest.leftAABB.distance.x * 1.05,
+          y: result.manifest.leftAABB.distance.y * 1.05
         };
         ball.velocity = {
           x: (direction.x !== 0) ? -ball.velocity.x : ball.velocity.x,
           y: (direction.y !== 0) ? -ball.velocity.y : ball.velocity.y
+        };
+        ball.position = {
+          x: ball.position.x + ball.velocity.x + direction.x,
+          y: ball.position.y + ball.velocity.y + direction.y
         };
         block.damage();
         return true;
@@ -91,15 +92,6 @@ const Collision = (function () {
       const aabbPaddle = rectangleToAabb({ position: { x: paddle.colBox.position.x, y: paddle.colBox.position.y }, width: paddle.colBox.size.x, height: paddle.colBox.size.y });
       const result = collisions.maniAABBToAABB(aabbBall, aabbPaddle);
       if (result.collision) {
-        /*ball.position = {
-          x: ball.position.x + result.manifest.leftAABB.distance.x,
-          y: ball.position.y + result.manifest.leftAABB.distance.y
-        };
-        const direction = {
-          x: result.manifest.leftAABB.distance.x,
-          y: result.manifest.leftAABB.distance.y
-        };
-        */
         var vectorBetweenBallAndPaddle = {
           x: ball.position.x + ball.radius - paddle.origin.x,
           y: ball.position.y + ball.radius - paddle.origin.y
@@ -119,12 +111,7 @@ const Collision = (function () {
         }
         ball.velocity.x = firingVector.x;
         ball.velocity.y = firingVector.y;
-        /*if (ball.velocity.y > 0)
-        {
-          console.log("negative bounce");
-        }
-        */
-
+        paddle.playPaddleHitSound();
       }
     }
     /**
