@@ -174,18 +174,22 @@ class Game {
             }
           }
           this.enemies.forEach(enemy => {
-            Collision.EnemyToBlock(enemy, brick);
+            if (!enemy.isDying()) {
+              Collision.EnemyToBlock(enemy, brick);
+            }
           });
         });
         this.enemies.forEach((enemy, index, array) => {
           enemy.update(dt);
-          if (!this.ballSpawning) {
-            Collision.BallToEnemy(this.ball, enemy);
+          if (!enemy.isDying()) {
+            if (!this.ballSpawning) {
+              Collision.BallToEnemy(this.ball, enemy);
+            }
+            Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
+            Collision.LasersToEnemies(this.paddle.lasers, enemy);
+            Collision.PaddleToEnemy(this.paddle, enemy);
           }
-          Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
-          Collision.LasersToEnemies(this.paddle.lasers, enemy);
-          Collision.PaddleToEnemy(this.paddle, enemy);
-          if (enemy.health <= 0) {
+          if (enemy.isDead()) {
             array.splice(index, 1);
             if (this.isPlayerOne) {
               this.players.one.score += 100;

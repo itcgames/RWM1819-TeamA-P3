@@ -32,6 +32,7 @@ class Enemy {
   */
   constructor(explosion, spritesheet, type, position, velocity, width, height, worldBounds) {
     this.type = type;
+    this.alive = true;
     this.position = {
       x: position.x,
       y: position.y
@@ -54,55 +55,66 @@ class Enemy {
     this.onScreen = false;
     this.image = spritesheet;
     this.explosion = explosion;
-    this.idleAnimator = new AnimationManager();
+    this.animator = new AnimationManager();
     this.idleAnimation = new Animation(this.image
       , 200 // width of the animation frame
       , 200 // height of the animation frame
-      , 10
+      , 10 // number of frames
     );
-    this.idleAnimator.addAnimation("idle", this.idleAnimation);
-    this.idleAnimator.setScale("idle", 0.5, 0.5);
-    this.idleAnimator.isLooping("idle", true);
+    this.explosionAnimation = new Animation(this.explosion
+      , 200 // width of the animation frame
+      , 200 // height of the animation frame
+      , 10 // number of frames
+    );
+    this.animator.addAnimation("explosion", this.explosionAnimation);
+    this.animator.setScale("explosion", 0.5, 0.5);
+    this.animator.isLooping("explosion", false);
+    this.animator.setAnimationFPS("explosion", 10);
+    this.animator.addAnimation("idle", this.idleAnimation);
+    this.animator.setScale("idle", 0.5, 0.5);
+    this.animator.isLooping("idle", true);
     if (this.type === "GREEN") {
-      this.idleAnimator.setAnimationFPS("idle", 15);
+      this.animator.setAnimationFPS("idle", 15);
     } if (this.type === "BLUE") {
     } if (this.type === "LIGHT_BLUE") {
     } if (this.type === "RED") {
     } else {
       this.idleAnimation.setAnimationFPS("idle", 60);
     }
-    this.idleAnimator.continue();
+    this.animator.continue();
   }
   /**
   * @update update enemy logic.
   * @param {number} dt delta time between update calls.
   */
   update(dt) {
-    this.position.y += this.velocity.y;
-    this.position.x += this.velocity.x;
-
-    if (this.position.x < this.minX) {
-      this.position.x = this.minX + 1;
-      this.velocity.x *= -1;
+    if (this.alive) {
+      this.position.y += this.velocity.y;
+      this.position.x += this.velocity.x;
+  
+      if (this.position.x < this.minX) {
+        this.position.x = this.minX + 1;
+        this.velocity.x *= -1;
+      }
+      if (this.position.x > this.maxX - this.width) {
+        this.x = this.maxX - this.width;
+        this.velocity.x *= -1;
+      }
+      if (this.position.y > this.minY) {
+        this.onScreen = true;
+      }
+      if (this.onScreen === true && this.position.y < this.minY) {
+        this.position.y = this.minY + 1;
+        this.velocity.y *= -1;
+      }
+      if (this.onScreen === true && this.position.y > this.maxY) {
+        this.die();
+      }
+      this.updateOrigin();
     }
-    if (this.position.x > this.maxX - this.width) {
-      this.x = this.maxX - this.width;
-      this.velocity.x *= -1;
+    if (this.animator.isPlaying()) {
+      this.animator.update(dt, this.origin.x, this.origin.y);
     }
-    if (this.position.y > this.minY) {
-      this.onScreen = true;
-    }
-    if (this.onScreen === true && this.position.y < this.minY) {
-      this.position.y = this.minY + 1;
-      this.velocity.y *= -1;
-    }
-    if (this.onScreen === true && this.position.y > this.maxY) {
-      this.die();
-    }
-    if (this.idleAnimator.isPlaying()) {
-      this.idleAnimator.update(dt, this.origin.x, this.origin.y);
-    }
-    this.updateOrigin();
   }
   /**
   * @draw
@@ -110,18 +122,29 @@ class Enemy {
   */
   draw(ctx) {
     ctx.save();
-    if (this.idleAnimator.isPlaying()) {
-      this.idleAnimator.draw(ctx);
+    if (this.animator.isPlaying()) {
+      this.animator.draw(ctx);
     }
-    // DEBUG COLLISION DRAWING
-    ctx.strokeStyle = "black";
-    ctx.strokeRect(this.position.x, this.position.y, this.width, this.height);
-    // END DEBUG COLLISION DRAWING
     ctx.restore();
   }
 
   die() {
     this.health -= 1;
+    if (this.health <= 0 && this.alive) {
+      this.alive = false;
+      this.animator.changeTo("explosion");
+      this.animator.continue();
+    }
+  }
+
+  /** @returns {boolean} */
+  isDying() {
+    return (!this.alive) && this.animator.isPlaying() && !this.animator.isAnimationFinished();
+  }
+
+  /** @returns {boolean} */
+  isDead() {
+    return (!this.alive) && this.animator.isAnimationFinished();
   }
 
   updateOrigin() {
