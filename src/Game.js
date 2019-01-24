@@ -151,6 +151,7 @@ class Game {
         this.pressedEnter = false;
 
         this.dnd.update();
+        this.paddle.update(dt);
         this.ballUpdate(dt);
         if ((this.isPlayerOne ? this.players.one.score : this.players.two.score) > this.highScore) {
           this.highScore = (this.isPlayerOne ? this.players.one.score : this.players.two.score);
@@ -274,7 +275,6 @@ class Game {
             }
           }
         }
-        this.paddle.update(dt);
       }
     }
   }

@@ -129,6 +129,7 @@ class Paddle {
             laser.update(dt);
         });
         this.colBox.position.x = this.position.x;
+        this.updateOrigin();
 
 
         if(this.enlargePowerActive){
@@ -167,9 +168,9 @@ class Paddle {
             if(this.paddleAnimator.isPlaying()){
                 this.paddleAnimator.update(dt, this.origin.x, this.origin.y);
             }
-            this.updateOrigin();
 
         }
+
         /**
          * code to run when collide with laser powerup
          *              if(!this.laserPowerActive){
