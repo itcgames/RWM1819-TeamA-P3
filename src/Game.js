@@ -325,6 +325,7 @@ class Game {
         var angle = Math.atan2(vectorBetweenBallAndPaddle.y, vectorBetweenBallAndPaddle.x);
         angle = VectorMath.toDeg(angle)
 
+        this.ball.slowStartSpeed = 0;
         //make unit vector from angle
         var firingVectorUnit = VectorMath.vector(angle);
         //multiply by start speed
