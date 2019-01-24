@@ -65,7 +65,7 @@ class Game {
 
     new LevelLoader("./res/Levels.json", (ev, data) => {
       this.levels = data;
-      this.currentLevelP1 = 0;
+      this.currentLevelP1 = 2;
       this.currentLevelP2 = 0;
       this.setLevel(this.players.one, this.currentLevelP1);
       this.setLevel(this.players.two, this.currentLevelP2);
@@ -427,10 +427,10 @@ class Game {
   }
 
   /**
-   * @param {Enemy} enemy 
-   * @param {number} index 
-   * @param {Array<Enemy>} array 
-   * @param {number} dt 
+   * @param {Enemy} enemy
+   * @param {number} index
+   * @param {Array<Enemy>} array
+   * @param {number} dt
    */
   updateEnemy(enemy, index, array, dt) {
     enemy.update(dt);
