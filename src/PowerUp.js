@@ -75,6 +75,7 @@ update(dt)
 
     this.animation = new Animation(this.img, 100, 50, 10);
     this.animationManager.addAnimation("Update", this.animation);
+    this.animationManager.setAnimationFPS("Update", 20);
     var scaleX = this.width / 100;
     var scaleY = this.height / 50;
     this.animationManager.setScale("Update", 0.7, 0.7);

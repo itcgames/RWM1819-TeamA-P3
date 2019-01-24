@@ -33,6 +33,13 @@ class Brick {
 
     this.setHealth();
     this.createNewBrick(level);
+    this.soundManager = new AudioManager();
+    this.soundManager.init();
+    this.soundManager.loadSoundFile("destroy", "./res/Sounds/Destroy.wav");
+  }
+
+  playDestroySound(){
+    this.soundManager.playAudio("destroy", false, 0.5);
   }
 
   /**
