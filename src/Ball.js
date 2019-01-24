@@ -10,6 +10,8 @@ class Ball{
     }
     this.radius = r;
     this.speed = 0;
+    this.minSpeed = 4;
+    this.slowStartSpeed = 0;
     this.img = new Image(this.radius, this.radius);
     this.img.src = "./res/Images/Ball/ball.png";
   }
