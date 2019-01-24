@@ -374,17 +374,17 @@ class Game {
   }
   updatePowerup(powerup,index,array){
       powerup.update();
-      if (Collision.PaddleToPowerUp(this.paddle, this.powerUp)) {
-        if (this.powerUp.type === "LASER") {
-          this.powerUp.active = false;
+      if (Collision.PaddleToPowerUp(this.paddle, powerup)) {
+        if (powerup.type === "LASER") {
+          powerup.active = false;
         }
-        else if (this.powerUp.type === "ENLARGE") {
-          this.powerUp.active = false;
+        else if (powerup.type === "ENLARGE") {
+          powerup.active = false;
         }
-        else if (this.powerUp.type === "CATCH") {
-          this.powerUp.active = false;
+        else if (powerup.type === "CATCH") {
+          powerup.active = false;
         }
-        else if (this.powerUp.type === "SLOW") {
+        else if (powerup.type === "SLOW") {
           this.ball.speed -= 4;//get angle
           var angle = Math.atan2(this.ball.velocity.y, this.ball.velocity.x);
           angle = VectorMath.toDeg(angle)
@@ -398,23 +398,23 @@ class Game {
           }
           this.ball.velocity.x = firingVector.x;
           this.ball.velocity.y = firingVector.y;
-          this.powerUp.active = false;
+          powerup.active = false;
         }
-        else if (this.powerUp.type === "BREAK") {
-          this.powerUp.active = false;
+        else if (powerup.type === "BREAK") {
+          powerup.active = false;
         }
-        else if (this.powerUp.type === "DISRUPTION") {
-          this.powerUp.active = false;
+        else if (powerup.type === "DISRUPTION") {
+          powerup.active = false;
         }
-        else if (this.powerUp.type === "PLAYER") {
-          this.powerUp.active = false;
+        else if (powerup.type === "PLAYER") {
+          powerup.active = false;
           if (this.isPlayerOne) {
             this.players.one.lives += 1;
           } else {
             this.players.two.lives += 1;
           }
         }
-      //  array.splice(index, 1);
+        array.splice(index, 1);
       }
   }
 }
