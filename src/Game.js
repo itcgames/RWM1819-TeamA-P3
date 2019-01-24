@@ -28,6 +28,7 @@ class Game {
       one: { score: 0, bricks: [], enemies: [], lives: 3 },
       two: { score: 0, bricks: [], enemies: [], lives: 3 }
     };
+    this.enemySprites = this.createEnemySprites();
     this.isPlayerOne = true;
     this.twoPlayerMode = false;
     this.play = true;
@@ -177,7 +178,7 @@ class Game {
           });
         });
         this.enemies.forEach(enemy => {
-          enemy.update();
+          enemy.update(dt);
           if (!this.ballSpawning) {
             Collision.BallToEnemy(this.ball, enemy);
           }
@@ -447,5 +448,32 @@ class Game {
       this.powerUpActive = true;
       this.powerUpTimer1 = new Date();
     }
+  }
+
+
+  /** Creates the enemy sprites and initiates the image loading process */
+  createEnemySprites() {
+    const sprites = {
+      blue: new Image(EnemySize.width, EnemySize.height),
+      lightBlue: new Image(EnemySize.width, EnemySize.height),
+      red: new Image(EnemySize.width, EnemySize.height),
+      green: new Image(EnemySize.width, EnemySize.height),
+      explosion: new Image(EnemySize.width, EnemySize.height)
+    };
+    sprites.blue.id = "EnemyBlue";
+    sprites.blue.src = EnemyType.BLUE;
+
+    sprites.lightBlue.id = "EnemyLightBlue";
+    sprites.lightBlue.src = EnemyType.LIGHT_BLUE;
+
+    sprites.red.id = "EnemyRed";
+    sprites.red.src = EnemyType.RED;
+
+    sprites.green.id = "EnemyGreen";
+    sprites.green.src = EnemyType.GREEN;
+
+    sprites.explosion.id = "EnemyExplosion";
+    sprites.explosion.src = "./res/Images/Enemies/enemy_explode.png";
+    return sprites;
   }
 }

@@ -2,107 +2,133 @@
 * @EnemyType enum for the different type of bricks in our game
 */
 const EnemyType = {
-    BLUE: "./res/Images/Bricks/brick_yellow.png",
-    RED: 2,
-    GREEN: 3,
-    RAINBOW: 4
+  BLUE: "./res/Images/Enemies/enemy_blue.png",
+  RED: "./res/Images/Enemies/enemy_red.png",
+  GREEN: "./res/Images/Enemies/enemy_green.png",
+  LIGHT_BLUE: "./res/Images/Enemies/enemy_light_blue.png"
 }
+/**
+ * 
+ */
+const EnemySize = {
+  width: 2000,
+  height: 200
+}
+
+/*
+
+    sprites.blue.src = ;
+    sprites.lightBlue.src = ;
+    sprites.red.src = ;
+    sprites.green.src = ;
+    sprites.explosion.src = "./res/Images/Enemies/enemy_explode.png";
+*/
+
 /**
 * Enemy class used to setup each of the enemy types in the game
 */
-class Enemy
-{
+class Enemy {
   /**
   * @constructor constructor for the enemy class
+  * @param {HTMLImageElement} explosion
+  * @param {HTMLImageElement} spritesheet
+  * @param {"BLUE" | "RED" | "GREEN" | ""} type
+  * @param {{x: number, y: number}} position
+  * @param {{x: number, y: number }} velocity
+  * @param {number} width
+  * @param {number} height
+  * @param {{ minX: number, maxX: number, minY: number, maxY: number }} worldBounds
   */
-  constructor(type, id, posX, posY, velX, velY, width, height, minX, maxX, minY, maxY)
-  {
-    this.img;
+  constructor(explosion, spritesheet, type, position, velocity, width, height, worldBounds) {
     this.type = type;
-    this.id = id;
     this.position = {
-      x: posX,
-      y: posY
+      x: position.x,
+      y: position.y
     }
     this.velocity = {
-      x:velX ,
-      y:velY
+      x: velocity.x,
+      y: velocity.y
     }
     this.width = width;
     this.height = height;
-    this.minX = minX;
-    this.maxX = maxX;
-    this.minY = minY;
-    this.maxY = maxY;
-    this.health =1;
-
+    this.origin = {
+      x: this.position.x + (this.width / 2),
+      y: this.position.y + (this.height / 2)
+    };
+    this.minX = worldBounds.minX;
+    this.maxX = worldBounds.maxX;
+    this.minY = worldBounds.minY;
+    this.maxY = worldBounds.maxY;
+    this.health = 1;
     this.onScreen = false;
-
-
-    this.createNewEnemy();
+    this.image = spritesheet;
+    this.explosion = explosion;
+    this.idleAnimator = new AnimationManager();
+    this.idleAnimation = new Animation(this.image
+      , 200 // width of the animation frame
+      , 200 // height of the animation frame
+      , 10
+    );
+    this.idleAnimator.addAnimation("idle", this.idleAnimation);
+    this.idleAnimator.setScale("idle", 0.5, 0.5);
+    this.idleAnimator.isLooping("idle", true);
+    this.idleAnimator.continue();
   }
   /**
   * @update update enemy logic.
+  * @param {number} dt delta time between update calls.
   */
-  update()
-  {
+  update(dt) {
     this.position.y += this.velocity.y;
     this.position.x += this.velocity.x;
 
-    if(this.position.x < this.minX)
-    {
+    if (this.position.x < this.minX) {
       this.position.x = this.minX + 1;
       this.velocity.x *= -1;
     }
-    if(this.position.x > this.maxX - this.width)
-    {
-      this.x = this.maxX-this.width;
+    if (this.position.x > this.maxX - this.width) {
+      this.x = this.maxX - this.width;
       this.velocity.x *= -1;
     }
-    if(this.position.y > this.minY)
-    {
+    if (this.position.y > this.minY) {
       this.onScreen = true;
     }
-    if(this.onScreen === true && this.position.y < this.minY)
-    {
+    if (this.onScreen === true && this.position.y < this.minY) {
       this.position.y = this.minY + 1;
       this.velocity.y *= -1;
     }
-    if(this.onScreen === true && this.position.y > this.maxY)
-    {
+    if (this.onScreen === true && this.position.y > this.maxY) {
       this.die();
     }
-
+    if (this.idleAnimator.isPlaying()) {
+      this.idleAnimator.update(dt, this.origin.x, this.origin.y);
+    }
+    this.updateOrigin();
   }
   /**
   * @draw
-  * @param {context} ctx used to draw the paddle.
+  * @param {CanvasRenderingContext2D} ctx used to draw the paddle.
   */
-  draw(ctx)
-  {
+  draw(ctx) {
     ctx.save();
-    ctx.drawImage(this.img, this.position.x, this.position.y, this.width, this.height);
+    if (this.idleAnimator.isPlaying()) {
+      this.idleAnimator.draw(ctx);
+    }
+    // DEBUG COLLISION DRAWING
+    ctx.strokeStyle = "black";
+    ctx.strokeRect(this.position.x, this.position.y, this.width, this.height);
+    // END DEBUG COLLISION DRAWING
     ctx.restore();
   }
-  /**
-  * @createNewEnemy function used to create new enemies
-  */
-  createNewEnemy()
-  {
-      this.img = new Image(this.width, this.height)
-      if(this.type === "BLUE")
-        this.img.src = EnemyType.BLUE;
-      if(this.type === "RED")
-        this.img.src = EnemyType.RED;
-      if(this.type === "GREEN")
-        this.img.src = EnemyType.GREEN;
-      if(this.type === "RAINBOW")
-        this.img.src = EnemyType.RAINBOW;
 
-      this.img.id = this.id;
+  die() {
+    this.health -= 1;
   }
-  die()
-  {
-    this.health -=1;
+
+  updateOrigin() {
+    this.origin = {
+      x: this.position.x + (this.width / 2),
+      y: this.position.y + (this.height / 2)
+    };
   }
 }
