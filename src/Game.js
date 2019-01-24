@@ -33,6 +33,14 @@ class Game {
     this.play = true;
     this.currentLevelP1 = 0;
     this.currentLevelP2 = 0;
+    //Sounds
+    this.soundManager = new AudioManager();
+    this.soundManager.init();
+    this.soundManager.loadSoundFile("levelComplete", "./res/Sounds/LevelComplete.wav");
+    this.soundManager.loadSoundFile("TitleMusic", "./res/Sounds/TitleMusic.wav");
+    this.soundManager.loadSoundFile("GameMusic", "./res/Sounds/GameMusic.wav");
+    this.switchMusicType = false;
+    this.hasPlayed = false;
     //powerups
     this.powerUps = [];
     this.randomNumGen;
@@ -125,6 +133,15 @@ class Game {
     const dt = this.calculateDt();
     this.menuManager.update(dt);
     if (this.menuManager.current.key === "Main Menu") {
+      if(this.switchMusicType === false)
+      {
+        if(this.hasPlayed === true)
+        {
+          this.soundManager.stopAudio("GameMusic");
+        }
+        this.soundManager.playAudio("TitleMusic", true, 0.3);
+        this.switchMusicType = true;
+      }
       if (this.pressedUp === true) {
         this.timer2 = new Date();
         this.menuManager.current.value.cursorHeight = 712;
@@ -149,8 +166,16 @@ class Game {
 
     if (this.menuManager.current.key === "Game Scene") {
       if (this.play) {
+        if(this.switchMusicType === true)
+        {
+          this.soundManager.stopAudio("TitleMusic");
+          this.soundManager.playAudio("GameMusic", true, 0.3);
+          this.switchMusicType = false;
+          this.hasPlayed = true;
+        }
         if(this.players.one.bricks.length<= 0)
         {
+          this.soundManager.playAudio("levelComplete",false, 0.3);
           this.ballSpawning = true;
           this.powerups = [];
           this.currentLevelP1+=1;
@@ -158,6 +183,7 @@ class Game {
         }
         if(this.players.two.bricks.length<= 0 && this.twoPlayerMode === true)
         {
+          this.soundManager.playAudio("levelComplete",false, 0.3);
           this.ballSpawning = true;
           this.powerups = [];
           this.currentLevelP2+=1;
@@ -292,6 +318,10 @@ class Game {
       this.ball.playWallBounce();
     }
     if (this.ball.position.y > this.worldBounds.maxY) {
+      this.ball.flipVelY();
+      this.ball.playWallBounce();
+    }
+    if (this.ball.position.y < this.worldBounds.minY) {
       this.ball.flipVelY();
       this.ball.playWallBounce();
     }
@@ -473,6 +503,7 @@ class Game {
   }
 
   setLevel(playerToSet, current) {
+    this.powerUps = [];
     if (current >= this.levels.length)  {
       console.log("Setting a level that doesn't exist in the loaded levels");
       this.menuManager.setCurrentScene("Main Menu");
