@@ -35,7 +35,21 @@ class Game {
     //powerups
     this.powerUps = [];
     this.randomNumGen;
-
+    //preload powerup images
+    this.laserImg = new Image(0,0);
+    this.laserImg.src = "./res/Images/Powerups/power_up_laser.png";
+    this.enlargeImg = new Image(0,0);
+    this.enlargeImg.src = "./res/Images/Powerups/power_up_enlarge.png";
+    this.catchImg = new Image(0,0);
+    this.catchImg.src = "./res/Images/Powerups/power_up_catch.png";
+    this.slowImg = new Image(0,0);
+    this.slowImg.src = "./res/Images/Powerups/power_up_slow.png";
+    this.breakImg = new Image(0,0);
+    this.breakImg.src = "./res/Images/Powerups/power_up_break.png";
+    this.disruptionImg = new Image(0,0);
+    this.disruptionImg.src = "./res/Images/Powerups/power_up_disruption.png";
+    this.playerImg = new Image(0,0);
+    this.playerImg.src = "./res/Images/Powerups/power_up_player.png";
     /** @type {Array<{ Bricks: Array<{ type: string, position: { x: number, y: number }, width: number, height: number }> }>} */
     this.levels = [];
 
@@ -156,17 +170,15 @@ class Game {
           this.updateEnemy(enemy);
         });
         this.powerUps.forEach((powerup,index,array) => {
-          this.updatePowerup(powerup,index,array);
+          this.updatePowerup(powerup,index,array,dt);
         });
         Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
         if (!this.ballSpawning) {
           Collision.BallToPaddle(this.ball, this.paddle);
         }
-
       }
     }
   }
-
   render() {
     this.ctx.clearRect(0, 0, this.canvas.resolution.x, this.canvas.resolution.y);
     this.menuManager.draw(this.ctx);
@@ -268,12 +280,14 @@ class Game {
       this.ballSpawning = true;
       this.ball.img.src = "./res/Images/Ball/ball.png";
       if (this.isPlayerOne) {
+        this.powerUps = [];
         this.players.one.lives -= 1;
         if (this.players.one.lives < 0)
           this.players.one.lives = 0;
 
       } else {
         this.players.two.lives -= 1;
+        this.powerUps = [];
         if (this.players.two.lives < 0)
           this.players.two.lives = 0;
       }
@@ -307,28 +321,28 @@ class Game {
   }
   checkSpawnPowerup(x, y) {
     this.randomNumGen = Math.floor((Math.random() * 100) + 1);
-    if (this.randomNumGen >= 75) {
-      this.randomNumGen = Math.floor((Math.random() * 7) + 1);
+    if (this.randomNumGen >= 1) {
+      this.randomNumGen = Math.floor((Math.random() * 1) + 1);
       if (this.randomNumGen === 1) {
-        this.powerUp = new PowerUp("LASER", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.laserImg,"LASER", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 2) {
-        this.powerUp = new PowerUp("ENLARGE", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.enlargeImg,"ENLARGE", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 3) {
-        this.powerUp = new PowerUp("CATCH", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.catchImg,"CATCH", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 4) {
-        this.powerUp = new PowerUp("SLOW", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.slowImg,"SLOW", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 5) {
-        this.powerUp = new PowerUp("BREAK", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.breakImg,"BREAK", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 6) {
-        this.powerUp = new PowerUp("DISRUPTION", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.disruptionImg,"DISRUPTION", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 7) {
-        this.powerUp = new PowerUp("PLAYER", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.playerImg,"PLAYER", x, y, 50, 25, this.worldBounds.maxY);
       }
       this.powerUps.push(this.powerUp);
     }
@@ -337,7 +351,7 @@ class Game {
     brick.update();
     if (Collision.BallToBlock(this.ball, brick))
     {
-      if(brick.health <= 1)
+      if(brick.health <= 0)
         this.checkSpawnPowerup(brick.x + 12, brick.y);
     }
     Collision.LasersToBlock(this.paddle.lasers, brick);
@@ -375,13 +389,22 @@ class Game {
       }
     }
   }
-  updatePowerup(powerup,index,array){
-      powerup.update();
+  updatePowerup(powerup,index,array,dt){
+      powerup.update(dt);
       if (Collision.PaddleToPowerUp(this.paddle, powerup)) {
         if (powerup.type === "LASER") {
+          if(this.paddle.enlargePowerActive){
+            this.paddle.enlargePowerActive = false;
+          }
+          this.paddle.laserPowerActive = true;
+          this.paddle.paddleAnimator.continue();
           powerup.active = false;
         }
         else if (powerup.type === "ENLARGE") {
+          if(this.paddle.laserPowerActive){
+            this.paddle.laserPowerActive = false;
+          }
+          this.paddle.enlargePowerActive = true;
           powerup.active = false;
         }
         else if (powerup.type === "CATCH") {
@@ -401,6 +424,7 @@ class Game {
           }
           this.ball.velocity.x = firingVector.x;
           this.ball.velocity.y = firingVector.y;
+          this.ball.img.src = "./res/Images/Ball/ball_slow.png";
           powerup.active = false;
         }
         else if (powerup.type === "BREAK") {
