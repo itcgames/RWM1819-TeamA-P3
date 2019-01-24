@@ -28,6 +28,7 @@ class Game {
       one: { score: 0, bricks: [], enemies: [], lives: 3 },
       two: { score: 0, bricks: [], enemies: [], lives: 3 }
     };
+    this.enemySprites = this.createEnemySprites();
     this.isPlayerOne = true;
     this.twoPlayerMode = false;
     this.play = true;
@@ -36,19 +37,19 @@ class Game {
     this.powerUps = [];
     this.randomNumGen;
     //preload powerup images
-    this.laserImg = new Image(0,0);
+    this.laserImg = new Image(0, 0);
     this.laserImg.src = "./res/Images/Powerups/power_up_laser.png";
-    this.enlargeImg = new Image(0,0);
+    this.enlargeImg = new Image(0, 0);
     this.enlargeImg.src = "./res/Images/Powerups/power_up_enlarge.png";
-    this.catchImg = new Image(0,0);
+    this.catchImg = new Image(0, 0);
     this.catchImg.src = "./res/Images/Powerups/power_up_catch.png";
-    this.slowImg = new Image(0,0);
+    this.slowImg = new Image(0, 0);
     this.slowImg.src = "./res/Images/Powerups/power_up_slow.png";
-    this.breakImg = new Image(0,0);
+    this.breakImg = new Image(0, 0);
     this.breakImg.src = "./res/Images/Powerups/power_up_break.png";
-    this.disruptionImg = new Image(0,0);
+    this.disruptionImg = new Image(0, 0);
     this.disruptionImg.src = "./res/Images/Powerups/power_up_disruption.png";
-    this.playerImg = new Image(0,0);
+    this.playerImg = new Image(0, 0);
     this.playerImg.src = "./res/Images/Powerups/power_up_player.png";
     /** @type {Array<{ Bricks: Array<{ type: string, position: { x: number, y: number }, width: number, height: number }> }>} */
     this.levels = [];
@@ -163,15 +164,15 @@ class Game {
           this.highScore = (this.isPlayerOne ? this.players.one.score : this.players.two.score);
         }
         //update entities
-        this.bricks.forEach((brick,index,array) => {
+        this.bricks.forEach((brick, index, array) => {
           this.updateBrick(brick, index, array);
         });
         Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
-        this.enemies.forEach(enemy => {
-          this.updateEnemy(enemy);
+        this.enemies.forEach((enemy, index, array) => {
+          this.updateEnemy(enemy, index, array, dt);
         });
-        this.powerUps.forEach((powerup,index,array) => {
-          this.updatePowerup(powerup,index,array,dt);
+        this.powerUps.forEach((powerup, index, array) => {
+          this.updatePowerup(powerup, index, array, dt);
         });
         if (!this.ballSpawning) {
           Collision.BallToPaddle(this.ball, this.paddle);
@@ -330,63 +331,67 @@ class Game {
     if (this.randomNumGen >= 75) {
       this.randomNumGen = Math.floor((Math.random() * 7) + 1);
       if (this.randomNumGen === 1) {
-        this.powerUp = new PowerUp(this.laserImg,"LASER", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.laserImg, "LASER", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 2) {
-        this.powerUp = new PowerUp(this.enlargeImg,"ENLARGE", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.enlargeImg, "ENLARGE", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 3) {
-        this.powerUp = new PowerUp(this.catchImg,"CATCH", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.catchImg, "CATCH", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 4) {
-        this.powerUp = new PowerUp(this.slowImg,"SLOW", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.slowImg, "SLOW", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 5) {
-        this.powerUp = new PowerUp(this.breakImg,"BREAK", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.breakImg, "BREAK", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 6) {
-        this.powerUp = new PowerUp(this.disruptionImg,"DISRUPTION", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.disruptionImg, "DISRUPTION", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 7) {
-        this.powerUp = new PowerUp(this.playerImg,"PLAYER", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.playerImg, "PLAYER", x, y, 50, 25, this.worldBounds.maxY);
       }
       this.powerUps.push(this.powerUp);
     }
   }
-  updateBrick(brick, index, array){
+
+  updateBrick(brick, index, array) {
     brick.update();
-    if (Collision.BallToBlock(this.ball, brick))
-    {
-      if(brick.health <= 0)
+    if (Collision.BallToBlock(this.ball, brick)) {
+      if (brick.health <= 0)
         this.checkSpawnPowerup(brick.x + 12, brick.y);
     }
     Collision.LasersToBlock(this.paddle.lasers, brick);
-    if (brick.health <= 0)
-    {
+    if (brick.health <= 0) {
       array.splice(index, 1);
-      if (this.isPlayerOne)
-      {
+      if (this.isPlayerOne) {
         this.players.one.score += brick.score;
       }
-      else
-      {
+      else {
         this.players.two.score += brick.score;
       }
     }
-    this.enemies.forEach(enemy =>
-    {
+    this.enemies.forEach(enemy => {
       Collision.EnemyToBlock(enemy, brick);
     });
   }
-  updateEnemy(enemy){
-    enemy.update();
-    if (!this.ballSpawning)
-    {
-      Collision.BallToEnemy(this.ball, enemy);
+
+  /**
+   * @param {Enemy} enemy 
+   * @param {number} index 
+   * @param {Array<Enemy>} array 
+   * @param {number} dt 
+   */
+  updateEnemy(enemy, index, array, dt) {
+    enemy.update(dt);
+    if (!enemy.isDying()) {
+      if (!this.ballSpawning) {
+        Collision.BallToEnemy(this.ball, enemy);
+      }
+      Collision.LasersToEnemy(this.paddle.lasers, enemy);
+      Collision.PaddleToEnemy(this.paddle, enemy);
     }
-    Collision.LasersToEnemies(this.paddle.lasers, enemy);
-    Collision.PaddleToEnemy(this.paddle, enemy);
-    if (enemy.health <= 0) {
+    if (enemy.isDead()) {
       array.splice(index, 1);
       if (this.isPlayerOne) {
         this.players.one.score += 100;
@@ -395,49 +400,76 @@ class Game {
       }
     }
   }
-  updatePowerup(powerup,index,array,dt){
-      powerup.update(dt);
-      if (Collision.PaddleToPowerUp(this.paddle, powerup) && powerup.active) {
-        this.paddle.playPowerUpPickup();
-        if (powerup.type === "LASER") {
-          if(this.paddle.enlargePowerActive){
-            this.paddle.enlargePowerActive = false;
-          }
-          this.paddle.laserPowerActive = true;
-          this.paddle.paddleAnimator.continue();
-          powerup.active = false;
+
+
+  /** Creates the enemy sprites and initiates the image loading process */
+  createEnemySprites() {
+    const sprites = {
+      blue: new Image(EnemySpritesheetSize.width, EnemySpritesheetSize.height),
+      lightBlue: new Image(EnemySpritesheetSize.width, EnemySpritesheetSize.height),
+      red: new Image(EnemySpritesheetSize.width, EnemySpritesheetSize.height),
+      green: new Image(EnemySpritesheetSize.width, EnemySpritesheetSize.height),
+      explosion: new Image(EnemySpritesheetSize.width, EnemySpritesheetSize.height)
+    };
+    sprites.blue.id = "EnemyBlue";
+    sprites.blue.src = EnemyType.BLUE;
+
+    sprites.lightBlue.id = "EnemyLightBlue";
+    sprites.lightBlue.src = EnemyType.LIGHT_BLUE;
+
+    sprites.red.id = "EnemyRed";
+    sprites.red.src = EnemyType.RED;
+
+    sprites.green.id = "EnemyGreen";
+    sprites.green.src = EnemyType.GREEN;
+
+    sprites.explosion.id = "EnemyExplosion";
+    sprites.explosion.src = "./res/Images/Enemies/enemy_explode.png";
+    return sprites;
+  }
+  updatePowerup(powerup, index, array, dt) {
+    powerup.update(dt);
+    if (Collision.PaddleToPowerUp(this.paddle, powerup) && powerup.active) {
+      this.paddle.playPowerUpPickup();
+      if (powerup.type === "LASER") {
+        if (this.paddle.enlargePowerActive) {
+          this.paddle.enlargePowerActive = false;
         }
-        else if (powerup.type === "ENLARGE") {
-          if(this.paddle.laserPowerActive){
-            this.paddle.laserPowerActive = false;
-          }
-          this.paddle.enlargePowerActive = true;
-          powerup.active = false;
-        }
-        else if (powerup.type === "CATCH") {
-          powerup.active = false;
-        }
-        else if (powerup.type === "SLOW") {
-          this.ball.speed -= 3;
-          //get angle
-          this.ball.img.src = "./res/Images/Ball/ball_slow.png";
-          powerup.active = false;
-        }
-        else if (powerup.type === "BREAK") {
-          powerup.active = false;
-        }
-        else if (powerup.type === "DISRUPTION") {
-          powerup.active = false;
-        }
-        else if (powerup.type === "PLAYER") {
-          powerup.active = false;
-          if (this.isPlayerOne) {
-            this.players.one.lives += 1;
-          } else {
-            this.players.two.lives += 1;
-          }
-        }
-        array.splice(index, 1);
+        this.paddle.laserPowerActive = true;
+        this.paddle.paddleAnimator.continue();
+        powerup.active = false;
       }
+      else if (powerup.type === "ENLARGE") {
+        if (this.paddle.laserPowerActive) {
+          this.paddle.laserPowerActive = false;
+        }
+        this.paddle.enlargePowerActive = true;
+        powerup.active = false;
+      }
+      else if (powerup.type === "CATCH") {
+        powerup.active = false;
+      }
+      else if (powerup.type === "SLOW") {
+        this.ball.speed -= 3;
+        //get angle
+        this.ball.img.src = "./res/Images/Ball/ball_slow.png";
+        powerup.active = false;
+      }
+      else if (powerup.type === "BREAK") {
+        powerup.active = false;
+      }
+      else if (powerup.type === "DISRUPTION") {
+        powerup.active = false;
+      }
+      else if (powerup.type === "PLAYER") {
+        powerup.active = false;
+        if (this.isPlayerOne) {
+          this.players.one.lives += 1;
+        } else {
+          this.players.two.lives += 1;
+        }
+      }
+      array.splice(index, 1);
+    }
   }
 }

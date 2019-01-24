@@ -66,17 +66,18 @@ const Collision = (function () {
       const aabbBlock = rectangleToAabb({ position: { x: block.x, y: block.y }, width: block.width, height: block.height });
       const result = collisions.maniAABBToAABB(aabbEnemy, aabbBlock);
       if (result.collision) {
-        enemy.position = {
-          x: enemy.position.x + result.manifest.leftAABB.distance.x,
-          y: enemy.position.y + result.manifest.leftAABB.distance.y
-        };
+        // hotfix for the inaccuracy of floating point numbers
         const direction = {
-          x: result.manifest.leftAABB.distance.x,
-          y: result.manifest.leftAABB.distance.y
+          x: result.manifest.leftAABB.distance.x * 1.05,
+          y: result.manifest.leftAABB.distance.y * 1.05
         };
         enemy.velocity = {
           x: (direction.x !== 0) ? -enemy.velocity.x : enemy.velocity.x,
           y: (direction.y !== 0) ? -enemy.velocity.y : enemy.velocity.y
+        };
+        enemy.position = {
+          x: enemy.position.x + enemy.velocity.x + direction.x,
+          y: enemy.position.y + enemy.velocity.y + direction.y
         };
 
       }
@@ -204,7 +205,7 @@ const Collision = (function () {
      * @param {Enemy} enemy
      * enemy to check against
      */
-    static LasersToEnemies(lasers, enemy) {
+    static LasersToEnemy(lasers, enemy) {
       lasers.forEach((laser, index, array) => {
         if (Collision.LaserToEnemyCol(laser, enemy)) {
           array.splice(index, 1);
