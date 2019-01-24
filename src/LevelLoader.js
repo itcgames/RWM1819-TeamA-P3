@@ -7,14 +7,14 @@ const LevelLoader = (function() {
    */
   function loadJson(dataString, e) {
     
-    /** @type {Array<{ WorldBounds: { minX: number, minY: number, maxX: number, maxY: number }, Paddle: { position: { x: number, y: number }}, Bricks: Array<{ type: string, position: { x: number, y: number }, width: number, height: number }>, Enemies: Array<{ type: string, position: { x: number, y: number }, velocity: { x: number, y: number }, width: number, height: number}> }>} */
+    /** @type {Array<{ Bricks: Array<{ type: string, position: { x: number, y: number }, width: number, height: number }> }>} */
     const data = JSON.parse(dataString);
     return data;
   }
 
   /**
    * @param {string} filePath File path to json file.
-   * @param {(ev: XMLHttpRequestEventMap["load"], data: Array<{ WorldBounds: { minX: number, minY: number, maxX: number, maxY: number }, Paddle: { position: { x: number, y: number }}, Bricks: Array<{ type: string, position: { x: number, y: number }, width: number, height: number }>, Enemies: Array<{ type: string, position: { x: number, y: number }, velocity: { x: number, y: number }, width: number, height: number}> }>) => void} successCallback
+   * @param {(ev: XMLHttpRequestEventMap["load"], data: Array<{ Bricks: Array<{ type: string, position: { x: number, y: number }, width: number, height: number }> }>) => void} successCallback
    *  function is called when level is fully loaded successfully.
    * @param {(ev: XMLHttpRequestEventMap["error"]) => void} failureCallback
    *  function is called when level does not load successfully.
