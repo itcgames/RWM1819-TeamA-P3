@@ -277,6 +277,10 @@ class Game {
       this.ball.flipVelY();
       this.ball.playWallBounce();
     }
+    if (this.ball.position.y < this.worldBounds.minY) {
+      this.ball.flipVelY();
+      this.ball.playWallBounce();
+    }
     if (this.ball.position.y + (this.ball.radius * 2) > this.worldBounds.maxY) {
       this.ballSpawning = true;
       this.ball.img.src = "./res/Images/Ball/ball.png";
@@ -414,19 +418,8 @@ class Game {
           powerup.active = false;
         }
         else if (powerup.type === "SLOW") {
-          this.ball.speed -= 3;//get angle
-          var angle = Math.atan2(this.ball.velocity.y, this.ball.velocity.x);
-          angle = VectorMath.toDeg(angle)
-
-          //make unit vector from angle
-          var firingVectorUnit = VectorMath.vector(angle);
-          //multiply by speed
-          var firingVector = {
-            x: firingVectorUnit.x * this.ball.speed,
-            y: firingVectorUnit.y * this.ball.speed
-          }
-          this.ball.velocity.x = firingVector.x;
-          this.ball.velocity.y = firingVector.y;
+          this.ball.speed -= 3;
+          //get angle
           this.ball.img.src = "./res/Images/Ball/ball_slow.png";
           powerup.active = false;
         }

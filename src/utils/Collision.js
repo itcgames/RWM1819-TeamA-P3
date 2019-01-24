@@ -161,6 +161,7 @@ const Collision = (function () {
 
       if (result.collision) {
         block.damage();
+        block.playDestroySound();
         return true;
       }
       return false;
