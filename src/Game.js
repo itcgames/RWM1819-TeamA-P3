@@ -166,13 +166,13 @@ class Game {
         this.bricks.forEach((brick,index,array) => {
           this.updateBrick(brick, index, array);
         });
+        Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
         this.enemies.forEach(enemy => {
           this.updateEnemy(enemy);
         });
         this.powerUps.forEach((powerup,index,array) => {
           this.updatePowerup(powerup,index,array,dt);
         });
-        Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
         if (!this.ballSpawning) {
           Collision.BallToPaddle(this.ball, this.paddle);
         }
@@ -321,8 +321,8 @@ class Game {
   }
   checkSpawnPowerup(x, y) {
     this.randomNumGen = Math.floor((Math.random() * 100) + 1);
-    if (this.randomNumGen >= 1) {
-      this.randomNumGen = Math.floor((Math.random() * 1) + 1);
+    if (this.randomNumGen >= 75) {
+      this.randomNumGen = Math.floor((Math.random() * 7) + 1);
       if (this.randomNumGen === 1) {
         this.powerUp = new PowerUp(this.laserImg,"LASER", x, y, 50, 25, this.worldBounds.maxY);
       }
@@ -391,7 +391,7 @@ class Game {
   }
   updatePowerup(powerup,index,array,dt){
       powerup.update(dt);
-      if (Collision.PaddleToPowerUp(this.paddle, powerup)) {
+      if (Collision.PaddleToPowerUp(this.paddle, powerup) && powerup.active) {
         if (powerup.type === "LASER") {
           if(this.paddle.enlargePowerActive){
             this.paddle.enlargePowerActive = false;
