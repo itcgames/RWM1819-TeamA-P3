@@ -32,7 +32,7 @@ update()
 {
   if (this.active)
   {
-    this.position.y += 1;
+    this.position.y += 5;
   }
   if(this.position.y > this.maxY)
   {

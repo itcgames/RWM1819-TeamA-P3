@@ -45,7 +45,11 @@ class Paddle {
         document.addEventListener("keydown", this.events.onKeyDown, false);
         document.addEventListener("keyup", this.events.onKeyUp, false);
 
+        /**LASER POWERUP */
         this.laserPowerActive = false;
+        /**ENLARGE POWERUP */
+        this.enlargePowerActive = false;
+        this.finishedEnlarging = false;
 
         /** @type {Array<Laser>} */
         this.lasers = [];
@@ -76,6 +80,11 @@ class Paddle {
             this.paddleAnimator.stop();
         });
         this.defaultToLaserImage.src = "./res/Images/Player/paddle_to_laser.png";
+
+        /**Laser image */
+        this.laserImg = new Image();
+        this.laserImg.src = "./res/Images/Laser.png";
+
         this.soundManager = new AudioManager();
         this.soundManager.init();
         this.soundManager.loadSoundFile("paddle-sound-hit", "./res/Sounds/paddle-ball-hit.mp3");
@@ -92,30 +101,6 @@ class Paddle {
      */
     update(dt) {
 
-        if (this.laserPowerActive) {
-            if (this.spacePressed && this.canFire) {
-                this.lasers.push(new Laser(this.position.x + 35,
-                    this.position.y,
-                    this.laserWidth,
-                    this.laserHeight,
-                    "Laser" + this.laserIndex)
-                );
-                this.laserIndex++;
-
-                this.lasers.push(new Laser(this.position.x + (this.size.x - this.laserWidth) - 35,
-                    this.position.y,
-                    this.laserWidth,
-                    this.laserHeight,
-                    "Laser" + this.laserIndex)
-                );
-                this.laserIndex++;
-
-                this.canFire = false;
-            }
-            if(this.paddleAnimator.isPlaying()){
-                this.paddleAnimator.update(dt, this.origin.x, this.origin.y);
-            }
-        }
 
         //if only right arrow pressed
         if (this.rightPressed && !this.leftPressed) {
@@ -140,20 +125,59 @@ class Paddle {
             this.position.x = this.clampPaddleRight - this.size.x;
             this.paddleRect.x = this.clampPaddleRight - this.size.x;
         }
-        this.updateOrigin();
         this.lasers.forEach((laser) => {
             laser.update(dt);
         });
         this.colBox.position.x = this.position.x;
 
+
+        if(this.enlargePowerActive){
+            if(!this.finishedEnlarging && this.size.x < 250){
+                this.colBox.size.x += 3.0;
+                this.size.x += 3.0;
+            }
+        }
+        else if(!this.enlargePowerActive && this.size.x > 150){
+            this.finishedEnlarging = false;
+            this.size.x = 150.0;
+            this.colBox.size.x = 130.0;
+        }
+        if (this.laserPowerActive) {
+            if (this.spacePressed && this.canFire) {
+                this.lasers.push(new Laser(this.laserImg,
+                    this.position.x + 35,
+                    this.position.y,
+                    this.laserWidth,
+                    this.laserHeight,
+                    "Laser" + this.laserIndex)
+                );
+                this.laserIndex++;
+
+                this.lasers.push(new Laser(this.laserImg,
+                    this.position.x + (this.size.x - this.laserWidth) - 35,
+                    this.position.y,
+                    this.laserWidth,
+                    this.laserHeight,
+                    "Laser" + this.laserIndex)
+                );
+                this.laserIndex++;
+
+                this.canFire = false;
+            }
+            if(this.paddleAnimator.isPlaying()){
+                this.paddleAnimator.update(dt, this.origin.x, this.origin.y);
+            }
+            this.updateOrigin();
+
+        }
         /**
          * code to run when collide with laser powerup
-         * 
-         *      if(!this.laserPowerActive){
+         *              if(!this.laserPowerActive){
                 this.paddleAnimator.isReversing("defaultToLaser", false);
                 this.laserPowerActive = true;
                 this.paddleAnimator.continue();
-            }
+            } 
+
          */
         
 
