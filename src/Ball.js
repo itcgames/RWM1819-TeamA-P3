@@ -14,6 +14,23 @@ class Ball{
     this.slowStartSpeed = 0;
     this.img = new Image(this.radius, this.radius);
     this.img.src = "./res/Images/Ball/ball.png";
+    this.soundManager = new AudioManager();
+    this.soundManager.init();
+    this.soundManager.loadSoundFile("block-hit", "./res/Sounds/Bumper.wav");
+    this.soundManager.loadSoundFile("wall-hit", "./res/Sounds/Bumper3.wav");
+    this.soundManager.loadSoundFile("death", "./res/Sounds/roblox-death-sound.mp3");
+  }
+
+  playDeathSound(){
+    this.soundManager.playAudio("death", false, 0.5);
+  }
+
+  playWallBounce(){
+    this.soundManager.playAudio("wall-hit", false, 0.5);
+  }
+
+  playBlockBounce(){
+    this.soundManager.playAudio("block-hit", false, 0.5);
   }
 
   update() {

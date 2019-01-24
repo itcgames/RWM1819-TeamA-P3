@@ -267,19 +267,20 @@ class Game {
   ballWorldCollision() {
     if (this.ball.position.x + (this.ball.radius * 2) > this.worldBounds.maxX) {
       this.ball.flipVelX();
+      this.ball.playWallBounce();
     }
     if (this.ball.position.x < this.worldBounds.minX) {
       this.ball.flipVelX();
+      this.ball.playWallBounce();
     }
     if (this.ball.position.y > this.worldBounds.maxY) {
       this.ball.flipVelY();
-    }
-    if (this.ball.position.y < this.worldBounds.minY) {
-      this.ball.flipVelY();
+      this.ball.playWallBounce();
     }
     if (this.ball.position.y + (this.ball.radius * 2) > this.worldBounds.maxY) {
       this.ballSpawning = true;
       this.ball.img.src = "./res/Images/Ball/ball.png";
+      this.ball.playDeathSound();
       if (this.isPlayerOne) {
         this.powerUps = [];
         this.players.one.lives -= 1;
@@ -393,6 +394,7 @@ class Game {
   updatePowerup(powerup,index,array,dt){
       powerup.update(dt);
       if (Collision.PaddleToPowerUp(this.paddle, powerup) && powerup.active) {
+        this.paddle.playPowerUpPickup();
         if (powerup.type === "LASER") {
           if(this.paddle.enlargePowerActive){
             this.paddle.enlargePowerActive = false;
@@ -412,7 +414,7 @@ class Game {
           powerup.active = false;
         }
         else if (powerup.type === "SLOW") {
-          this.ball.speed -= 4;//get angle
+          this.ball.speed -= 3;//get angle
           var angle = Math.atan2(this.ball.velocity.y, this.ball.velocity.x);
           angle = VectorMath.toDeg(angle)
 
