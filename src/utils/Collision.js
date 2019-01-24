@@ -49,6 +49,7 @@ const Collision = (function () {
           y: ball.position.y + ball.velocity.y + direction.y
         };
         block.damage();
+        ball.playBlockBounce();
         return true;
       }
       return false;

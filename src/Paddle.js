@@ -88,10 +88,15 @@ class Paddle {
         this.soundManager = new AudioManager();
         this.soundManager.init();
         this.soundManager.loadSoundFile("paddle-sound-hit", "./res/Sounds/paddle-ball-hit.mp3");
+        this.soundManager.loadSoundFile("power-up", "./res/Sounds/BlueShield.wav");
     }
 
     playPaddleHitSound() {
       this.soundManager.playAudio("paddle-sound-hit", false, 0.5);
+    }
+
+    playPowerUpPickup(){
+        this.soundManager.playAudio("power-up", false, 0.5);
     }
 
     /**

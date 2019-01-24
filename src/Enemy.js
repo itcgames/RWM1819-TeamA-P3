@@ -38,6 +38,11 @@ class Enemy
 
     this.onScreen = false;
 
+    this.soundManager = new AudioManager();
+    this.soundManager.init();
+    this.soundManager.loadSoundFile("death", "./res/Sounds/Explosion.wav");
+    this.soundManager.loadSoundFile("block-hit", "./res/Sounds/Bumper2.wav");
+    this.soundManager.loadSoundFile("wall-hit", "./res/Sounds/Bumper3.wav");
 
     this.createNewEnemy();
   }
@@ -53,11 +58,13 @@ class Enemy
     {
       this.position.x = this.minX + 1;
       this.velocity.x *= -1;
+      this.soundManager.playAudio("wall-hit", false, 0.5);
     }
     if(this.position.x > this.maxX - this.width)
     {
       this.x = this.maxX-this.width;
       this.velocity.x *= -1;
+      this.soundManager.playAudio("wall-hit", false, 0.5);
     }
     if(this.position.y > this.minY)
     {
@@ -67,6 +74,7 @@ class Enemy
     {
       this.position.y = this.minY + 1;
       this.velocity.y *= -1;
+      this.soundManager.playAudio("wall-hit", false, 0.5);
     }
     if(this.onScreen === true && this.position.y > this.maxY)
     {
@@ -103,6 +111,7 @@ class Enemy
   }
   die()
   {
+    this.soundManager.playAudio("death", false, 0.5);
     this.health -=1;
   }
 }

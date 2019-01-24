@@ -206,6 +206,7 @@ class Game {
         }
         if (this.powerUpActive === true) {
           if (Collision.PaddleToPowerUp(this.paddle, this.powerUp) && this.powerUp.active) {
+            this.paddle.playPowerUpPickup();
             if (this.powerUp.type === "LASER") {
               if (this.paddle.enlargePowerActive) {
                 this.paddle.enlargePowerActive = false;
@@ -352,19 +353,20 @@ class Game {
   ballWorldCollision() {
     if (this.ball.position.x + (this.ball.radius * 2) > this.worldBounds.maxX) {
       this.ball.flipVelX();
+      this.ball.playWallBounce();
     }
     if (this.ball.position.x < this.worldBounds.minX) {
       this.ball.flipVelX();
+      this.ball.playWallBounce();
     }
     if (this.ball.position.y > this.worldBounds.maxY) {
       this.ball.flipVelY();
-    }
-    if (this.ball.position.y < this.worldBounds.minY) {
-      this.ball.flipVelY();
+      this.ball.playWallBounce();
     }
     if (this.ball.position.y + (this.ball.radius * 2) > this.worldBounds.maxY) {
       this.ballSpawning = true;
       this.ball.img.src = "./res/Images/Ball/ball.png";
+      this.ball.playDeathSound();
       if (this.isPlayerOne) {
         this.players.one.lives -= 1;
         if (this.players.one.lives < 0)
