@@ -10,19 +10,10 @@ const EnemyType = {
 /**
  * 
  */
-const EnemySize = {
+const EnemySpritesheetSize = {
   width: 2000,
   height: 200
 }
-
-/*
-
-    sprites.blue.src = ;
-    sprites.lightBlue.src = ;
-    sprites.red.src = ;
-    sprites.green.src = ;
-    sprites.explosion.src = "./res/Images/Enemies/enemy_explode.png";
-*/
 
 /**
 * Enemy class used to setup each of the enemy types in the game
@@ -32,7 +23,7 @@ class Enemy {
   * @constructor constructor for the enemy class
   * @param {HTMLImageElement} explosion
   * @param {HTMLImageElement} spritesheet
-  * @param {"BLUE" | "RED" | "GREEN" | ""} type
+  * @param {"BLUE" | "RED" | "GREEN" | "LIGHT_BLUE"} type
   * @param {{x: number, y: number}} position
   * @param {{x: number, y: number }} velocity
   * @param {number} width
@@ -72,6 +63,14 @@ class Enemy {
     this.idleAnimator.addAnimation("idle", this.idleAnimation);
     this.idleAnimator.setScale("idle", 0.5, 0.5);
     this.idleAnimator.isLooping("idle", true);
+    if (this.type === "GREEN") {
+      this.idleAnimator.setAnimationFPS("idle", 15);
+    } if (this.type === "BLUE") {
+    } if (this.type === "LIGHT_BLUE") {
+    } if (this.type === "RED") {
+    } else {
+      this.idleAnimation.setAnimationFPS("idle", 60);
+    }
     this.idleAnimator.continue();
   }
   /**

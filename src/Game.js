@@ -177,7 +177,7 @@ class Game {
             Collision.EnemyToBlock(enemy, brick);
           });
         });
-        this.enemies.forEach(enemy => {
+        this.enemies.forEach((enemy, index, array) => {
           enemy.update(dt);
           if (!this.ballSpawning) {
             Collision.BallToEnemy(this.ball, enemy);
@@ -438,11 +438,11 @@ class Game {
   /** Creates the enemy sprites and initiates the image loading process */
   createEnemySprites() {
     const sprites = {
-      blue: new Image(EnemySize.width, EnemySize.height),
-      lightBlue: new Image(EnemySize.width, EnemySize.height),
-      red: new Image(EnemySize.width, EnemySize.height),
-      green: new Image(EnemySize.width, EnemySize.height),
-      explosion: new Image(EnemySize.width, EnemySize.height)
+      blue: new Image(EnemySpritesheetSize.width, EnemySpritesheetSize.height),
+      lightBlue: new Image(EnemySpritesheetSize.width, EnemySpritesheetSize.height),
+      red: new Image(EnemySpritesheetSize.width, EnemySpritesheetSize.height),
+      green: new Image(EnemySpritesheetSize.width, EnemySpritesheetSize.height),
+      explosion: new Image(EnemySpritesheetSize.width, EnemySpritesheetSize.height)
     };
     sprites.blue.id = "EnemyBlue";
     sprites.blue.src = EnemyType.BLUE;
