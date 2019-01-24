@@ -85,6 +85,13 @@ class Paddle {
         this.laserImg = new Image();
         this.laserImg.src = "./res/Images/Laser.png";
 
+        this.soundManager = new AudioManager();
+        this.soundManager.init();
+        this.soundManager.loadSoundFile("paddle-sound-hit", "./res/Sounds/paddle-ball-hit.mp3");
+    }
+
+    playPaddleHitSound() {
+      this.soundManager.playAudio("paddle-sound-hit", false, 0.5);
     }
 
     /**

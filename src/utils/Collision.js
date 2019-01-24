@@ -91,15 +91,6 @@ const Collision = (function () {
       const aabbPaddle = rectangleToAabb({ position: { x: paddle.colBox.position.x, y: paddle.colBox.position.y }, width: paddle.colBox.size.x, height: paddle.colBox.size.y });
       const result = collisions.maniAABBToAABB(aabbBall, aabbPaddle);
       if (result.collision) {
-        /*ball.position = {
-          x: ball.position.x + result.manifest.leftAABB.distance.x,
-          y: ball.position.y + result.manifest.leftAABB.distance.y
-        };
-        const direction = {
-          x: result.manifest.leftAABB.distance.x,
-          y: result.manifest.leftAABB.distance.y
-        };
-        */
         var vectorBetweenBallAndPaddle = {
           x: ball.position.x + ball.radius - paddle.origin.x,
           y: ball.position.y + ball.radius - paddle.origin.y
@@ -119,12 +110,7 @@ const Collision = (function () {
         }
         ball.velocity.x = firingVector.x;
         ball.velocity.y = firingVector.y;
-        /*if (ball.velocity.y > 0)
-        {
-          console.log("negative bounce");
-        }
-        */
-
+        paddle.playPaddleHitSound();
       }
     }
     /**
