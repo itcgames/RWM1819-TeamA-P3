@@ -142,12 +142,12 @@ class Paddle {
 
         /**
          * code to run when collide with laser powerup
-         * 
-         *      if(!this.laserPowerActive){
+         *              if(!this.laserPowerActive){
                 this.paddleAnimator.isReversing("defaultToLaser", false);
                 this.laserPowerActive = true;
                 this.paddleAnimator.continue();
-            }
+            } 
+
          */
         
 

@@ -13,7 +13,7 @@ class Game {
     this.menuManager.addScene("Main Menu", new Scene("MAIN", "m", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
     this.menuManager.addScene("Game Scene", new Scene("GAME", "g", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
     this.menuManager.setCurrentScene("Splash");
-    this.menuManager.fadeSpeed = 4000;
+    this.menuManager.fadeSpeed = 2000;
     this.menuManager.fadeTo("Main Menu");
     this.prevDt = Date.now();
     this.paddle = new Paddle(100, 700, this.worldBounds.minX, this.worldBounds.maxX);
@@ -32,7 +32,7 @@ class Game {
     this.twoPlayerMode = false;
 
     this.currentLevel = 0;
-    this.powerUp = new PowerUp("SLOW", 100, 100);
+    this.powerUp = new PowerUp("LASER", 100, 100);
     new LevelLoader("./res/Levels.json", (ev, data) => {
       const level = data[this.currentLevel];
       this.worldBounds = level.WorldBounds;
@@ -192,6 +192,12 @@ class Game {
           this.ball.velocity.y = firingVector.y;
           this.powerUp.active = false;
         }
+        if (this.powerUp.type === "LASER"){
+          this.paddle.paddleAnimator.isReversing("defaultToLaser", false);
+          this.paddle.laserPowerActive = true;
+          this.paddle.paddleAnimator.continue();
+          this.powerUp.active = false;
+        }
       }
 
     }
@@ -295,6 +301,7 @@ class Game {
     if (this.ball.position.y + (this.ball.radius * 2) > this.worldBounds.maxY) {
       this.ballSpawning = true;
       if (this.twoPlayerMode) {
+        this.paddle.laserPowerActive = false;
         this.isPlayerOne = !this.isPlayerOne;
         this.bricks = this.isPlayerOne
           ? this.players.one.bricks

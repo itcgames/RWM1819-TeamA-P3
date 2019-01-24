@@ -3,7 +3,8 @@
 */
 const PowerUpType = {
   Slow: "./res/Images/Bricks/brick_red.png",
-  Player: 2
+  Player: 2,
+  Laser: "./res/Images/Bricks/brick_red.png"
 }
 
 class PowerUp
@@ -25,7 +26,7 @@ class PowerUp
 update()
 {
   if (this.active)
-    this.position.y += 1;
+    this.position.y += 5;
 }
 
     /**
@@ -43,7 +44,11 @@ update()
 
  createPowerUp(){
     this.img = new Image(this.width, this.height);
-    if (this.type === "SLOW")
+    if (this.type === "SLOW"){
       this.img.src = PowerUpType.Slow;
+    }
+    else if(this.type === "LASER"){
+      this.img.src = PowerUpType.Laser;
+    }
  }
 }
