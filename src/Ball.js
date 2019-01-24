@@ -34,6 +34,18 @@ class Ball{
   }
 
   update() {
+    var angle = Math.atan2(this.velocity.y, this.velocity.x);
+    angle = VectorMath.toDeg(angle)
+
+    //make unit vector from angle
+    var firingVectorUnit = VectorMath.vector(angle);
+    //multiply by speed
+    var firingVector = {
+      x: firingVectorUnit.x * this.speed,
+      y: firingVectorUnit.y * this.speed
+    }
+    this.velocity.x = firingVector.x;
+    this.velocity.y = firingVector.y;
     this.position.x += this.velocity.x;
     this.position.y += this.velocity.y;
   }

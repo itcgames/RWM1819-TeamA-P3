@@ -89,6 +89,7 @@ class Paddle {
         this.soundManager.init();
         this.soundManager.loadSoundFile("paddle-sound-hit", "./res/Sounds/paddle-ball-hit.mp3");
         this.soundManager.loadSoundFile("power-up", "./res/Sounds/BlueShield.wav");
+        this.soundManager.loadSoundFile("laser", "./res/Sounds/Shot.wav");
     }
 
     playPaddleHitSound() {
@@ -157,6 +158,7 @@ class Paddle {
                     this.laserHeight,
                     "Laser" + this.laserIndex)
                 );
+                this.soundManager.playAudio("laser", false, 0.5);
                 this.laserIndex++;
 
                 this.lasers.push(new Laser(this.laserImg,
