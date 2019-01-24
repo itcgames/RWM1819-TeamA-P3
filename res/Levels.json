@@ -1,11 +1,5 @@
 [
     {
-        "WorldBounds": {
-            "minX": 100,
-            "minY": 100,
-            "maxX": 1100,
-            "maxY": 800
-        },
         "Bricks": [
             {
                 "type": "GREEN",
@@ -475,15 +469,7 @@
                 "width": 75,
                 "height": 25
             }
-        ],
-        "Enemies": [
-            {
-                "type": "BLUE",
-                "position": { "x": 100, "y": -200 },
-                "velocity": { "x": 3, "y": 1},
-                "width": 25,
-                "height": 25
-            }
         ]
+
     }
 ]

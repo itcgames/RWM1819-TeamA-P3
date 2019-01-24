@@ -231,7 +231,7 @@ const Collision = (function () {
      */
     static LaserToEnemyCol(laser,enemy){
       const aabbLaser = rectangleToAabb({ position: laser.position, width: laser.width, height: laser.height });
-      const aabbEnemy = rectangleToAabb({ position: { x: enemy.x, y: enemy.y }, width: enemy.width, height: enemy.height });
+      const aabbEnemy = rectangleToAabb({ position: { x: enemy.position.x, y: enemy.position.y }, width: enemy.width, height: enemy.height });
 
       const result = collisions.maniAABBToAABB(aabbLaser, aabbEnemy);
 

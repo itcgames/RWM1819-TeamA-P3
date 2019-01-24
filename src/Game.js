@@ -1,17 +1,17 @@
 
 class Game {
   constructor() {
-                                                                                              this.worldBounds = {
+  this.worldBounds = {
       minX: 100,
       minY: 100,
-      maxX: 1000,
+      maxX: 1100,
       maxY: 800
     };
     //scene management
     this.menuManager = new MenuManager();
-    this.menuManager.addScene("Splash", new Scene("SPLASH", "s", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
-    this.menuManager.addScene("Main Menu", new Scene("MAIN", "m", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
-    this.menuManager.addScene("Game Scene", new Scene("GAME", "g", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX, this.worldBounds.maxY));
+    this.menuManager.addScene("Splash", new Scene("SPLASH", "s", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX - 100, this.worldBounds.maxY));
+    this.menuManager.addScene("Main Menu", new Scene("MAIN", "m", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX- 100, this.worldBounds.maxY));
+    this.menuManager.addScene("Game Scene", new Scene("GAME", "g", this.worldBounds.minX, this.worldBounds.minY, this.worldBounds.maxX- 100, this.worldBounds.maxY));
     this.menuManager.setCurrentScene("Splash");
     this.menuManager.fadeSpeed = 4000;
     this.menuManager.fadeTo("Main Menu");
@@ -40,20 +40,19 @@ class Game {
     this.randomNumGen;
 
     new LevelLoader("./res/Levels.json", (ev, data) => {
-      const level = data[0];
-      this.worldBounds = level.WorldBounds;
+      const level = data[this.currentLevel];
       level.Bricks.forEach((brick, index) => {
         const id = brick.type + index.toString();
         this.players.one.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, this.currentLevel));
         this.players.two.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, this.currentLevel));
         this.bricks = this.players.one.bricks;
       });
-      level.Enemies.forEach((enemy, index) => {
-        const id = enemy.type + index.toString();
-        this.players.one.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height, this.worldBounds.minX, this.worldBounds.maxX, this.worldBounds.minY, this.worldBounds.maxY));
-        this.players.two.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height, this.worldBounds.minX, this.worldBounds.maxX, this.worldBounds.minY, this.worldBounds.maxY));
-        this.enemies = this.players.one.enemies;
-      });
+      // level.Enemies.forEach((enemy, index) => {
+      //   const id = enemy.type + index.toString();
+      //   this.players.one.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height, this.worldBounds.minX, this.worldBounds.maxX, this.worldBounds.minY, this.worldBounds.maxY));
+      //   this.players.two.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height, this.worldBounds.minX, this.worldBounds.maxX, this.worldBounds.minY, this.worldBounds.maxY));
+      //   this.enemies = this.players.one.enemies;
+      // });
       this.dnd = new DragDrop();
       this.dnd.addDraggable(this.paddle.paddleRect, false, true);
       window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
@@ -158,6 +157,7 @@ class Game {
             this.checkSpawnPowerup(brick.x+12, brick.y);
           }
         }
+        Collision.LasersToBlock(this.paddle.lasers, brick);
         if (brick.health <= 0) {
           array.splice(index, 1);
           if (this.isPlayerOne) {
@@ -184,6 +184,8 @@ class Game {
             this.players.two.score += 100;
           }
         }
+        Collision.LasersToEnemies(this.paddle.lasers, enemy);
+
       });
       if (!this.ballSpawning){
         Collision.BallToPaddle(this.ball, this.paddle);
