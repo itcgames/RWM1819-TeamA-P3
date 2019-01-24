@@ -15,7 +15,7 @@ class Game {
     this.menuManager.setCurrentScene("Splash");
     this.menuManager.fadeSpeed = 2000;
     this.menuManager.fadeTo("Main Menu");
-    this.paddle = new Paddle(100, 700, this.worldBounds.minX, this.worldBounds.maxX);
+    this.paddle = new Paddle(this.worldBounds.maxX/2, 700, this.worldBounds.minX, this.worldBounds.maxX);
     this.prevDt = Date.now();
     this.canvas = new Canvas("canvas");
     this.ctx = canvas.getContext("2d");
@@ -31,7 +31,8 @@ class Game {
     this.isPlayerOne = true;
     this.twoPlayerMode = false;
     this.play = true;
-    this.currentLevel = 0;
+    this.currentLevelP1 = 0;
+    this.currentLevelP2 = 0;
     //powerups
     this.powerUps = [];
     this.randomNumGen;
@@ -55,13 +56,10 @@ class Game {
 
     new LevelLoader("./res/Levels.json", (ev, data) => {
       this.levels = data;
-      const level = data[this.currentLevel];
-      level.Bricks.forEach((brick, index) => {
-        const id = brick.type + index.toString();
-        this.players.one.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, this.currentLevel));
-        this.players.two.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, this.currentLevel));
-        this.bricks = this.players.one.bricks;
-      });
+      this.currentLevelP1 = 0;
+      this.currentLevelP2 = 0;
+      this.setLevel(this.players.one, this.currentLevelP1);
+      this.setLevel(this.players.two, this.currentLevelP2);
       this.dnd = new DragDrop();
       this.dnd.addDraggable(this.paddle.paddleRect, false, true);
       window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
@@ -151,6 +149,20 @@ class Game {
 
     if (this.menuManager.current.key === "Game Scene") {
       if (this.play) {
+        if(this.players.one.bricks.length<= 0)
+        {
+          this.ballSpawning = true;
+          this.powerups = [];
+          this.currentLevelP1+=1;
+          this.setLevel(this.players.one, this.currentLevelP1);
+        }
+        if(this.players.two.bricks.length<= 0 && this.twoPlayerMode === true)
+        {
+          this.ballSpawning = true;
+          this.powerups = [];
+          this.currentLevelP2+=1;
+          this.setLevel(this.players.two, this.currentLevelP2);
+        }
         //reset bools
         this.pressedUp = true;
         this.pressedEnter = false;
@@ -162,6 +174,9 @@ class Game {
         if ((this.isPlayerOne ? this.players.one.score : this.players.two.score) > this.highScore) {
           this.highScore = (this.isPlayerOne ? this.players.one.score : this.players.two.score);
         }
+        this.bricks = this.isPlayerOne
+          ? this.players.one.bricks
+          : this.players.two.bricks;
         //update entities
         this.bricks.forEach((brick,index,array) => {
           this.updateBrick(brick, index, array);
@@ -188,6 +203,9 @@ class Game {
     if (this.menuManager.current.key === "Game Scene") {
       this.paddle.draw(this.ctx);
       this.ball.render(this.ctx);
+      this.bricks = this.isPlayerOne
+        ? this.players.one.bricks
+        : this.players.two.bricks;
       this.bricks.forEach(brick => brick.draw(this.ctx));
       this.enemies.forEach(enemy => enemy.draw(this.ctx));
       this.powerUps.forEach(powerup => powerup.draw(this.ctx));
@@ -307,6 +325,10 @@ class Game {
           // Game over both players lose
           this.menuManager.setCurrentScene("Main Menu");
           this.play = false;
+          this.currentLevelP1 = 0;
+          this.currentLevelP2 = 0;
+          this.setLevel(this.players.one, this.currentLevelP1);
+          this.setLevel(this.players.two, this.currentLevelP2);
         }
         this.bricks = this.isPlayerOne
           ? this.players.one.bricks
@@ -318,12 +340,14 @@ class Game {
         // Game over in player one mode
         this.menuManager.setCurrentScene("Main Menu");
         this.play = false;
+        this.currentLevelP1 = 0;
+        this.setLevel(this.players.one, this.currentLevelP1);
       }
     }
   }
   checkSpawnPowerup(x, y) {
     this.randomNumGen = Math.floor((Math.random() * 100) + 1);
-    if (this.randomNumGen >= 75) {
+    if (this.randomNumGen >= 90) {
       this.randomNumGen = Math.floor((Math.random() * 7) + 1);
       if (this.randomNumGen === 1) {
         this.powerUp = new PowerUp(this.laserImg,"LASER", x, y, 50, 25, this.worldBounds.maxY);
@@ -446,5 +470,21 @@ class Game {
         }
         array.splice(index, 1);
       }
+  }
+
+  setLevel(playerToSet, current) {
+    if (current >= this.levels.length)  {
+      console.log("Setting a level that doesn't exist in the loaded levels");
+      this.menuManager.setCurrentScene("Main Menu");
+    }
+    else{
+      playerToSet.bricks.splice(0);
+      const currentLevel = this.levels[current];
+      currentLevel.Bricks.forEach((brick, index) => {
+        const id = brick.type + index.toString();
+        playerToSet.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, current));
+        this.bricks = playerToSet.bricks;
+      });
+    }
   }
 }
