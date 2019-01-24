@@ -34,6 +34,9 @@ class Ball{
   }
 
   update() {
+    if (this.speed < this.minSpeed){
+      this.speed = this.minSpeed;
+    }
     var angle = Math.atan2(this.velocity.y, this.velocity.x);
     angle = VectorMath.toDeg(angle)
 
