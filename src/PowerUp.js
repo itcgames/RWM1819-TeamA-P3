@@ -2,13 +2,13 @@
 * @PowerUpType enum for the different type of power ups in our game
 */
 const PowerUpType = {
-  LASER: "./res/Images/Bricks/brick_red.png",
-  ENLARGE: "./res/Images/Bricks/brick_blue.png",
-  CATCH: "./res/Images/Bricks/brick_green.png",
-  SLOW: "./res/Images/Bricks/brick_orange.png",
-  BREAK: "./res/Images/Bricks/brick_pink.png",
-  DISRUPTION: "./res/Images/Bricks/brick_light_blue.png",
-  PLAYER: "./res/Images/Bricks/brick_metal.png",
+  LASER: "./res/Images/Powerups/power_up_laser.png",
+  ENLARGE: "./res/Images/Powerups/power_up_enlarge.png",
+  CATCH: "./res/Images/Powerups/power_up_catch.png",
+  SLOW: "./res/Images/Powerups/power_up_slow.png",
+  BREAK: "./res/Images/Powerups/power_up_slow.png",
+  DISRUPTION: "./res/Images/Powerups/power_up_disruption.png",
+  PLAYER: "./res/Images/Powerups/power_up_player.png",
 }
 
 class PowerUp
@@ -25,10 +25,12 @@ class PowerUp
     this.height = height;
     this.active = true;
     this.maxY = maxY;
+    this.animation;
+    this.animationManager = new AnimationManager();
     this.createPowerUp();
   }
 
-update()
+update(dt)
 {
   if (this.active)
   {
@@ -38,6 +40,7 @@ update()
   {
     this.active = false;
   }
+  this.animationManager.update(dt, this.position.x + this.width / 2, this.position.y + this.height / 2);
 }
 
     /**
@@ -48,7 +51,7 @@ update()
  {
    if (this.active){
     ctx.save();
-    ctx.drawImage(this.img, this.position.x, this.position.y, this.width, this.height);
+    this.animationManager.draw(ctx);
     ctx.restore();
   }
  }
@@ -69,5 +72,11 @@ update()
       this.img.src = PowerUpType.DISRUPTION;
     else if (this.type === "PLAYER")
       this.img.src = PowerUpType.PLAYER;
+      
+    this.animation = new Animation(this.img, 100, 50, 10);
+    this.animationManager.addAnimation("Update", this.animation);
+    var scaleX = this.width / 100;
+    var scaleY = this.height / 50;
+    this.animationManager.setScale("Update", 0.7, 0.7);
  }
 }
