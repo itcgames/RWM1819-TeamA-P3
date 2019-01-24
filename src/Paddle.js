@@ -76,7 +76,13 @@ class Paddle {
             this.paddleAnimator.stop();
         });
         this.defaultToLaserImage.src = "./res/Images/Player/paddle_to_laser.png";
+        this.soundManager = new AudioManager();
+        this.soundManager.init();
+        this.soundManager.loadSoundFile("paddle-sound-hit", "./res/Sounds/paddle-ball-hit.mp3");
+    }
 
+    playPaddleHitSound() {
+      this.soundManager.playAudio("paddle-sound-hit", false, 0.5);
     }
 
     /**
