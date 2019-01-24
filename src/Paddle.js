@@ -177,10 +177,10 @@ class Paddle {
                 this.paddleAnimator.isReversing("defaultToLaser", false);
                 this.laserPowerActive = true;
                 this.paddleAnimator.continue();
-            } 
+            }
 
          */
-        
+
 
     }
 
