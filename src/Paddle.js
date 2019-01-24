@@ -118,7 +118,6 @@ class Paddle {
             this.position.x = this.clampPaddleRight - this.size.x;
             this.paddleRect.x = this.clampPaddleRight - this.size.x;
         }
-        this.updateOrigin();
         this.lasers.forEach((laser) => {
             laser.update(dt);
         });
@@ -161,6 +160,7 @@ class Paddle {
             if(this.paddleAnimator.isPlaying()){
                 this.paddleAnimator.update(dt, this.origin.x, this.origin.y);
             }
+            this.updateOrigin();
 
         }
         /**

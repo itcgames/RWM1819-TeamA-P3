@@ -15,21 +15,29 @@ class Enemy
   /**
   * @constructor constructor for the enemy class
   */
-  constructor(type, id, posX, posY, velX, velY, width, height, minX, maxX)
+  constructor(type, id, posX, posY, velX, velY, width, height, minX, maxX, minY, maxY)
   {
     this.img;
     this.type = type;
     this.id = id;
-    this.x = posX;
-    this.y = posY;
-    this.velX = velX;
-    this.velY = velY;
+    this.position = {
+      x: posX,
+      y: posY
+    }
+    this.velocity = {
+      x:velX ,
+      y:velY
+    }
     this.width = width;
     this.height = height;
     this.minX = minX;
     this.maxX = maxX;
+    this.minY = minY;
+    this.maxY = maxY;
     this.health =1;
-    this.direction = Math.floor((Math.random() * 2) + 1);
+
+    this.onScreen = false;
+
 
     this.createNewEnemy();
   }
@@ -38,25 +46,31 @@ class Enemy
   */
   update()
   {
-    this.y +=1;
-    if(this.direction === 1)
-    {
-      this.x -=3;
-    }
-    else {
-      this.x+=3;
-    }
+    this.position.y += this.velocity.y;
+    this.position.x += this.velocity.x;
 
-    if(this.x < this.minX)
+    if(this.position.x < this.minX)
     {
-      this.x = this.minX;
-      this.direction = 2;
+      this.position.x = this.minX + 1;
+      this.velocity.x *= -1;
     }
-
-    if(this.x > this.maxX)
+    if(this.position.x > this.maxX - this.width)
     {
-      this.x = this.maxX;
-      this.direction = 1
+      this.x = this.maxX-this.width;
+      this.velocity.x *= -1;
+    }
+    if(this.position.y > this.minY)
+    {
+      this.onScreen = true;
+    }
+    if(this.onScreen === true && this.position.y < this.minY)
+    {
+      this.position.y = this.minY + 1;
+      this.velocity.y *= -1;
+    }
+    if(this.onScreen === true && this.position.y > this.maxY)
+    {
+      this.die();
     }
 
   }
@@ -67,7 +81,7 @@ class Enemy
   draw(ctx)
   {
     ctx.save();
-    ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+    ctx.drawImage(this.img, this.position.x, this.position.y, this.width, this.height);
     ctx.restore();
   }
   /**
