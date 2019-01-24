@@ -10,6 +10,8 @@ class Ball{
     }
     this.radius = r;
     this.speed = 0;
+    this.img = new Image(this.radius, this.radius);
+    this.img.src = "./res/Images/Ball/ball.png";
   }
 
   update() {
@@ -21,7 +23,8 @@ class Ball{
   render(ctx) {
     ctx.save();
     ctx.fillStyle = "#ce0a2b";
-    ctx.fillRect(this.position.x, this.position.y, this.radius, this.radius);
+    //ctx.fillRect(this.position.x, this.position.y, this.radius, this.radius);
+    ctx.drawImage(this.img, this.position.x, this.position.y, this.radius, this.radius);
     ctx.restore();
   }
 

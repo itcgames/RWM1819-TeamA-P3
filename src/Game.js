@@ -217,7 +217,7 @@ class Game {
         }
         Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
         if (this.powerUpActive === true) {
-          this.powerUp.update();
+          this.powerUp.update(dt);
           this.powerUpTimer2 = new Date();
         }
         if (this.powerUpTimer2 - this.powerUpTimer1 >= 10000) {
@@ -248,6 +248,7 @@ class Game {
               }
               this.ball.velocity.x = firingVector.x;
               this.ball.velocity.y = firingVector.y;
+              this.ball.img.src = "./res/Images/Ball/ball_slow.png";
               this.powerUp.active = false;
             }
             else if (this.powerUp.type === "BREAK") {
@@ -370,6 +371,7 @@ class Game {
     }
     if (this.ball.position.y + (this.ball.radius * 2) > this.worldBounds.maxY) {
       this.ballSpawning = true;
+      this.ball.img.src = "./res/Images/Ball/ball.png";
       if (this.isPlayerOne) {
         this.players.one.lives -= 1;
         if (this.players.one.lives < 0)
