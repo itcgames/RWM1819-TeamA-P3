@@ -88,7 +88,7 @@ class Game {
    */
   onKeyDown(event) {
     if (this.menuManager.current.key === "Main Menu") {
-      if (this.timer1 - this.timer2 < -8000) {
+      if (this.timer1 - this.timer2 < this.menuManager.fadeSpeed * -2) {
         //enter key
         if (event.keyCode === 13) {
           this.pressedEnter = true;
