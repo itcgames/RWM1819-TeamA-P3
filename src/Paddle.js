@@ -88,10 +88,16 @@ class Paddle {
         this.soundManager = new AudioManager();
         this.soundManager.init();
         this.soundManager.loadSoundFile("paddle-sound-hit", "./res/Sounds/paddle-ball-hit.mp3");
+        this.soundManager.loadSoundFile("power-up", "./res/Sounds/BlueShield.wav");
+        this.soundManager.loadSoundFile("laser", "./res/Sounds/Shot.wav");
     }
 
     playPaddleHitSound() {
       this.soundManager.playAudio("paddle-sound-hit", false, 0.5);
+    }
+
+    playPowerUpPickup(){
+        this.soundManager.playAudio("power-up", false, 0.5);
     }
 
     /**
@@ -152,6 +158,7 @@ class Paddle {
                     this.laserHeight,
                     "Laser" + this.laserIndex)
                 );
+                this.soundManager.playAudio("laser", false, 0.5);
                 this.laserIndex++;
 
                 this.lasers.push(new Laser(this.laserImg,
@@ -177,10 +184,10 @@ class Paddle {
                 this.paddleAnimator.isReversing("defaultToLaser", false);
                 this.laserPowerActive = true;
                 this.paddleAnimator.continue();
-            } 
+            }
 
          */
-        
+
 
     }
 

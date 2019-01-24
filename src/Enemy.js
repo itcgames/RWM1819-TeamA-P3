@@ -79,9 +79,15 @@ class Enemy {
     } if (this.type === "LIGHT_BLUE") {
     } if (this.type === "RED") {
     } else {
-      this.idleAnimation.setAnimationFPS("idle", 60);
+      this.animator.setAnimationFPS("idle", 60);
     }
     this.animator.continue();
+
+    this.soundManager = new AudioManager();
+    this.soundManager.init();
+    this.soundManager.loadSoundFile("death", "./res/Sounds/Explosion.wav");
+    this.soundManager.loadSoundFile("block-hit", "./res/Sounds/Bumper2.wav");
+    this.soundManager.loadSoundFile("wall-hit", "./res/Sounds/Bumper3.wav");
   }
   /**
   * @update update enemy logic.
@@ -95,10 +101,12 @@ class Enemy {
       if (this.position.x < this.minX) {
         this.position.x = this.minX + 1;
         this.velocity.x *= -1;
+        this.soundManager.playAudio("wall-hit", false, 0.5);
       }
       if (this.position.x > this.maxX - this.width) {
         this.x = this.maxX - this.width;
         this.velocity.x *= -1;
+        this.soundManager.playAudio("wall-hit", false, 0.5);
       }
       if (this.position.y > this.minY) {
         this.onScreen = true;
@@ -106,6 +114,7 @@ class Enemy {
       if (this.onScreen === true && this.position.y < this.minY) {
         this.position.y = this.minY + 1;
         this.velocity.y *= -1;
+        this.soundManager.playAudio("wall-hit", false, 0.5);
       }
       if (this.onScreen === true && this.position.y > this.maxY) {
         this.die();
@@ -130,10 +139,11 @@ class Enemy {
 
   die() {
     this.health -= 1;
-    if (this.health <= 0 && this.alive) {
+    if (this.health <= 0 && this.alive && this.onScreen) {
       this.alive = false;
       this.animator.changeTo("explosion");
       this.animator.continue();
+      this.soundManager.playAudio("death", false, 0.5);
     }
   }
 

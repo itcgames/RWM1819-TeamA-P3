@@ -49,6 +49,7 @@ const Collision = (function () {
           y: ball.position.y + ball.velocity.y + direction.y
         };
         block.damage();
+        ball.playBlockBounce();
         return true;
       }
       return false;
@@ -161,6 +162,7 @@ const Collision = (function () {
 
       if (result.collision) {
         block.damage();
+        block.playDestroySound();
         return true;
       }
       return false;
@@ -203,7 +205,7 @@ const Collision = (function () {
      * @param {Enemy} enemy
      * enemy to check against
      */
-    static LasersToEnemies(lasers, enemy) {
+    static LasersToEnemy(lasers, enemy) {
       lasers.forEach((laser, index, array) => {
         if (Collision.LaserToEnemyCol(laser, enemy)) {
           array.splice(index, 1);
