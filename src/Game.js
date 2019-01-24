@@ -38,7 +38,7 @@ class Game {
     this.powerUpTimer1;
     this.powerUpTimer2;
     this.randomNumGen;
-    
+
     /** @type {Array<{ Bricks: Array<{ type: string, position: { x: number, y: number }, width: number, height: number }> }>} */
     this.levels = [];
 
@@ -182,25 +182,6 @@ class Game {
             Collision.BallToEnemy(this.ball, enemy);
           }
           Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
-          this.powerUp.update();
-          if (Collision.PaddleToPowerUp(this.paddle, this.powerUp) && this.powerUp.active) {
-            if (this.powerUp.type === "SLOW") {
-              this.ball.speed -= 4;//get angle
-              var angle = Math.atan2(this.ball.velocity.y, this.ball.velocity.x);
-              angle = VectorMath.toDeg(angle)
-
-              //make unit vector from angle
-              var firingVectorUnit = VectorMath.vector(angle);
-              //multiply by speed
-              var firingVector = {
-                x: firingVectorUnit.x * this.ball.speed,
-                y: firingVectorUnit.y * this.ball.speed
-              }
-              this.ball.velocity.x = firingVector.x;
-              this.ball.velocity.y = firingVector.y;
-              this.powerUp.active = false;
-            }
-          }
           Collision.LasersToEnemies(this.paddle.lasers, enemy);
           Collision.PaddleToEnemy(this.paddle, enemy);
           if (enemy.health <= 0) {
@@ -226,7 +207,7 @@ class Game {
         if (this.powerUpActive === true) {
           if (Collision.PaddleToPowerUp(this.paddle, this.powerUp) && this.powerUp.active) {
             if (this.powerUp.type === "LASER") {
-              if(this.paddle.enlargePowerActive){
+              if (this.paddle.enlargePowerActive) {
                 this.paddle.enlargePowerActive = false;
               }
               this.paddle.laserPowerActive = true;
@@ -234,7 +215,7 @@ class Game {
               this.powerUp.active = false;
             }
             else if (this.powerUp.type === "ENLARGE") {
-              if(this.paddle.laserPowerActive){
+              if (this.paddle.laserPowerActive) {
                 this.paddle.laserPowerActive = false;
               }
               this.paddle.enlargePowerActive = true;
@@ -244,7 +225,9 @@ class Game {
               this.powerUp.active = false;
             }
             else if (this.powerUp.type === "SLOW") {
-              this.ball.speed -= 4;//get angle
+              this.ball.slowStartSpeed = this.ball.speed;
+              this.ball.speed -= 3;
+              //get angle
               var angle = Math.atan2(this.ball.velocity.y, this.ball.velocity.x);
               angle = VectorMath.toDeg(angle)
 
@@ -421,7 +404,7 @@ class Game {
   }
   checkSpawnPowerup(x, y) {
     this.randomNumGen = Math.floor((Math.random() * 100) + 1);
-    if (this.randomNumGen >= 75) {
+    if (this.randomNumGen >= 1) {
       this.randomNumGen = Math.floor((Math.random() * 7) + 1);
       if (this.randomNumGen === 1) {
         this.powerUp = new PowerUp("LASER", x, y, 50, 25, this.worldBounds.maxY);
