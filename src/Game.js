@@ -245,7 +245,8 @@ class Game {
                 if(!this.triple){
                   this.triple = true;
                   //calculate VectorMath.vector()
-                  var angle = VectorMath.angle(ball.velocity);
+                  var angle = Math.atan2(ball.velocity.y, ball.velocity.x);
+                  angle = VectorMath.toDeg(angle)
                   //offset the angle
                   var angle1 = angle - 10;
                   var angle2 = angle + 10;
