@@ -27,6 +27,7 @@ class Paddle {
         this.leftPressed = false;
         this.rightPressed = false;
         this.spacePressed = false;
+        this.collidingWithBreakout = false;
 
         this.maxX = maxX;
         this.minX = minX;
@@ -130,6 +131,10 @@ class Paddle {
         else if (this.position.x + this.size.x > this.clampPaddleRight) {
             this.position.x = this.clampPaddleRight - this.size.x;
             this.paddleRect.x = this.clampPaddleRight - this.size.x;
+            this.collidingWithBreakout = true;
+        }
+        else{
+            this.collidingWithBreakout = false;
         }
         this.lasers.forEach((laser) => {
             laser.update(dt);
