@@ -154,6 +154,7 @@ class Game {
           ));
         } else if(event.keyCode === 53) { // Number 5
           this.powerUps.push(new PowerUp(this.breakImg, "BREAK", 100, 100, 50, 25, this.worldBounds.maxY));
+        }else if (event.keyCode === 54) { // Number 6
           this.powerUps.push(new PowerUp(this.disruptionImg, "DISRUPTION", 100, 200, 50, 25, this.worldBounds.maxY));
         }
       }
