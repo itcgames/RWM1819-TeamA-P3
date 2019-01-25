@@ -1,6 +1,7 @@
 
 class Game {
   constructor() {
+    this.spawnKeyPressed = false;
     this.worldBounds = {
       minX: 100,
       minY: 100,
@@ -15,7 +16,7 @@ class Game {
     this.menuManager.setCurrentScene("Splash");
     this.menuManager.fadeSpeed = 2000;
     this.menuManager.fadeTo("Main Menu");
-    this.paddle = new Paddle(this.worldBounds.maxX/2, 700, this.worldBounds.minX, this.worldBounds.maxX);
+    this.paddle = new Paddle(this.worldBounds.maxX / 2, 700, this.worldBounds.minX, this.worldBounds.maxX);
     this.prevDt = Date.now();
     this.canvas = new Canvas("canvas");
     this.ctx = canvas.getContext("2d");
@@ -89,9 +90,11 @@ class Game {
     this.timer1 = new Date();
     this.timer2;
     this.events = {
-      onKeyDown: this.onKeyDown.bind(this)
+      onKeyDown: this.onKeyDown.bind(this),
+      onKeyUp: this.onKeyUp.bind(this)
     };
     window.addEventListener("keydown", this.events.onKeyDown, false);
+    window.addEventListener("keyup", this.events.onKeyUp, false);
   }
   /**
    * This is the function that detect key presses.
@@ -114,9 +117,37 @@ class Game {
           this.pressedUp = false;
         }
       }
+    } else if (this.menuManager.current.key === "Game Scene" && this.play) {
+      if (!this.spawnKeyPressed) {
+        this.spawnKeyPressed = true;
+        const spawnPosition = { x: 300, y: 600 };
+        const spawnSize = { x: 50, y: 50 };
+        const spawnVelocity = { x: 0, y: 0.2 };
+        if (event.keyCode === 49) { // Number 1
+          this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.blue, "BLUE",
+            spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds
+          ));
+        } else if (event.keyCode === 50) { // Number 2
+          this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.red, "RED",
+            spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds
+          ));
+        } else if (event.keyCode === 51) { // Number 3
+          this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.green, "GREEN",
+            spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds
+          ));
+        } else if (event.keyCode === 52) { // Number 4
+          this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.lightBlue, "LIGHT_BLUE",
+            spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds
+          ));
+        }
+      }
     }
   }
 
+  /** @param {KeyboardEvent} event */
+  onKeyUp(event) {
+    if (this.spawnKeyPressed) { this.spawnKeyPressed = false; }
+  }
 
   run() {
     this.loop();
@@ -134,10 +165,8 @@ class Game {
     const dt = this.calculateDt();
     this.menuManager.update(dt);
     if (this.menuManager.current.key === "Main Menu") {
-      if(this.switchMusicType === false)
-      {
-        if(this.hasPlayed === true)
-        {
+      if (this.switchMusicType === false) {
+        if (this.hasPlayed === true) {
           this.soundManager.stopAudio("GameMusic");
         }
         this.soundManager.playAudio("TitleMusic", true, 0.3);
@@ -167,27 +196,24 @@ class Game {
 
     if (this.menuManager.current.key === "Game Scene") {
       if (this.play) {
-        if(this.switchMusicType === true)
-        {
+        if (this.switchMusicType === true) {
           this.soundManager.stopAudio("TitleMusic");
           this.soundManager.playAudio("GameMusic", true, 0.3);
           this.switchMusicType = false;
           this.hasPlayed = true;
         }
-        if(this.players.one.bricks.length<= 0)
-        {
-          this.soundManager.playAudio("levelComplete",false, 0.3);
+        if (this.players.one.bricks.length <= 0) {
+          this.soundManager.playAudio("levelComplete", false, 0.3);
           this.ballSpawning = true;
           this.powerups = [];
-          this.currentLevelP1+=1;
+          this.currentLevelP1 += 1;
           this.setLevel(this.players.one, this.currentLevelP1);
         }
-        if(this.players.two.bricks.length<= 0 && this.twoPlayerMode === true)
-        {
-          this.soundManager.playAudio("levelComplete",false, 0.3);
+        if (this.players.two.bricks.length <= 0 && this.twoPlayerMode === true) {
+          this.soundManager.playAudio("levelComplete", false, 0.3);
           this.ballSpawning = true;
           this.powerups = [];
-          this.currentLevelP2+=1;
+          this.currentLevelP2 += 1;
           this.setLevel(this.players.two, this.currentLevelP2);
         }
         //reset bools
@@ -525,11 +551,11 @@ class Game {
 
   setLevel(playerToSet, current) {
     this.powerUps = [];
-    if (current >= this.levels.length)  {
+    if (current >= this.levels.length) {
       console.log("Setting a level that doesn't exist in the loaded levels");
       this.menuManager.setCurrentScene("Main Menu");
     }
-    else{
+    else {
       playerToSet.bricks.splice(0);
       const currentLevel = this.levels[current];
       currentLevel.Bricks.forEach((brick, index) => {
