@@ -1,6 +1,7 @@
 
 class Game {
   constructor() {
+    this.spawnKeyPressed = false;
     this.worldBounds = {
       minX: 100,
       minY: 100,
@@ -91,10 +92,12 @@ class Game {
     this.timer1 = new Date();
     this.timer2;
     this.events = {
-      onKeyDown: this.onKeyDown.bind(this)
+      onKeyDown: this.onKeyDown.bind(this),
+      onKeyUp: this.onKeyUp.bind(this)
     };
     window.addEventListener("keydown", this.events.onKeyDown, false);
     this.triple = false;
+    window.addEventListener("keyup", this.events.onKeyUp, false);
   }
   /**
    * This is the function that detect key presses.
@@ -117,9 +120,37 @@ class Game {
           this.pressedUp = false;
         }
       }
+    } else if (this.menuManager.current.key === "Game Scene" && this.play) {
+      if (!this.spawnKeyPressed) {
+        this.spawnKeyPressed = true;
+        const spawnPosition = { x: 300, y: 600 };
+        const spawnSize = { x: 50, y: 50 };
+        const spawnVelocity = { x: 0, y: 0.2 };
+        if (event.keyCode === 49) { // Number 1
+          this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.blue, "BLUE",
+            spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds
+          ));
+        } else if (event.keyCode === 50) { // Number 2
+          this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.red, "RED",
+            spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds
+          ));
+        } else if (event.keyCode === 51) { // Number 3
+          this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.green, "GREEN",
+            spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds
+          ));
+        } else if (event.keyCode === 52) { // Number 4
+          this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.lightBlue, "LIGHT_BLUE",
+            spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds
+          ));
+        }
+      }
     }
   }
 
+  /** @param {KeyboardEvent} event */
+  onKeyUp(event) {
+    if (this.spawnKeyPressed) { this.spawnKeyPressed = false; }
+  }
 
   run() {
     this.loop();
