@@ -136,7 +136,7 @@ class Game {
         const spawnPosition = { x: 300, y: 600 };
         const spawnSize = { x: 50, y: 50 };
         const spawnVelocity = { x: 0, y: 0.2 };
-        if (event.keyCode === 49) { // Number 1
+        if (event.keyCode === 49) { // Number 1 
           this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.blue, "BLUE",
             spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds
           ));
