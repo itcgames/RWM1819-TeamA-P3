@@ -64,9 +64,18 @@ class Game {
     /** @type {Array<{ Bricks: Array<{ type: string, position: { x: number, y: number }, width: number, height: number }> }>} */
     this.levels = [];
 
+    this.breakoutWallImg = new Image(0, 0);
+    this.breakoutWallImg.src = "./res/Images/Scenes/border_pill_vertical.png";
+    this.breakoutWallMove = false;
+    this.breakoutPos = {
+      x: this.worldBounds.maxX,
+      y: this.worldBounds.maxY - 100
+    };
+
+
     new LevelLoader("./res/Levels.json", (ev, data) => {
       this.levels = data;
-      this.currentLevelP1 = 2;
+      this.currentLevelP1 = 0;
       this.currentLevelP2 = 0;
       this.setLevel(this.players.one, this.currentLevelP1);
       this.setLevel(this.players.two, this.currentLevelP2);
@@ -98,6 +107,7 @@ class Game {
     window.addEventListener("keydown", this.events.onKeyDown, false);
     this.triple = false;
     window.addEventListener("keyup", this.events.onKeyUp, false);
+    this.breakoutActive = false;
   }
   /**
    * This is the function that detect key presses.
@@ -142,6 +152,9 @@ class Game {
           this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.lightBlue, "LIGHT_BLUE",
             spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds
           ));
+        } else if(event.keyCode === 53) { // Number 5
+          this.powerUps.push(new PowerUp(this.breakImg, "BREAK", 100, 100, 50, 25, this.worldBounds.maxY));
+          this.powerUps.push(new PowerUp(this.disruptionImg, "DISRUPTION", 100, 200, 50, 25, this.worldBounds.maxY));
         }
       }
     }
@@ -251,6 +264,7 @@ class Game {
           }
         });
       }
+      this.checkBreakoutPower();
     }
   }
   render() {
@@ -260,6 +274,8 @@ class Game {
 
     }
     if (this.menuManager.current.key === "Game Scene") {
+      this.ctx.drawImage(this.breakoutWallImg, this.breakoutPos.x, this.breakoutPos.y, 30, 70);
+
       this.paddle.draw(this.ctx);
       //this.ball.render(this.ctx);
       this.balls.forEach(ball => ball.render(this.ctx));
@@ -363,6 +379,8 @@ class Game {
       if (this.balls.length === 1) {
         this.triple = false;
         this.ballSpawning = true;
+        this.breakoutActive = false;
+        this.paddle.enlargePowerActive = false;
         ball.img.src = "./res/Images/Ball/ball.png";
         ball.playDeathSound();
         if (this.isPlayerOne) {
@@ -546,10 +564,11 @@ class Game {
         powerup.active = false;
       }
       else if (powerup.type === "BREAK") {
+        this.breakoutActive = true;
         powerup.active = false;
       }
       else if (powerup.type === "DISRUPTION") {
-        if (!this.triple) {
+        if (this.balls.length === 1) {
           this.triple = true;
           //calculate VectorMath.vector()
           var angle = Math.atan2(ball.velocity.y, ball.velocity.x);
@@ -592,6 +611,32 @@ class Game {
         playerToSet.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, current));
         this.bricks = playerToSet.bricks;
       });
+    }
+  }
+
+  checkBreakoutPower(){
+    if(this.breakoutActive){
+
+      if(this.breakoutPos.y > this.worldBounds.maxY - 200){
+        this.breakoutPos.y -= 2;
+      }
+      if(this.paddle.collidingWithBreakout){
+        if(this.isPlayerOne){
+          this.setLevel(this.players.one, this.currentLevelP1 + 1);
+          this.currentLevelP1 += 1;
+        }
+        else{
+          this.setLevel(this.playerImg.two, this.currentLevelP2 + 1);
+          this.currentLevelP2 += 1;
+        }
+        this.breakoutActive = false;
+        this.balls.splice(0);
+        this.balls.push(new Ball(100, 100, 20, 8));
+        this.ballSpawning = true;
+      }
+    }
+    else{
+      this.breakoutPos.y = this.worldBounds.maxY - 100;
     }
   }
 }
