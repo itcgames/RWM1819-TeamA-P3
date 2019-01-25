@@ -74,6 +74,7 @@ const Collision = (function () {
           y: ball.position.y + result.y
         };
         block.damage();
+        block.playDestroySound();
         ball.playBlockBounce();
         return true;
       }

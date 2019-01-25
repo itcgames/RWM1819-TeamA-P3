@@ -242,6 +242,17 @@ class Game {
         this.balls.forEach((ball, index) => {
           this.ballUpdate(ball, index, dt);
 
+<<<<<<< HEAD
+        if ((this.isPlayerOne ? this.players.one.score : this.players.two.score) > this.highScore) {
+          this.highScore = (this.isPlayerOne ? this.players.one.score : this.players.two.score);
+        }
+        this.bricks = this.isPlayerOne
+          ? this.players.one.bricks
+          : this.players.two.bricks;
+        //update entities
+        this.bricks.forEach((brick, index, array) => {
+          this.updateBrick(brick, index, array, dt);
+=======
           if ((this.isPlayerOne ? this.players.one.score : this.players.two.score) > this.highScore) {
             this.highScore = (this.isPlayerOne ? this.players.one.score : this.players.two.score);
           }
@@ -262,6 +273,7 @@ class Game {
           if (!this.ballSpawning) {
             Collision.BallToPaddle(ball, this.paddle);
           }
+>>>>>>> 5ecf94f29842f8973dc73dbb8a7da09345098f3e
         });
       }
       this.checkBreakoutPower();
@@ -463,9 +475,15 @@ class Game {
     }
   }
 
+<<<<<<< HEAD
+  updateBrick(brick, index, array,dt) {
+    brick.update(dt);
+    if (Collision.BallToBlock(this.ball, brick)) {
+=======
   updateBrick(brick, index, array, ball) {
     brick.update();
     if (Collision.BallToBlock(ball, brick)) {
+>>>>>>> 5ecf94f29842f8973dc73dbb8a7da09345098f3e
       if (brick.health <= 0)
         this.checkSpawnPowerup(brick.x + 12, brick.y);
     }
