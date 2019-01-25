@@ -79,7 +79,7 @@ class Game {
 
     new LevelLoader("./res/Levels.json", (ev, data) => {
       this.levels = data;
-      this.currentLevelP1 = 0;
+      this.currentLevelP1 = 2;
       this.currentLevelP2 = 0;
       this.setLevel(this.players.one, this.currentLevelP1);
       this.setLevel(this.players.two, this.currentLevelP2);
@@ -654,7 +654,7 @@ class Game {
   checkSpawnEnemies()
   {
     this.spawnTimer2 = new Date();
-    if(this.spawnTimer1 -this.spawnTimer2 < - 10000 && this.enemies.length < this.spawnMax)
+    if(this.spawnTimer1 -this.spawnTimer2 < - 10000 && this.enemies.length <= this.spawnMax)
     {
       const spawnPosition = { x: 300, y: -100 };
       const spawnSize = { x: 50, y: 50 };
