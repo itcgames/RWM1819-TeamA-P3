@@ -65,7 +65,7 @@ class Game {
 
     new LevelLoader("./res/Levels.json", (ev, data) => {
       this.levels = data;
-      this.currentLevelP1 = 2;
+      this.currentLevelP1 = 0;
       this.currentLevelP2 = 0;
       this.setLevel(this.players.one, this.currentLevelP1);
       this.setLevel(this.players.two, this.currentLevelP2);
@@ -206,7 +206,7 @@ class Game {
           : this.players.two.bricks;
         //update entities
         this.bricks.forEach((brick, index, array) => {
-          this.updateBrick(brick, index, array);
+          this.updateBrick(brick, index, array, dt);
         });
         Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
         this.enemies.forEach((enemy, index, array) => {
@@ -405,8 +405,8 @@ class Game {
     }
   }
 
-  updateBrick(brick, index, array) {
-    brick.update();
+  updateBrick(brick, index, array,dt) {
+    brick.update(dt);
     if (Collision.BallToBlock(this.ball, brick)) {
       if (brick.health <= 0)
         this.checkSpawnPowerup(brick.x + 12, brick.y);
