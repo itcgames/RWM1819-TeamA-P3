@@ -240,7 +240,6 @@ class Game {
         this.dnd.update();
         this.paddle.update(dt);
         this.balls.forEach((ball, index) => {
-          ball.update(dt);
           this.ballUpdate(ball, index, dt);
 
           if ((this.isPlayerOne ? this.players.one.score : this.players.two.score) > this.highScore) {
