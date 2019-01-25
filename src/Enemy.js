@@ -8,7 +8,7 @@ const EnemyType = {
   LIGHT_BLUE: "./res/Images/Enemies/enemy_light_blue.png"
 }
 /**
- * 
+ *
  */
 const EnemySpritesheetSize = {
   width: 2000,
@@ -95,9 +95,12 @@ class Enemy {
   */
   update(dt) {
     if (this.alive) {
+      if(this.onScreen === true)
+      {
+        this.position.x += this.velocity.x;
+      }
       this.position.y += this.velocity.y;
-      this.position.x += this.velocity.x;
-  
+
       if (this.position.x < this.minX) {
         this.position.x = this.minX + 1;
         this.velocity.x *= -1;

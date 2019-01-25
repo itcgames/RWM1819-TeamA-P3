@@ -63,6 +63,10 @@ class Game {
     this.playerImg.src = "./res/Images/Powerups/power_up_player.png";
     /** @type {Array<{ Bricks: Array<{ type: string, position: { x: number, y: number }, width: number, height: number }> }>} */
     this.levels = [];
+    //spawn enemies
+    this.spawnMax = 5;
+    this.spawnTimer1 = new Date();
+    this.spawnTimer2;
 
     this.breakoutWallImg = new Image(0, 0);
     this.breakoutWallImg.src = "./res/Images/Scenes/border_pill_vertical.png";
@@ -253,6 +257,11 @@ class Game {
             this.updateBrick(brick, index, array, ball);
           });
           Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
+
+
+          //spawning enemies
+          this.checkSpawnEnemies();
+
           this.enemies.forEach((enemy, index, array) => {
             this.updateEnemy(enemy, index, array, dt, ball);
           });
@@ -350,6 +359,7 @@ class Game {
         ball.velocity.y = firingVector.y;
         ball.speed = this.ballStartSpeed;
         this.generatedRandomPaddlePos = false;
+        this.spawnTimer1 = new Date();
       }
     }
     else {
@@ -600,6 +610,7 @@ class Game {
 
   setLevel(playerToSet, current) {
     this.powerUps = [];
+    this.enemies = [];
     if (current >= this.levels.length) {
       console.log("Setting a level that doesn't exist in the loaded levels");
       this.menuManager.setCurrentScene("Main Menu");
@@ -638,6 +649,54 @@ class Game {
     }
     else{
       this.breakoutPos.y = this.worldBounds.maxY - 100;
+    }
+  }
+  checkSpawnEnemies()
+  {
+    this.spawnTimer2 = new Date();
+    if(this.spawnTimer1 -this.spawnTimer2 < - 10000 && this.enemies.length < this.spawnMax)
+    {
+      const spawnPosition = { x: 300, y: -100 };
+      const spawnSize = { x: 50, y: 50 };
+      var randomSpawnVX = Math.floor((Math.random() * 3) + 1);
+      const spawnVelocity = { x: randomSpawnVX, y: 1 };
+      if(this.isPlayerOne)
+      {
+        if(this.currentLevelP1 === 0)
+        {
+          this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.blue, "BLUE",
+            spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds));
+        }
+        else if(this.currentLevelP1 === 1)
+        {
+          this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.red, "RED",
+            spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds));
+        }
+        else
+        {
+          this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.green, "GREEN",
+            spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds));
+        }
+      }
+      else {
+        if(this.currentLevelP2 === 0)
+        {
+          this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.blue, "BLUE",
+            spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds));
+        }
+        else if(this.currentLevelP2 === 1)
+        {
+          this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.red, "RED",
+            spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds));
+        }
+        else
+        {
+          this.enemies.push(new Enemy(this.enemySprites.explosion, this.enemySprites.green, "GREEN",
+            spawnPosition, spawnVelocity, spawnSize.x, spawnSize.y, this.worldBounds));
+        }
+      }
+
+      this.spawnTimer1 = new Date();
     }
   }
 }
