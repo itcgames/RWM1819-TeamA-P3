@@ -13,9 +13,9 @@ const PowerUpType = {
 
 class PowerUp
 {
-  constructor(type, posX, posY, width, height, maxY)
+  constructor(img, type, posX, posY, width, height, maxY)
   {
-    this.img;
+    this.img = img;
     this.type = type;
     this.position = {
       x: posX,
@@ -34,7 +34,7 @@ update(dt)
 {
   if (this.active)
   {
-    this.position.y += 5;
+    this.position.y += 3;
   }
   if(this.position.y > this.maxY)
   {
@@ -57,24 +57,25 @@ update(dt)
  }
 
  createPowerUp(){
-   this.img = new Image(this.width, this.height);
-    if(this.type === "LASER")
-      this.img.src = PowerUpType.LASER;
-    else if(this.type === "ENLARGE")
-      this.img.src = PowerUpType.ENLARGE;
-    else if(this.type === "CATCH")
-      this.img.src = PowerUpType.CATCH;
-    else if (this.type === "SLOW")
-      this.img.src = PowerUpType.SLOW;
-    else if (this.type === "BREAK")
-      this.img.src = PowerUpType.BREAK;
-    else if (this.type === "DISRUPTION")
-      this.img.src = PowerUpType.DISRUPTION;
-    else if (this.type === "PLAYER")
-      this.img.src = PowerUpType.PLAYER;
-      
+   //this.img = new Image(this.width, this.height);
+    // if(this.type === "LASER")
+    //   this.img.src = PowerUpType.LASER;
+    // else if(this.type === "ENLARGE")
+    //   this.img.src = PowerUpType.ENLARGE;
+    // else if(this.type === "CATCH")
+    //   this.img.src = PowerUpType.CATCH;
+    // else if (this.type === "SLOW")
+    //   this.img.src = PowerUpType.SLOW;
+    // else if (this.type === "BREAK")
+    //   this.img.src = PowerUpType.BREAK;
+    // else if (this.type === "DISRUPTION")
+    //   this.img.src = PowerUpType.DISRUPTION;
+    // else if (this.type === "PLAYER")
+    //   this.img.src = PowerUpType.PLAYER;
+
     this.animation = new Animation(this.img, 100, 50, 10);
     this.animationManager.addAnimation("Update", this.animation);
+    this.animationManager.setAnimationFPS("Update", 20);
     var scaleX = this.width / 100;
     var scaleY = this.height / 50;
     this.animationManager.setScale("Update", 0.7, 0.7);

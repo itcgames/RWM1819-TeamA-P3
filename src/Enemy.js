@@ -2,107 +2,165 @@
 * @EnemyType enum for the different type of bricks in our game
 */
 const EnemyType = {
-    BLUE: "./res/Images/Bricks/brick_yellow.png",
-    RED: 2,
-    GREEN: 3,
-    RAINBOW: 4
+  BLUE: "./res/Images/Enemies/enemy_blue.png",
+  RED: "./res/Images/Enemies/enemy_red.png",
+  GREEN: "./res/Images/Enemies/enemy_green.png",
+  LIGHT_BLUE: "./res/Images/Enemies/enemy_light_blue.png"
 }
+/**
+ * 
+ */
+const EnemySpritesheetSize = {
+  width: 2000,
+  height: 200
+}
+
 /**
 * Enemy class used to setup each of the enemy types in the game
 */
-class Enemy
-{
+class Enemy {
   /**
   * @constructor constructor for the enemy class
+  * @param {HTMLImageElement} explosion
+  * @param {HTMLImageElement} spritesheet
+  * @param {"BLUE" | "RED" | "GREEN" | "LIGHT_BLUE"} type
+  * @param {{x: number, y: number}} position
+  * @param {{x: number, y: number }} velocity
+  * @param {number} width
+  * @param {number} height
+  * @param {{ minX: number, maxX: number, minY: number, maxY: number }} worldBounds
   */
-  constructor(type, id, posX, posY, velX, velY, width, height, minX, maxX, minY, maxY)
-  {
-    this.img;
+  constructor(explosion, spritesheet, type, position, velocity, width, height, worldBounds) {
     this.type = type;
-    this.id = id;
+    this.alive = true;
     this.position = {
-      x: posX,
-      y: posY
+      x: position.x,
+      y: position.y
     }
     this.velocity = {
-      x:velX ,
-      y:velY
+      x: velocity.x,
+      y: velocity.y
     }
     this.width = width;
     this.height = height;
-    this.minX = minX;
-    this.maxX = maxX;
-    this.minY = minY;
-    this.maxY = maxY;
-    this.health =1;
-
+    this.origin = {
+      x: this.position.x + (this.width / 2),
+      y: this.position.y + (this.height / 2)
+    };
+    this.minX = worldBounds.minX;
+    this.maxX = worldBounds.maxX;
+    this.minY = worldBounds.minY;
+    this.maxY = worldBounds.maxY;
+    this.health = 1;
     this.onScreen = false;
+    this.image = spritesheet;
+    this.explosion = explosion;
+    this.animator = new AnimationManager();
+    this.idleAnimation = new Animation(this.image
+      , 200 // width of the animation frame
+      , 200 // height of the animation frame
+      , 10 // number of frames
+    );
+    this.explosionAnimation = new Animation(this.explosion
+      , 200 // width of the animation frame
+      , 200 // height of the animation frame
+      , 10 // number of frames
+    );
+    this.animator.addAnimation("explosion", this.explosionAnimation);
+    this.animator.setScale("explosion", 0.5, 0.5);
+    this.animator.isLooping("explosion", false);
+    this.animator.setAnimationFPS("explosion", 10);
+    this.animator.addAnimation("idle", this.idleAnimation);
+    this.animator.setScale("idle", 0.5, 0.5);
+    this.animator.isLooping("idle", true);
+    if (this.type === "GREEN") {
+      this.animator.setAnimationFPS("idle", 15);
+    } if (this.type === "BLUE") {
+    } if (this.type === "LIGHT_BLUE") {
+    } if (this.type === "RED") {
+    } else {
+      this.animator.setAnimationFPS("idle", 60);
+    }
+    this.animator.continue();
 
-
-    this.createNewEnemy();
+    this.soundManager = new AudioManager();
+    this.soundManager.init();
+    this.soundManager.loadSoundFile("death", "./res/Sounds/Explosion.wav");
+    this.soundManager.loadSoundFile("block-hit", "./res/Sounds/Bumper2.wav");
+    this.soundManager.loadSoundFile("wall-hit", "./res/Sounds/Bumper3.wav");
   }
   /**
   * @update update enemy logic.
+  * @param {number} dt delta time between update calls.
   */
-  update()
-  {
-    this.position.y += this.velocity.y;
-    this.position.x += this.velocity.x;
-
-    if(this.position.x < this.minX)
-    {
-      this.position.x = this.minX + 1;
-      this.velocity.x *= -1;
+  update(dt) {
+    if (this.alive) {
+      this.position.y += this.velocity.y;
+      this.position.x += this.velocity.x;
+  
+      if (this.position.x < this.minX) {
+        this.position.x = this.minX + 1;
+        this.velocity.x *= -1;
+        this.soundManager.playAudio("wall-hit", false, 0.5);
+      }
+      if (this.position.x > this.maxX - this.width) {
+        this.x = this.maxX - this.width;
+        this.velocity.x *= -1;
+        this.soundManager.playAudio("wall-hit", false, 0.5);
+      }
+      if (this.position.y > this.minY) {
+        this.onScreen = true;
+      }
+      if (this.onScreen === true && this.position.y < this.minY) {
+        this.position.y = this.minY + 1;
+        this.velocity.y *= -1;
+        this.soundManager.playAudio("wall-hit", false, 0.5);
+      }
+      if (this.onScreen === true && this.position.y > this.maxY) {
+        this.die();
+      }
+      this.updateOrigin();
     }
-    if(this.position.x > this.maxX - this.width)
-    {
-      this.x = this.maxX-this.width;
-      this.velocity.x *= -1;
+    if (this.animator.isPlaying()) {
+      this.animator.update(dt, this.origin.x, this.origin.y);
     }
-    if(this.position.y > this.minY)
-    {
-      this.onScreen = true;
-    }
-    if(this.onScreen === true && this.position.y < this.minY)
-    {
-      this.position.y = this.minY + 1;
-      this.velocity.y *= -1;
-    }
-    if(this.onScreen === true && this.position.y > this.maxY)
-    {
-      this.die();
-    }
-
   }
   /**
   * @draw
-  * @param {context} ctx used to draw the paddle.
+  * @param {CanvasRenderingContext2D} ctx used to draw the paddle.
   */
-  draw(ctx)
-  {
+  draw(ctx) {
     ctx.save();
-    ctx.drawImage(this.img, this.position.x, this.position.y, this.width, this.height);
+    if (this.animator.isPlaying()) {
+      this.animator.draw(ctx);
+    }
     ctx.restore();
   }
-  /**
-  * @createNewEnemy function used to create new enemies
-  */
-  createNewEnemy()
-  {
-      this.img = new Image(this.width, this.height)
-      if(this.type === "BLUE")
-        this.img.src = EnemyType.BLUE;
-      if(this.type === "RED")
-        this.img.src = EnemyType.RED;
-      if(this.type === "GREEN")
-        this.img.src = EnemyType.GREEN;
-      if(this.type === "RAINBOW")
-        this.img.src = EnemyType.RAINBOW;
 
-      this.img.id = this.id;
+  die() {
+    this.health -= 1;
+    if (this.health <= 0 && this.alive && this.onScreen) {
+      this.alive = false;
+      this.animator.changeTo("explosion");
+      this.animator.continue();
+      this.soundManager.playAudio("death", false, 0.5);
+    }
   }
-  die()
-  {
-    this.health -=1;
+
+  /** @returns {boolean} */
+  isDying() {
+    return (!this.alive) && this.animator.isPlaying() && !this.animator.isAnimationFinished();
+  }
+
+  /** @returns {boolean} */
+  isDead() {
+    return (!this.alive) && this.animator.isAnimationFinished();
+  }
+
+  updateOrigin() {
+    this.origin = {
+      x: this.position.x + (this.width / 2),
+      y: this.position.y + (this.height / 2)
+    };
   }
 }

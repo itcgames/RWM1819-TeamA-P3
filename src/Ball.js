@@ -18,15 +18,37 @@ class Ball{
     }
     this.radius = r;
     this.speed = speed === undefined ? 0 : speed;
+    this.speed = speed;
+    this.minSpeed = 4;
+    this.slowStartSpeed = 0;
     this.img = new Image(this.radius, this.radius);
     this.img.src = "./res/Images/Ball/ball.png";
+    this.soundManager = new AudioManager();
+    this.soundManager.init();
+    this.soundManager.loadSoundFile("block-hit", "./res/Sounds/Bumper.wav");
+    this.soundManager.loadSoundFile("wall-hit", "./res/Sounds/Bumper3.wav");
+    this.soundManager.loadSoundFile("death", "./res/Sounds/roblox-death-sound.mp3");
+  }
+
+  playDeathSound(){
+    this.soundManager.playAudio("death", false, 0.5);
+  }
+
+  playWallBounce(){
+    this.soundManager.playAudio("wall-hit", false, 0.5);
+  }
+
+  playBlockBounce(){
+    this.soundManager.playAudio("block-hit", false, 0.5);
   }
 
   update() {
-
+    if (this.speed < this.minSpeed){
+      this.speed = this.minSpeed;
+    }
     var angle = Math.atan2(this.velocity.y, this.velocity.x);
     angle = VectorMath.toDeg(angle)
-  
+
     //make unit vector from angle
     var firingVectorUnit = VectorMath.vector(angle);
     //multiply by speed

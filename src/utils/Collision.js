@@ -49,44 +49,46 @@ const Collision = (function () {
           y: ball.position.y + ball.velocity.y + direction.y
         };
         block.damage();
+        ball.playBlockBounce();
         return true;
       }
       return false;
     }
-      /**
-       * Will process collisions between enemy and rectangle.
-       * @param {Enemy} enemy
-       *  enemy object is expected to have a position and velocity properties.
-       * @param {Brick} block
-       *  block is expected to have a position, width and height.
-       */
-      static EnemyToBlock(enemy, block) {
-        const aabbEnemy = rectangleToAabb({ position: enemy.position, width: enemy.width, height: enemy.height });
-        const aabbBlock = rectangleToAabb({ position: { x: block.x, y: block.y } , width: block.width, height: block.height });
-        const result = collisions.maniAABBToAABB(aabbEnemy, aabbBlock);
-        if (result.collision) {
-          enemy.position = {
-            x: enemy.position.x + result.manifest.leftAABB.distance.x,
-            y: enemy.position.y + result.manifest.leftAABB.distance.y
-          };
-          const direction = {
-            x: result.manifest.leftAABB.distance.x,
-            y: result.manifest.leftAABB.distance.y
-          };
-          enemy.velocity = {
-            x: (direction.x !== 0) ? -enemy.velocity.x : enemy.velocity.x,
-            y: (direction.y !== 0) ? -enemy.velocity.y : enemy.velocity.y
-          };
-
-        }
-    }
-      /**
-     * Will process collisions between ball and rectangle.
-     * @param {Ball} ball
-     *  Ball object is expected to have a position and radius properties.
-     * @param {Paddle} paddle
+    /**
+     * Will process collisions between enemy and rectangle.
+     * @param {Enemy} enemy
+     *  enemy object is expected to have a position and velocity properties.
+     * @param {Brick} block
      *  block is expected to have a position, width and height.
      */
+    static EnemyToBlock(enemy, block) {
+      const aabbEnemy = rectangleToAabb({ position: enemy.position, width: enemy.width, height: enemy.height });
+      const aabbBlock = rectangleToAabb({ position: { x: block.x, y: block.y }, width: block.width, height: block.height });
+      const result = collisions.maniAABBToAABB(aabbEnemy, aabbBlock);
+      if (result.collision) {
+        // hotfix for the inaccuracy of floating point numbers
+        const direction = {
+          x: result.manifest.leftAABB.distance.x * 1.05,
+          y: result.manifest.leftAABB.distance.y * 1.05
+        };
+        enemy.velocity = {
+          x: (direction.x !== 0) ? -enemy.velocity.x : enemy.velocity.x,
+          y: (direction.y !== 0) ? -enemy.velocity.y : enemy.velocity.y
+        };
+        enemy.position = {
+          x: enemy.position.x + enemy.velocity.x + direction.x,
+          y: enemy.position.y + enemy.velocity.y + direction.y
+        };
+
+      }
+    }
+    /**
+   * Will process collisions between ball and rectangle.
+   * @param {Ball} ball
+   *  Ball object is expected to have a position and radius properties.
+   * @param {Paddle} paddle
+   *  block is expected to have a position, width and height.
+   */
     static BallToPaddle(ball, paddle) {
       const aabbBall = rectangleToAabb({ position: ball.position, width: ball.radius, height: ball.radius });
       const aabbPaddle = rectangleToAabb({ position: { x: paddle.colBox.position.x, y: paddle.colBox.position.y }, width: paddle.colBox.size.x, height: paddle.colBox.size.y });
@@ -104,7 +106,11 @@ const Collision = (function () {
         //make unit vector from angle
         var firingVectorUnit = VectorMath.vector(angle);
         //multiply by speed
-        ball.speed += 0.1;
+        ball.speed += 0.2;
+        if (ball.speed > ball.slowStartSpeed && ball.slowStartSpeed != 0) {
+          ball.img.src = "./res/Images/Ball/ball.png";
+          ball.slowStartSpeed = 0;
+        }
         var firingVector = {
           x: firingVectorUnit.x * ball.speed,
           y: firingVectorUnit.y * ball.speed
@@ -149,13 +155,14 @@ const Collision = (function () {
      * @param {Brick} block
      * block to check against
      */
-    static LaserToBlock(laser, block){
-      const aabbLaser = rectangleToAabb({position: laser.position, width: laser.width, height: laser.height});
+    static LaserToBlock(laser, block) {
+      const aabbLaser = rectangleToAabb({ position: laser.position, width: laser.width, height: laser.height });
       const aabbBlock = rectangleToAabb({ position: { x: block.x, y: block.y }, width: block.width, height: block.height });
       const result = collisions.maniAABBToAABB(aabbLaser, aabbBlock);
 
-      if(result.collision){
+      if (result.collision) {
         block.damage();
+        block.playDestroySound();
         return true;
       }
       return false;
@@ -183,7 +190,7 @@ const Collision = (function () {
      * @param {Brick} minY
      * top y value of the border of the game
      */
-    static LasersToWorld(lasers, minY){
+    static LasersToWorld(lasers, minY) {
       lasers.forEach((laser, index, array) => {
         if (laser.position.y < minY) {
           array.splice(index, 1);
@@ -198,9 +205,9 @@ const Collision = (function () {
      * @param {Enemy} enemy
      * enemy to check against
      */
-    static LasersToEnemies(lasers, enemy){
-      lasers.forEach((laser,index,array) =>{
-        if(Collision.LaserToEnemyCol(laser,enemy)){
+    static LasersToEnemy(lasers, enemy) {
+      lasers.forEach((laser, index, array) => {
+        if (Collision.LaserToEnemyCol(laser, enemy)) {
           array.splice(index, 1);
           enemy.die();
         }
@@ -216,13 +223,13 @@ const Collision = (function () {
      * @returns {boolean}
      * returns true on collision
      */
-    static LaserToEnemyCol(laser,enemy){
+    static LaserToEnemyCol(laser, enemy) {
       const aabbLaser = rectangleToAabb({ position: laser.position, width: laser.width, height: laser.height });
       const aabbEnemy = rectangleToAabb({ position: { x: enemy.position.x, y: enemy.position.y }, width: enemy.width, height: enemy.height });
 
       const result = collisions.maniAABBToAABB(aabbLaser, aabbEnemy);
 
-      if(result.collision){
+      if (result.collision) {
         return true;
       }
       return false;
@@ -241,7 +248,7 @@ const Collision = (function () {
       }
     }
 
-    static PaddleToPowerUp(paddle,powerup){
+    static PaddleToPowerUp(paddle, powerup) {
       const aabbPaddle = rectangleToAabb({ position: paddle.position, width: paddle.size.x, height: paddle.size.y });
       const aabbPowerUp = rectangleToAabb({ position: powerup.position, width: powerup.width, height: powerup.height });
       return collisions.boolAABBToAABB(aabbPaddle, aabbPowerUp);

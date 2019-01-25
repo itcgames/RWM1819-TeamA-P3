@@ -15,7 +15,7 @@ class Game {
     this.menuManager.setCurrentScene("Splash");
     this.menuManager.fadeSpeed = 2000;
     this.menuManager.fadeTo("Main Menu");
-    this.paddle = new Paddle(100, 700, this.worldBounds.minX, this.worldBounds.maxX);
+    this.paddle = new Paddle(this.worldBounds.maxX / 2, 700, this.worldBounds.minX, this.worldBounds.maxX);
     this.prevDt = Date.now();
     this.canvas = new Canvas("canvas");
     this.ctx = canvas.getContext("2d");
@@ -28,35 +28,47 @@ class Game {
       one: { score: 0, bricks: [], enemies: [], lives: 3 },
       two: { score: 0, bricks: [], enemies: [], lives: 3 }
     };
+    this.enemySprites = this.createEnemySprites();
     this.isPlayerOne = true;
     this.twoPlayerMode = false;
     this.play = true;
-    this.currentLevel = 0;
+    this.currentLevelP1 = 0;
+    this.currentLevelP2 = 0;
+    //Sounds
+    this.soundManager = new AudioManager();
+    this.soundManager.init();
+    this.soundManager.loadSoundFile("levelComplete", "./res/Sounds/LevelComplete.wav");
+    this.soundManager.loadSoundFile("TitleMusic", "./res/Sounds/TitleMusic.wav");
+    this.soundManager.loadSoundFile("GameMusic", "./res/Sounds/GameMusic.wav");
+    this.switchMusicType = false;
+    this.hasPlayed = false;
     //powerups
-    this.powerUp;
-    this.powerUpActive = false;
-    this.powerUpTimer1;
-    this.powerUpTimer2;
+    this.powerUps = [];
     this.randomNumGen;
-
+    //preload powerup images
+    this.laserImg = new Image(0, 0);
+    this.laserImg.src = "./res/Images/Powerups/power_up_laser.png";
+    this.enlargeImg = new Image(0, 0);
+    this.enlargeImg.src = "./res/Images/Powerups/power_up_enlarge.png";
+    this.catchImg = new Image(0, 0);
+    this.catchImg.src = "./res/Images/Powerups/power_up_catch.png";
+    this.slowImg = new Image(0, 0);
+    this.slowImg.src = "./res/Images/Powerups/power_up_slow.png";
+    this.breakImg = new Image(0, 0);
+    this.breakImg.src = "./res/Images/Powerups/power_up_break.png";
+    this.disruptionImg = new Image(0, 0);
+    this.disruptionImg.src = "./res/Images/Powerups/power_up_disruption.png";
+    this.playerImg = new Image(0, 0);
+    this.playerImg.src = "./res/Images/Powerups/power_up_player.png";
     /** @type {Array<{ Bricks: Array<{ type: string, position: { x: number, y: number }, width: number, height: number }> }>} */
     this.levels = [];
 
     new LevelLoader("./res/Levels.json", (ev, data) => {
       this.levels = data;
-      const level = data[this.currentLevel];
-      level.Bricks.forEach((brick, index) => {
-        const id = brick.type + index.toString();
-        this.players.one.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, this.currentLevel));
-        this.players.two.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, this.currentLevel));
-        this.bricks = this.players.one.bricks;
-      });
-      // level.Enemies.forEach((enemy, index) => {
-      //   const id = enemy.type + index.toString();
-      //   this.players.one.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height, this.worldBounds.minX, this.worldBounds.maxX, this.worldBounds.minY, this.worldBounds.maxY));
-      //   this.players.two.enemies.push(new Enemy(enemy.type, id, enemy.position.x, enemy.position.y, enemy.velocity.x, enemy.velocity.y, enemy.width, enemy.height, this.worldBounds.minX, this.worldBounds.maxX, this.worldBounds.minY, this.worldBounds.maxY));
-      //   this.enemies = this.players.one.enemies;
-      // });
+      this.currentLevelP1 = 2;
+      this.currentLevelP2 = 0;
+      this.setLevel(this.players.one, this.currentLevelP1);
+      this.setLevel(this.players.two, this.currentLevelP2);
       this.dnd = new DragDrop();
       this.dnd.addDraggable(this.paddle.paddleRect, false, true);
       window.addEventListener("mousedown", this.dnd.dragstart.bind(this.dnd));
@@ -125,6 +137,13 @@ class Game {
     const dt = this.calculateDt();
     this.menuManager.update(dt);
     if (this.menuManager.current.key === "Main Menu") {
+      if (this.switchMusicType === false) {
+        if (this.hasPlayed === true) {
+          this.soundManager.stopAudio("GameMusic");
+        }
+        this.soundManager.playAudio("TitleMusic", true, 0.3);
+        this.switchMusicType = true;
+      }
       if (this.pressedUp === true) {
         this.timer2 = new Date();
         this.menuManager.current.value.cursorHeight = 712;
@@ -149,6 +168,26 @@ class Game {
 
     if (this.menuManager.current.key === "Game Scene") {
       if (this.play) {
+        if (this.switchMusicType === true) {
+          this.soundManager.stopAudio("TitleMusic");
+          this.soundManager.playAudio("GameMusic", true, 0.3);
+          this.switchMusicType = false;
+          this.hasPlayed = true;
+        }
+        if (this.players.one.bricks.length <= 0) {
+          this.soundManager.playAudio("levelComplete", false, 0.3);
+          this.ballSpawning = true;
+          this.powerups = [];
+          this.currentLevelP1 += 1;
+          this.setLevel(this.players.one, this.currentLevelP1);
+        }
+        if (this.players.two.bricks.length <= 0 && this.twoPlayerMode === true) {
+          this.soundManager.playAudio("levelComplete", false, 0.3);
+          this.ballSpawning = true;
+          this.powerups = [];
+          this.currentLevelP2 += 1;
+          this.setLevel(this.players.two, this.currentLevelP2);
+        }
         //reset bools
         this.pressedUp = true;
         this.pressedEnter = false;
@@ -156,126 +195,33 @@ class Game {
         this.dnd.update();
         this.paddle.update(dt);
         this.balls.forEach((ball, index) => {
-          ball.update(dt)
+          ball.update(dt);
           this.ballUpdate(ball, index, dt);
+
           if ((this.isPlayerOne ? this.players.one.score : this.players.two.score) > this.highScore) {
             this.highScore = (this.isPlayerOne ? this.players.one.score : this.players.two.score);
           }
+          this.bricks = this.isPlayerOne
+            ? this.players.one.bricks
+            : this.players.two.bricks;
+          //update entities
           this.bricks.forEach((brick, index, array) => {
-            brick.update();
-            if (Collision.BallToBlock(ball, brick)) {
-              if (this.powerUpActive === false) {
-                this.checkSpawnPowerup(brick.x + 12, brick.y);
-              }
-            }
-            Collision.LasersToBlock(this.paddle.lasers, brick);
-            if (brick.health <= 0) {
-              array.splice(index, 1);
-              if (this.isPlayerOne) {
-                this.players.one.score += brick.score;
-              } else {
-                this.players.two.score += brick.score;
-              }
-            }
-            this.enemies.forEach(enemy => {
-              Collision.EnemyToBlock(enemy, brick);
-            });
+            this.updateBrick(brick, index, array, ball);
           });
-          this.enemies.forEach(enemy => {
-            enemy.update();
-            if (!this.ballSpawning) {
-              Collision.BallToEnemy(ball, enemy);
-            }
-            Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
-            this.powerUp.update();
-            Collision.LasersToEnemies(this.paddle.lasers, enemy);
-            Collision.PaddleToEnemy(this.paddle, enemy);
-            if (enemy.health <= 0) {
-              array.splice(index, 1);
-              if (this.isPlayerOne) {
-                this.players.one.score += 100;
-              } else {
-                this.players.two.score += 100;
-              }
-            }
+          Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
+          this.enemies.forEach((enemy, index, array) => {
+            this.updateEnemy(enemy, index, array, dt, ball);
+          });
+          this.powerUps.forEach((powerup, index, array) => {
+            this.updatePowerup(powerup, index, array, dt, ball);
           });
           if (!this.ballSpawning) {
             Collision.BallToPaddle(ball, this.paddle);
           }
-          Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
-          if (this.powerUpActive === true) {
-            this.powerUp.update(dt);
-            this.powerUpTimer2 = new Date();
-          }
-          if (this.powerUpTimer2 - this.powerUpTimer1 >= 10000) {
-            this.powerUpActive = false;
-          }
-          if (this.powerUpActive === true) {
-            if (Collision.PaddleToPowerUp(this.paddle, this.powerUp) && this.powerUp.active) {
-              if (this.powerUp.type === "LASER") {
-                if (this.paddle.enlargePowerActive) {
-                  this.paddle.enlargePowerActive = false;
-                }
-                this.paddle.laserPowerActive = true;
-                this.paddle.paddleAnimator.continue();
-                this.powerUp.active = false;
-              }
-              else if (this.powerUp.type === "ENLARGE") {
-                if (this.paddle.laserPowerActive) {
-                  this.paddle.laserPowerActive = false;
-                }
-                this.paddle.enlargePowerActive = true;
-                this.powerUp.active = false;
-              }
-              else if (this.powerUp.type === "CATCH") {
-                this.powerUp.active = false;
-              }
-              else if (this.powerUp.type === "SLOW") {
-                this.balls.forEach(ball =>{
-                  ball.speed -= 4;
-                  ball.img.src = "./res/Images/Ball/ball_slow.png";
-                });
-
-                this.powerUp.active = false;
-              }
-              else if (this.powerUp.type === "BREAK") {
-                this.powerUp.active = false;
-              }
-              else if (this.powerUp.type === "DISRUPTION") {
-                if(!this.triple){
-                  this.triple = true;
-                  //calculate VectorMath.vector()
-                  var angle = Math.atan2(ball.velocity.y, ball.velocity.x);
-                  angle = VectorMath.toDeg(angle)
-                  //offset the angle
-                  var angle1 = angle - 10;
-                  var angle2 = angle + 10;
-                  //var firingVectorUnit = VectorMath.vector(angle);
-
-                  var vel1 = VectorMath.vector(angle1);
-                  var vel2 = VectorMath.vector(angle2);
-                  this.balls.push(new Ball(ball.position.x, ball.position.y, 20, ball.speed, vel1));
-                  this.balls.push(new Ball(ball.position.x, ball.position.y, 20, ball.speed, vel2));
-                  this.powerUp.active = false;
-                }
-                
-              }
-              else if (this.powerUp.type === "PLAYER") {
-                this.powerUp.active = false;
-                if (this.isPlayerOne) {
-                  this.players.one.lives += 1;
-                } else {
-                  this.players.two.lives += 1;
-                }
-              }
-            }
-          }
         });
       }
-
     }
   }
-
   render() {
     this.ctx.clearRect(0, 0, this.canvas.resolution.x, this.canvas.resolution.y);
     this.menuManager.draw(this.ctx);
@@ -286,11 +232,13 @@ class Game {
       this.paddle.draw(this.ctx);
       //this.ball.render(this.ctx);
       this.balls.forEach(ball => ball.render(this.ctx));
+      this.bricks = this.isPlayerOne
+        ? this.players.one.bricks
+        : this.players.two.bricks;
       this.bricks.forEach(brick => brick.draw(this.ctx));
       this.enemies.forEach(enemy => enemy.draw(this.ctx));
-      if (this.powerUpActive === true) {
-        this.powerUp.draw(this.ctx);
-      }
+      this.powerUps.forEach(powerup => powerup.draw(this.ctx));
+
       this.ctx.font = "14px Arial";
       this.ctx.fillText("Score: " + (this.isPlayerOne ? this.players.one.score : this.players.two.score), 50, 50);
       this.ctx.fillText("High Score: " + this.highScore, 50, 80);
@@ -339,6 +287,7 @@ class Game {
         var angle = Math.atan2(vectorBetweenBallAndPaddle.y, vectorBetweenBallAndPaddle.x);
         angle = VectorMath.toDeg(angle)
 
+        ball.slowStartSpeed = 0;
         //make unit vector from angle
         var firingVectorUnit = VectorMath.vector(angle);
         //multiply by start speed
@@ -365,28 +314,35 @@ class Game {
   ballWorldCollision(ball, index) {
     if (ball.position.x + (ball.radius * 2) > this.worldBounds.maxX) {
       ball.flipVelX();
+      ball.playWallBounce();
     }
     if (ball.position.x < this.worldBounds.minX) {
       ball.flipVelX();
+      ball.playWallBounce();
     }
     if (ball.position.y > this.worldBounds.maxY) {
       ball.flipVelY();
+      ball.playWallBounce();
     }
     if (ball.position.y < this.worldBounds.minY) {
       ball.flipVelY();
+      ball.playWallBounce();
     }
     if (ball.position.y + (ball.radius * 2) > this.worldBounds.maxY) {
-      if(this.balls.length === 1){
+      if (this.balls.length === 1) {
         this.triple = false;
         this.ballSpawning = true;
         ball.img.src = "./res/Images/Ball/ball.png";
+        ball.playDeathSound();
         if (this.isPlayerOne) {
+          this.powerUps = [];
           this.players.one.lives -= 1;
           if (this.players.one.lives < 0)
             this.players.one.lives = 0;
-  
+
         } else {
           this.players.two.lives -= 1;
+          this.powerUps = [];
           if (this.players.two.lives < 0)
             this.players.two.lives = 0;
         }
@@ -402,9 +358,14 @@ class Game {
             this.isPlayerOne = false;
           } else {
             // Game over both players lose
-            this.menuManager.fadeTo("Main Menu");
+            this.menuManager.setCurrentScene("Main Menu");
             this.play = false;
+            this.currentLevelP1 = 0;
+            this.currentLevelP2 = 0;
+            this.setLevel(this.players.one, this.currentLevelP1);
+            this.setLevel(this.players.two, this.currentLevelP2);
           }
+
           this.bricks = this.isPlayerOne
             ? this.players.one.bricks
             : this.players.two.bricks;
@@ -413,42 +374,193 @@ class Game {
             : this.players.two.enemies;
         } else if (this.players.one.lives <= 0) {
           // Game over in player one mode
-          this.menuManager.fadeTo("Main Menu");
+          this.menuManager.setCurrentScene("Main Menu");
           this.play = false;
+          this.currentLevelP1 = 0;
+          this.setLevel(this.players.one, this.currentLevelP1);
         }
       }
-      else{
+      else {
         this.balls.splice(index, 1);
       }
     }
   }
   checkSpawnPowerup(x, y) {
     this.randomNumGen = Math.floor((Math.random() * 100) + 1);
-    if (this.randomNumGen >= 75) {
+    if (this.randomNumGen >= 90) {
       this.randomNumGen = Math.floor((Math.random() * 7) + 1);
       if (this.randomNumGen === 1) {
-        this.powerUp = new PowerUp("LASER", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.laserImg, "LASER", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 2) {
-        this.powerUp = new PowerUp("ENLARGE", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.enlargeImg, "ENLARGE", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 3) {
-        this.powerUp = new PowerUp("CATCH", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.catchImg, "CATCH", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 4) {
-        this.powerUp = new PowerUp("SLOW", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.slowImg, "SLOW", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 5) {
-        this.powerUp = new PowerUp("BREAK", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.breakImg, "BREAK", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 6) {
-        this.powerUp = new PowerUp("DISRUPTION", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.disruptionImg, "DISRUPTION", x, y, 50, 25, this.worldBounds.maxY);
       }
       if (this.randomNumGen === 7) {
-        this.powerUp = new PowerUp("PLAYER", x, y, 50, 25, this.worldBounds.maxY);
+        this.powerUp = new PowerUp(this.playerImg, "PLAYER", x, y, 50, 25, this.worldBounds.maxY);
       }
-      this.powerUpActive = true;
-      this.powerUpTimer1 = new Date();
+      this.powerUps.push(this.powerUp);
+    }
+  }
+
+  updateBrick(brick, index, array, ball) {
+    brick.update();
+    if (Collision.BallToBlock(ball, brick)) {
+      if (brick.health <= 0)
+        this.checkSpawnPowerup(brick.x + 12, brick.y);
+    }
+    Collision.LasersToBlock(this.paddle.lasers, brick);
+    if (brick.health <= 0) {
+      array.splice(index, 1);
+      if (this.isPlayerOne) {
+        this.players.one.score += brick.score;
+      }
+      else {
+        this.players.two.score += brick.score;
+      }
+    }
+    this.enemies.forEach(enemy => {
+      Collision.EnemyToBlock(enemy, brick);
+    });
+  }
+
+  /**
+   * @param {Enemy} enemy
+   * @param {number} index
+   * @param {Array<Enemy>} array
+   * @param {number} dt
+   */
+  updateEnemy(enemy, index, array, dt, ball) {
+    enemy.update(dt);
+    if (!enemy.isDying()) {
+      if (!this.ballSpawning) {
+        Collision.BallToEnemy(this.ball, enemy);
+      }
+      Collision.LasersToEnemy(this.paddle.lasers, enemy);
+      Collision.PaddleToEnemy(this.paddle, enemy);
+    }
+    if (enemy.isDead()) {
+      array.splice(index, 1);
+      if (this.isPlayerOne) {
+        this.players.one.score += 100;
+      } else {
+        this.players.two.score += 100;
+      }
+    }
+  }
+
+
+  /** Creates the enemy sprites and initiates the image loading process */
+  createEnemySprites() {
+    const sprites = {
+      blue: new Image(EnemySpritesheetSize.width, EnemySpritesheetSize.height),
+      lightBlue: new Image(EnemySpritesheetSize.width, EnemySpritesheetSize.height),
+      red: new Image(EnemySpritesheetSize.width, EnemySpritesheetSize.height),
+      green: new Image(EnemySpritesheetSize.width, EnemySpritesheetSize.height),
+      explosion: new Image(EnemySpritesheetSize.width, EnemySpritesheetSize.height)
+    };
+    sprites.blue.id = "EnemyBlue";
+    sprites.blue.src = EnemyType.BLUE;
+
+    sprites.lightBlue.id = "EnemyLightBlue";
+    sprites.lightBlue.src = EnemyType.LIGHT_BLUE;
+
+    sprites.red.id = "EnemyRed";
+    sprites.red.src = EnemyType.RED;
+
+    sprites.green.id = "EnemyGreen";
+    sprites.green.src = EnemyType.GREEN;
+
+    sprites.explosion.id = "EnemyExplosion";
+    sprites.explosion.src = "./res/Images/Enemies/enemy_explode.png";
+    return sprites;
+  }
+  updatePowerup(powerup, index, array, dt, ball) {
+    powerup.update(dt);
+    if (Collision.PaddleToPowerUp(this.paddle, powerup) && powerup.active) {
+      this.paddle.playPowerUpPickup();
+      if (powerup.type === "LASER") {
+        if (this.paddle.enlargePowerActive) {
+          this.paddle.enlargePowerActive = false;
+        }
+        this.paddle.laserPowerActive = true;
+        this.paddle.paddleAnimator.continue();
+        powerup.active = false;
+      }
+      else if (powerup.type === "ENLARGE") {
+        if (this.paddle.laserPowerActive) {
+          this.paddle.laserPowerActive = false;
+        }
+        this.paddle.enlargePowerActive = true;
+        powerup.active = false;
+      }
+      else if (powerup.type === "CATCH") {
+        powerup.active = false;
+      }
+      else if (powerup.type === "SLOW") {
+        this.ball.speed -= 3;
+        //get angle
+        this.ball.img.src = "./res/Images/Ball/ball_slow.png";
+        powerup.active = false;
+      }
+      else if (powerup.type === "BREAK") {
+        powerup.active = false;
+      }
+      else if (powerup.type === "DISRUPTION") {
+        if (!this.triple) {
+          this.triple = true;
+          //calculate VectorMath.vector()
+          var angle = Math.atan2(ball.velocity.y, ball.velocity.x);
+          angle = VectorMath.toDeg(angle)
+          //offset the angle
+          var angle1 = angle - 10;
+          var angle2 = angle + 10;
+          //var firingVectorUnit = VectorMath.vector(angle);
+
+          var vel1 = VectorMath.vector(angle1);
+          var vel2 = VectorMath.vector(angle2);
+          this.balls.push(new Ball(ball.position.x, ball.position.y, 20, ball.speed, vel1));
+          this.balls.push(new Ball(ball.position.x, ball.position.y, 20, ball.speed, vel2));
+        }
+        powerup.active = false;
+      }
+      else if (powerup.type === "PLAYER") {
+        powerup.active = false;
+        if (this.isPlayerOne) {
+          this.players.one.lives += 1;
+        } else {
+          this.players.two.lives += 1;
+        }
+      }
+      array.splice(index, 1);
+    }
+  }
+
+  setLevel(playerToSet, current) {
+    this.powerUps = [];
+    if (current >= this.levels.length) {
+      console.log("Setting a level that doesn't exist in the loaded levels");
+      this.menuManager.setCurrentScene("Main Menu");
+    }
+    else {
+      playerToSet.bricks.splice(0);
+      const currentLevel = this.levels[current];
+      currentLevel.Bricks.forEach((brick, index) => {
+        const id = brick.type + index.toString();
+        playerToSet.bricks.push(new Brick(brick.type, id, brick.position.x, brick.position.y, brick.width, brick.height, current));
+        this.bricks = playerToSet.bricks;
+      });
     }
   }
 }
