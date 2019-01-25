@@ -114,6 +114,8 @@ class Paddle {
             //check if next step will be out of bounds if not move
             if (!((this.position.x + this.size.x) + this.speed * (dt / 1000) > this.maxX)) {
                 this.paddleRect.x += this.speed * (dt / 1000);
+            } else {
+              this.collidingWithBreakout = true;
             }
         }
         //if only left arrow pressed
@@ -121,6 +123,8 @@ class Paddle {
             if (!(this.position.x - this.speed * (dt / 1000) < this.minX)) {
                 this.paddleRect.x -= this.speed * (dt / 1000);
             }
+        } else {
+          this.collidingWithBreakout = false;
         }
         this.position.x = this.paddleRect.x;
         this.position.y = this.paddleRect.y;
@@ -132,9 +136,6 @@ class Paddle {
             this.position.x = this.clampPaddleRight - this.size.x;
             this.paddleRect.x = this.clampPaddleRight - this.size.x;
             this.collidingWithBreakout = true;
-        }
-        else{
-            this.collidingWithBreakout = false;
         }
         this.lasers.forEach((laser) => {
             laser.update(dt);

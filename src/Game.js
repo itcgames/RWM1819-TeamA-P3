@@ -61,8 +61,8 @@ class Game {
     this.disruptionImg.src = "./res/Images/Powerups/power_up_disruption.png";
     this.playerImg = new Image(0, 0);
     this.playerImg.src = "./res/Images/Powerups/power_up_player.png";
-
-
+    this.wallImg = new Image(0, 0);
+    this.wallImg.src = "./res/Images/Scenes/GameSceneWall.png";
     /** @type {Array<{ Bricks: Array<{ type: string, position: { x: number, y: number }, width: number, height: number }> }>} */
     this.levels = [];
     //spawn enemies
@@ -77,6 +77,9 @@ class Game {
       x: this.worldBounds.maxX,
       y: this.worldBounds.maxY - 100
     };
+    const font = new FontFace("Joystix", "url(res/Fonts/Joystix.ttf)");
+    document.fonts.add(font);
+    document.body.classList.add("Joystix");
 
 
     new LevelLoader("./res/Levels.json", (ev, data) => {
@@ -161,33 +164,25 @@ class Game {
           ));
         } else if(event.keyCode === 53) { // Number 5
           this.powerUps.push(new PowerUp(this.breakImg, "BREAK", 100, 100, 50, 25, this.worldBounds.maxY));
-        }else if (event.keyCode === 54) { // Number 6
+        } else if (event.keyCode === 54) { // Number 6
           this.powerUps.push(new PowerUp(this.disruptionImg, "DISRUPTION", 100, 200, 50, 25, this.worldBounds.maxY));
+        } else if (event.keyCode === 55) { // Number 7
+          this.powerUps.push(new PowerUp(this.playerImg, "PLAYER", 100, 200, 50, 25, this.worldBounds.maxY));
+        } else if (event.keyCode === 56) { // Number 8
+          this.powerUps.push(new PowerUp(this.slowImg, "SLOW", 100, 200, 50, 25, this.worldBounds.maxY));
+        } else if (event.keyCode === 57) { // Number 9
+          this.powerUps.push(new PowerUp(this.catchImg, "CATCH", 100, 200, 50, 25, this.worldBounds.maxY));
+        } else if (event.keyCode === 48) { // Number 0
+          this.powerUps.push(new PowerUp(this.enlargeImg, "ENLARGE", 100, 200, 50, 25, this.worldBounds.maxY));
+        } else if (event.keyCode === 189) { // '-' Dash key
+          this.powerUps.push(new PowerUp(this.laserImg, "LASER", 100, 200, 50, 25, this.worldBounds.maxY));
         }
         else if(event.keyCode === 32){
           if(this.balls[0].sticky){
             this.balls[0].sticky = false;
             this.spawnBallCountdown = 0;
             //calculate vector between ball and paddle
-            var vectorBetweenBallAndPaddle = {
-              x: this.balls[0].position.x + this.balls[0].radius - this.paddle.origin.x,
-              y: this.balls[0].position.y + this.balls[0].radius - this.paddle.origin.y
-            }
-
-            //get angle
-            var angle = Math.atan2(vectorBetweenBallAndPaddle.y, vectorBetweenBallAndPaddle.x);
-            angle = VectorMath.toDeg(angle)
-
-            this.balls[0].slowStartSpeed = 0;
-            //make unit vector from angle
-            var firingVectorUnit = VectorMath.vector(angle);
-            //multiply by start speed
-            var firingVector = {
-              x: firingVectorUnit.x * this.ballStartSpeed,
-              y: firingVectorUnit.y * this.ballStartSpeed
-            }
-            this.balls[0].velocity.x = firingVector.x;
-            this.balls[0].velocity.y = firingVector.y;
+            this.fireBall()
             this.balls[0].offsetOnce = false;
             this.balls[0].speed = 8;
           }
@@ -195,7 +190,28 @@ class Game {
       }
     }
   }
+  fireBall()
+  {
+    var vectorBetweenBallAndPaddle = {
+      x: this.balls[0].position.x + this.balls[0].radius - this.paddle.origin.x,
+      y: this.balls[0].position.y + this.balls[0].radius - this.paddle.origin.y
+    }
 
+    //get angle
+    var angle = Math.atan2(vectorBetweenBallAndPaddle.y, vectorBetweenBallAndPaddle.x);
+    angle = VectorMath.toDeg(angle)
+
+    this.balls[0].slowStartSpeed = 0;
+    //make unit vector from angle
+    var firingVectorUnit = VectorMath.vector(angle);
+    //multiply by start speed
+    var firingVector = {
+      x: firingVectorUnit.x * this.ballStartSpeed,
+      y: firingVectorUnit.y * this.ballStartSpeed
+    }
+    this.balls[0].velocity.x = firingVector.x;
+    this.balls[0].velocity.y = firingVector.y;
+  }
   /** @param {KeyboardEvent} event */
   onKeyUp(event) {
     if (this.spawnKeyPressed) { this.spawnKeyPressed = false; }
@@ -314,10 +330,8 @@ class Game {
 
     }
     if (this.menuManager.current.key === "Game Scene") {
-      this.ctx.drawImage(this.breakoutWallImg, this.breakoutPos.x, this.breakoutPos.y, 30, 70);
 
       this.paddle.draw(this.ctx);
-      //this.ball.render(this.ctx);
       this.balls.forEach(ball => ball.render(this.ctx));
       this.bricks = this.isPlayerOne
         ? this.players.one.bricks
@@ -326,11 +340,14 @@ class Game {
       this.enemies.forEach(enemy => enemy.draw(this.ctx));
       this.powerUps.forEach(powerup => powerup.draw(this.ctx));
 
-      this.ctx.font = "14px Arial";
-      this.ctx.fillText("Score: " + (this.isPlayerOne ? this.players.one.score : this.players.two.score), 50, 50);
-      this.ctx.fillText("High Score: " + this.highScore, 50, 80);
-      this.ctx.fillText("Lives: " + (this.isPlayerOne ? this.players.one.lives : this.players.two.lives), 200, 50);
-      this.ctx.fillText("Player " + (this.isPlayerOne ? "1" : "2"), 200, 80);
+      this.ctx.font = "14px Joystix";
+      this.ctx.fillText("Score: " + (this.isPlayerOne ? this.players.one.score : this.players.two.score), 1120, 150);
+      this.ctx.fillText("High Score: " + this.highScore, 1120, 200);
+      this.ctx.fillText("Lives: " + (this.isPlayerOne ? this.players.one.lives : this.players.two.lives), 1120, 250);
+      this.ctx.fillText("Player " + (this.isPlayerOne ? "1" : "2"), 1120, 300);
+      this.ctx.fillText("Level: " + (this.isPlayerOne ? this.currentLevelP1 + 1 : this.currentLevelP2 + 1), 1120, 350);
+      this.ctx.drawImage(this.wallImg, this.worldBounds.minX - 20, this.worldBounds.minY, this.worldBounds.maxX - this.worldBounds.minX + 40, this.worldBounds.maxY);
+      this.ctx.drawImage(this.breakoutWallImg, this.breakoutPos.x, this.breakoutPos.y, 30, 70);
     }
   }
   calculateDt() {
@@ -605,7 +622,11 @@ class Game {
     if (Collision.PaddleToPowerUp(this.paddle, powerup) && powerup.active) {
       this.paddle.playPowerUpPickup();
       if (powerup.type === "LASER") {
-        this.balls[0].sticky = false;
+        if(this.balls[0].sticky === true)
+        {
+          this.fireBall();
+          this.balls[0].sticky = false;
+        }
         if (this.paddle.enlargePowerActive) {
           this.paddle.enlargePowerActive = false;
         }
@@ -618,7 +639,12 @@ class Game {
         powerup.active = false;
       }
       else if (powerup.type === "ENLARGE") {
-        this.balls[0].sticky = false;
+        if(this.balls[0].sticky === true)
+        {
+          this.fireBall();
+          this.balls[0].sticky = false;
+          this.balls[0].speed = 8;
+        }
         if (this.paddle.laserPowerActive) {
           this.paddle.laserPowerActive = false;
         }
@@ -639,9 +665,9 @@ class Game {
         powerup.active = false;
       }
       else if (powerup.type === "SLOW") {
-        this.ball.speed -= 3;
+        ball.speed -= 3;
         //get angle
-        this.ball.img.src = "./res/Images/Ball/ball_slow.png";
+        ball.img.src = "./res/Images/Ball/ball_slow.png";
         powerup.active = false;
       }
       else if (powerup.type === "BREAK") {
@@ -651,6 +677,12 @@ class Game {
       else if (powerup.type === "DISRUPTION") {
         if(this.catchPowerActive === true){
           this.catchPowerActive = false;
+        }
+        if(this.balls[0].sticky === true)
+        {
+          this.fireBall();
+          this.balls[0].sticky = false;
+          this.balls[0].speed = 8;
         }
         if (this.balls.length === 1) {
           this.triple = true;
