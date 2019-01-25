@@ -163,8 +163,18 @@ class Game {
           ));
         } else if(event.keyCode === 53) { // Number 5
           this.powerUps.push(new PowerUp(this.breakImg, "BREAK", 100, 100, 50, 25, this.worldBounds.maxY));
-        }else if (event.keyCode === 54) { // Number 6
+        } else if (event.keyCode === 54) { // Number 6
           this.powerUps.push(new PowerUp(this.disruptionImg, "DISRUPTION", 100, 200, 50, 25, this.worldBounds.maxY));
+        } else if (event.keyCode === 55) { // Number 7
+          this.powerUps.push(new PowerUp(this.playerImg, "PLAYER", 100, 200, 50, 25, this.worldBounds.maxY));
+        } else if (event.keyCode === 56) { // Number 8
+          this.powerUps.push(new PowerUp(this.slowImg, "SLOW", 100, 200, 50, 25, this.worldBounds.maxY));
+        } else if (event.keyCode === 57) { // Number 9
+          this.powerUps.push(new PowerUp(this.catchImg, "CATCH", 100, 200, 50, 25, this.worldBounds.maxY));
+        } else if (event.keyCode === 48) { // Number 0
+          this.powerUps.push(new PowerUp(this.enlargeImg, "ENLARGE", 100, 200, 50, 25, this.worldBounds.maxY));
+        } else if (event.keyCode === 189) { // '-' Dash key
+          this.powerUps.push(new PowerUp(this.laserImg, "LASER", 100, 200, 50, 25, this.worldBounds.maxY));
         }
       }
     }
@@ -290,7 +300,6 @@ class Game {
     if (this.menuManager.current.key === "Game Scene") {
 
       this.paddle.draw(this.ctx);
-      //this.ball.render(this.ctx);
       this.balls.forEach(ball => ball.render(this.ctx));
       this.bricks = this.isPlayerOne
         ? this.players.one.bricks
@@ -576,9 +585,9 @@ class Game {
         powerup.active = false;
       }
       else if (powerup.type === "SLOW") {
-        this.ball.speed -= 3;
+        ball.speed -= 3;
         //get angle
-        this.ball.img.src = "./res/Images/Ball/ball_slow.png";
+        ball.img.src = "./res/Images/Ball/ball_slow.png";
         powerup.active = false;
       }
       else if (powerup.type === "BREAK") {
