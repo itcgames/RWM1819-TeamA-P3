@@ -476,7 +476,7 @@ class Game {
     enemy.update(dt);
     if (!enemy.isDying()) {
       if (!this.ballSpawning) {
-        Collision.BallToEnemy(this.ball, enemy);
+        Collision.BallToEnemy(ball, enemy);
       }
       Collision.LasersToEnemy(this.paddle.lasers, enemy);
       Collision.PaddleToEnemy(this.paddle, enemy);
