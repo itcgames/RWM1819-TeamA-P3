@@ -133,8 +133,7 @@ class Brick {
       this.score = 120;
     }
     if (this.colour === "METAL") {
-      this.img = new Image(1000,50)
-      this.img.src = ColourEnum.METAL;
+      this.img = new Image(1000,50);
       this.animation = new Animation(this.img, 100, 50, 10);
       this.animationManager.addAnimation("Hit", this.animation);
       this.animationManager.setScale("Hit", 0.85, 0.72);
@@ -142,16 +141,17 @@ class Brick {
       this.animationManager.setAnimationFPS("Hit", 60);
       this.animationManager.stop();
       this.score = (level + 1) * 50;
+      this.img.src = ColourEnum.METAL;
     }
     if (this.colour === "GOLD") {
       this.img = new Image(1000,50)
-      this.img.src = ColourEnum.GOLD;
       this.animation = new Animation(this.img, 100, 50, 10);
       this.animationManager.addAnimation("Hit", this.animation);
       this.animationManager.setScale("Hit", 0.85, 0.72);
       this.animationManager.isLooping("Hit",false);
       this.animationManager.setAnimationFPS("Hit", 60);
       this.animationManager.stop();
+      this.img.src = ColourEnum.GOLD;
     }
 
     this.img.id = this.id;

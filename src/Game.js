@@ -254,7 +254,7 @@ class Game {
             : this.players.two.bricks;
           //update entities
           this.bricks.forEach((brick, index, array) => {
-            this.updateBrick(brick, index, array, ball);
+            this.updateBrick(brick, index, array,dt,  ball);
           });
           Collision.LasersToWorld(this.paddle.lasers, this.worldBounds.minY);
 
@@ -473,8 +473,8 @@ class Game {
     }
   }
 
-  updateBrick(brick, index, array, ball) {
-    brick.update();
+  updateBrick(brick, index, array, dt, ball) {
+    brick.update(dt);
     if (Collision.BallToBlock(ball, brick)) {
 
       if (brick.health <= 0)
