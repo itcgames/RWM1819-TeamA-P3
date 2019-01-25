@@ -34,7 +34,7 @@ const VectorMath = (function() {
      * @param {{ x: number, y: number }} v 
      */
     static angle(v) {
-      return (VectorMath.toDeg(Math.atan2(v.x, v.y)));
+      return (VectorMath.toDeg(Math.atan2(v.y, v.x)));
     }
   
     /**
