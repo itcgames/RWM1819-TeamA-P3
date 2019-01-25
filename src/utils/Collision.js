@@ -21,6 +21,19 @@ const Collision = (function () {
     ];
   }
 
+  /** @param {{ left: number, top: number, right: number, bottom: number }} direction */
+  function pickAbsoluteSmallestDirection(direction) {
+    const dir = {
+      left: Math.abs(direction.left), top: Math.abs(direction.top),
+      right: Math.abs(direction.right), bottom: Math.abs(direction.bottom)
+    };
+    const min = Math.min(dir.left, dir.top, dir.right, dir.bottom);
+    return min === dir.left ? { x: direction.left, y: 0}
+      : (min === dir.top ? { x: 0, y: direction.top }
+      : (min === dir.right ? { x: direction.right, y: 0 }
+      : { x: 0, y: direction.bottom }));
+  }
+
   class Collision {
 
     /**
@@ -31,22 +44,34 @@ const Collision = (function () {
      *  block is expected to have a position, width and height.
      */
     static BallToBlock(ball, block) {
-      const aabbBall = rectangleToAabb({ position: ball.position, width: ball.radius, height: ball.radius });
-      const aabbBlock = rectangleToAabb({ position: { x: block.x, y: block.y }, width: block.width, height: block.height });
-      const result = collisions.maniAABBToAABB(aabbBall, aabbBlock);
-      if (result.collision) {
-        // hotfix for the inaccuracy of floating point numbers
-        const direction = {
-          x: result.manifest.leftAABB.distance.x * 1.05,
-          y: result.manifest.leftAABB.distance.y * 1.05
+      /** @type {{x: number, y: number, w: number, h: number }} */
+      const rectBall = { x: ball.position.x, y: ball.position.y, w: ball.radius, h: ball.radius };
+      const rectBlock = { x: block.x, y: block.y, w: block.width, h: block.height };
+      
+      if (
+        rectBall.x < rectBlock.x + rectBlock.w &&
+        rectBall.x + rectBall.w > rectBlock.x &&
+        rectBall.y < rectBlock.y + rectBlock.h &&
+        rectBall.y + rectBall.h > rectBlock.y
+      ) {
+        const response = {
+          left: rectBlock.x - (rectBall.x + rectBall.w),
+          top: (rectBlock.y + rectBlock.h) - rectBall.y,
+          right: (rectBlock.x + rectBlock.w) - rectBall.x,
+          bottom: rectBlock.y - (rectBall.y + rectBall.h)
         };
-        ball.velocity = {
-          x: (direction.x !== 0) ? -ball.velocity.x : ball.velocity.x,
-          y: (direction.y !== 0) ? -ball.velocity.y : ball.velocity.y
-        };
+        const result = pickAbsoluteSmallestDirection(response);
+        if (result.x !== 0) {
+          ball.velocity.x = (result.x > 0) ? Math.abs(ball.velocity.x)
+            : -Math.abs(ball.velocity.x);
+        }
+        if (result.y !== 0) {
+          ball.velocity.y = (result.y > 0) ? Math.abs(ball.velocity.y)
+            : -Math.abs(ball.velocity.y)
+        }
         ball.position = {
-          x: ball.position.x + ball.velocity.x + direction.x,
-          y: ball.position.y + ball.velocity.y + direction.y
+          x: ball.position.x + result.x,
+          y: ball.position.y + result.y
         };
         block.damage();
         ball.playBlockBounce();
