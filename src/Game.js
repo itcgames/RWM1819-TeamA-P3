@@ -79,7 +79,7 @@ class Game {
 
     new LevelLoader("./res/Levels.json", (ev, data) => {
       this.levels = data;
-      this.currentLevelP1 = 2;
+      this.currentLevelP1 = 0;
       this.currentLevelP2 = 0;
       this.setLevel(this.players.one, this.currentLevelP1);
       this.setLevel(this.players.two, this.currentLevelP2);
