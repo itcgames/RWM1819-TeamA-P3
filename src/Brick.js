@@ -10,10 +10,10 @@ const ColourEnum = {
   BLUE: "./res/Images/Bricks/brick_blue.png",
   PINK: "./res/Images/Bricks/brick_pink.png",
   YELLOW: "./res/Images/Bricks/brick_yellow.png",
-  METAL: "./res/Images/Bricks/brick_metal.png",
-  GOLD: "./res/Images/Bricks/brick_gold.png"
-  //METAL: "./res/Images/Bricks/brick_metal_hit.png",
-  //GOLD: "./res/Images/Bricks/brick_gold_hit.png"
+  // METAL: "./res/Images/Bricks/brick_metal.png",
+  // GOLD: "./res/Images/Bricks/brick_gold.png"
+  METAL: "./res/Images/Bricks/brick_metal_hit.png",
+  GOLD: "./res/Images/Bricks/brick_gold_hit.png"
 }
 /**
 * Brick class used to setup each of the destructible blocks in the game
@@ -32,9 +32,10 @@ class Brick {
     this.height = height;
     this.health = 1;
     this.score = 0;
+    this.dt;
     if(this.colour === "METAL" || this.colour === "GOLD")
     {
-    //  this.animationManager = new AnimationManager();
+      this.animationManager = new AnimationManager();
     }
     this.setHealth();
     this.createNewBrick(level);
@@ -63,13 +64,14 @@ class Brick {
   * @update update paddle logic.
   */
   update(dt) {
-    // if(this.colour === "METAL" || this.colour === "GOLD")
-    // {
-    //   if(this.animationManager.isPlaying())
-    //   {
-    //     this.animationManager.update(dt, this.x + this.width / 2, this.y + this.height / 2);
-    //  }
-    // }
+    this.dt = dt;
+    if(this.colour === "METAL" || this.colour === "GOLD")
+    {
+      if(this.animationManager.isPlaying())
+      {
+        this.animationManager.update(dt, this.x + (this.width / 2), this.y + (this.height / 2));
+     }
+    }
   }
   /**
   * @draw
@@ -77,14 +79,19 @@ class Brick {
   */
   draw(ctx) {
     ctx.save();
-    ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
-    // if(this.colour === "METAL" || this.colour === "GOLD")
-    // {
-    //   if(this.animationManager.isPlaying())
-    //   {
-    //     this.animationManager.draw(ctx);
-    //   }
-    // }
+
+    if(this.colour === "METAL" || this.colour === "GOLD")
+    {
+        //ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+        ctx.drawImage(this.img, 0, 0, 100, 50,this.x,this.y,this.width,this.height);
+      if(this.animationManager.isPlaying())
+      {
+        this.animationManager.draw(ctx);
+     }
+    }
+    else {
+        ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+    }
     ctx.restore();
 
   }
@@ -126,25 +133,25 @@ class Brick {
       this.score = 120;
     }
     if (this.colour === "METAL") {
+      this.img = new Image(1000,50)
       this.img.src = ColourEnum.METAL;
-      // this.animation = new Animation(this.img, 100, 50, 10);
-      // this.animationManager.addAnimation("Hit", this.animation);
-      // this.animationManager.setScale("Hit", 0.5, 0.5);
-      // this.animationManager.isLooping("Hit",false);
-      // this.animationManager.setAnimationFPS("Hit", 10);
-      // this.animationManager.continue();
+      this.animation = new Animation(this.img, 100, 50, 10);
+      this.animationManager.addAnimation("Hit", this.animation);
+      this.animationManager.setScale("Hit", 0.85, 0.72);
+      this.animationManager.isLooping("Hit",false);
+      this.animationManager.setAnimationFPS("Hit", 60);
+      this.animationManager.stop();
       this.score = (level + 1) * 50;
     }
     if (this.colour === "GOLD") {
-      // this.animation = new Animation(this.img, 100, 50, 10);
-      // this.animationManager.addAnimation("Hit", this.animation);
-      // this.animationManager.setAnimationFPS("Hit", 20);
-      // // var scaleX = this.width / 100;
-      // // var scaleY = this.height / 50;
-      // // this.animationManager.setScale("Hit", scaleX, scaleY);
-      // // this.animationManager.isLooping("Hit",false);
-      // // this.animationManager.stop();
+      this.img = new Image(1000,50)
       this.img.src = ColourEnum.GOLD;
+      this.animation = new Animation(this.img, 100, 50, 10);
+      this.animationManager.addAnimation("Hit", this.animation);
+      this.animationManager.setScale("Hit", 0.85, 0.72);
+      this.animationManager.isLooping("Hit",false);
+      this.animationManager.setAnimationFPS("Hit", 60);
+      this.animationManager.stop();
     }
 
     this.img.id = this.id;
@@ -166,6 +173,12 @@ class Brick {
   }
   damage() {
       this.health -= 1;
+      if(this.colour === "METAL" || this.colour === "GOLD")
+      {
+        this.animationManager.continue();
+        this.animationManager.update(this.dt, this.x + (this.width / 2), this.y + (this.height / 2));
+      }
+
   }
 
 }
