@@ -117,6 +117,7 @@ class Game {
     this.triple = false;
     window.addEventListener("keyup", this.events.onKeyUp, false);
     this.breakoutActive = false;
+    this.catchPowerActive = false;
   }
   /**
    * This is the function that detect key presses.
@@ -176,10 +177,41 @@ class Game {
         } else if (event.keyCode === 189) { // '-' Dash key
           this.powerUps.push(new PowerUp(this.laserImg, "LASER", 100, 200, 50, 25, this.worldBounds.maxY));
         }
+        else if(event.keyCode === 32){
+          if(this.balls[0].sticky){
+            this.balls[0].sticky = false;
+            this.spawnBallCountdown = 0;
+            //calculate vector between ball and paddle
+            this.fireBall()
+            this.balls[0].offsetOnce = false;
+            this.balls[0].speed = 8;
+          }
+        }
       }
     }
   }
+  fireBall()
+  {
+    var vectorBetweenBallAndPaddle = {
+      x: this.balls[0].position.x + this.balls[0].radius - this.paddle.origin.x,
+      y: this.balls[0].position.y + this.balls[0].radius - this.paddle.origin.y
+    }
 
+    //get angle
+    var angle = Math.atan2(vectorBetweenBallAndPaddle.y, vectorBetweenBallAndPaddle.x);
+    angle = VectorMath.toDeg(angle)
+
+    this.balls[0].slowStartSpeed = 0;
+    //make unit vector from angle
+    var firingVectorUnit = VectorMath.vector(angle);
+    //multiply by start speed
+    var firingVector = {
+      x: firingVectorUnit.x * this.ballStartSpeed,
+      y: firingVectorUnit.y * this.ballStartSpeed
+    }
+    this.balls[0].velocity.x = firingVector.x;
+    this.balls[0].velocity.y = firingVector.y;
+  }
   /** @param {KeyboardEvent} event */
   onKeyUp(event) {
     if (this.spawnKeyPressed) { this.spawnKeyPressed = false; }
@@ -284,7 +316,7 @@ class Game {
             this.updatePowerup(powerup, index, array, dt, ball);
           });
           if (!this.ballSpawning) {
-            Collision.BallToPaddle(ball, this.paddle);
+            Collision.BallToPaddle(ball, this.paddle, this.catchPowerActive);
           }
         });
       }
@@ -382,6 +414,28 @@ class Game {
       this.ballWorldCollision(ball, index);
       ball.update(dt);
     }
+    if(ball.sticky)
+    {
+      if(this.paddle.origin.x >= ball.position.x && ball.offsetOnce === false)
+      {
+        ball.offset = this.paddle.origin.x - ball.position.x;
+        ball.offsetOnce = true;
+        ball.offset *= -1;
+      }
+      else if(ball.position.x > this.paddle.origin.x && ball.offsetOnce === false){
+        ball.offset = ball.position.x - this.paddle.origin.x;
+        ball.offsetOnce = true;
+      }
+      ball.velocity.x = 0;
+      ball.velocity.y = 0;
+      ball.speed = 0;
+      //make balls position relative to the paddle
+      // if(ball.offsetOnce === false)
+      // {
+        ball.position.x = ball.offset + this.paddle.origin.x - (ball.radius / 2) ;
+        ball.position.y = this.paddle.colBox.position.y - (ball.radius);
+      // }
+    }
   }
 
   ballWorldCollision(ball, index) {
@@ -407,6 +461,7 @@ class Game {
         this.ballSpawning = true;
         this.breakoutActive = false;
         this.paddle.enlargePowerActive = false;
+        this.catchPowerActive = false;
         ball.img.src = "./res/Images/Ball/ball.png";
         ball.playDeathSound();
         if (this.isPlayerOne) {
@@ -567,21 +622,46 @@ class Game {
     if (Collision.PaddleToPowerUp(this.paddle, powerup) && powerup.active) {
       this.paddle.playPowerUpPickup();
       if (powerup.type === "LASER") {
+        if(this.balls[0].sticky === true)
+        {
+          this.fireBall();
+          this.balls[0].sticky = false;
+        }
         if (this.paddle.enlargePowerActive) {
           this.paddle.enlargePowerActive = false;
         }
+        if(this.catchPowerActive === true){
+          this.catchPowerActive = false;
+        }
+
         this.paddle.laserPowerActive = true;
         this.paddle.paddleAnimator.continue();
         powerup.active = false;
       }
       else if (powerup.type === "ENLARGE") {
+        if(this.balls[0].sticky === true)
+        {
+          this.fireBall();
+          this.balls[0].sticky = false;
+          this.balls[0].speed = 8;
+        }
         if (this.paddle.laserPowerActive) {
           this.paddle.laserPowerActive = false;
+        }
+        if(this.catchPowerActive === true){
+          this.catchPowerActive = false;
         }
         this.paddle.enlargePowerActive = true;
         powerup.active = false;
       }
       else if (powerup.type === "CATCH") {
+        if (this.paddle.enlargePowerActive) {
+          this.paddle.enlargePowerActive = false;
+        }
+        if (this.paddle.laserPowerActive) {
+          this.paddle.laserPowerActive = false;
+        }
+        this.catchPowerActive = true;
         powerup.active = false;
       }
       else if (powerup.type === "SLOW") {
@@ -595,6 +675,15 @@ class Game {
         powerup.active = false;
       }
       else if (powerup.type === "DISRUPTION") {
+        if(this.catchPowerActive === true){
+          this.catchPowerActive = false;
+        }
+        if(this.balls[0].sticky === true)
+        {
+          this.fireBall();
+          this.balls[0].sticky = false;
+          this.balls[0].speed = 8;
+        }
         if (this.balls.length === 1) {
           this.triple = true;
           //calculate VectorMath.vector()
