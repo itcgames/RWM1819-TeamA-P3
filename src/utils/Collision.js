@@ -47,7 +47,7 @@ const Collision = (function () {
       /** @type {{x: number, y: number, w: number, h: number }} */
       const rectBall = { x: ball.position.x, y: ball.position.y, w: ball.radius, h: ball.radius };
       const rectBlock = { x: block.x, y: block.y, w: block.width, h: block.height };
-      
+
       if (
         rectBall.x < rectBlock.x + rectBlock.w &&
         rectBall.x + rectBall.w > rectBlock.x &&
@@ -115,7 +115,7 @@ const Collision = (function () {
    * @param {Paddle} paddle
    *  block is expected to have a position, width and height.
    */
-    static BallToPaddle(ball, paddle) {
+    static BallToPaddle(ball, paddle, catchPowerActive) {
       const aabbBall = rectangleToAabb({ position: ball.position, width: ball.radius, height: ball.radius });
       const aabbPaddle = rectangleToAabb({ position: { x: paddle.colBox.position.x, y: paddle.colBox.position.y }, width: paddle.colBox.size.x, height: paddle.colBox.size.y });
       const result = collisions.maniAABBToAABB(aabbBall, aabbPaddle);
@@ -141,8 +141,14 @@ const Collision = (function () {
           x: firingVectorUnit.x * ball.speed,
           y: firingVectorUnit.y * ball.speed
         }
-        ball.velocity.x = firingVector.x;
-        ball.velocity.y = firingVector.y;
+        if(catchPowerActive === false)
+        {
+          ball.velocity.x = firingVector.x;
+          ball.velocity.y = firingVector.y;
+        }
+        else {
+          ball.sticky = true;
+        }
         paddle.playPaddleHitSound();
       }
     }

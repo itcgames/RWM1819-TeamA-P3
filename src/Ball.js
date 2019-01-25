@@ -28,6 +28,9 @@ class Ball{
     this.soundManager.loadSoundFile("block-hit", "./res/Sounds/Bumper.wav");
     this.soundManager.loadSoundFile("wall-hit", "./res/Sounds/Bumper3.wav");
     this.soundManager.loadSoundFile("death", "./res/Sounds/roblox-death-sound.mp3");
+    this.sticky = false;
+    this.offset = 0;
+    this.resetSpeed = 0;
   }
 
   playDeathSound(){
